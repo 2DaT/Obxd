@@ -2,13 +2,16 @@
 #include "../Source/Engine/SynthEngine.h"
 class Knob  : public Slider
 {
-	Knob(Image image, const int numFrames, const bool stripIsHorizontal) : Slider("Knob")
-	{
+public:
+	//Knob(Image image, const int numFrames, const bool stripIsHorizontal) : Slider("Knob")
+	//{
 		
-		setTextBoxStyle(NoTextBox, 0, 0, 0);
-		setSliderStyle(RotaryVerticalDrag);
-		setRange(0.0f, 1.0f, 0.001f);
-	}
+	//	setTextBoxStyle(NoTextBox, 0, 0, 0);
+	//	setSliderStyle(RotaryVerticalDrag);
+	//	setRange(0.0f, 1.0f, 0.001f);
+	//}
+	Knob() : Slider("Knob")
+	{;};
 
 	//void paint(Graphics& g)
 	//{

@@ -16,22 +16,82 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
     : AudioProcessorEditor (ownerFilter)
 {
     // This is where our plugin's editor size is set.
-    setSize (400, 300);
+    setSize (800, 300);
+	cutoffKnob = addNormalKnob(270,70,ownerFilter,CUTOFF,"Cutoff");
+	resonanceKnob = addNormalKnob(310,70,ownerFilter,RESONANCE,"Resonance");
+	volumeKnob = addNormalKnob(10,70,ownerFilter,VOLUME,"Volume");
+	portamentoKnob = addNormalKnob(60,70,ownerFilter,PORTAMENTO,"Portamento");
+	osc1PitchKnob = addNormalKnob(160,70,ownerFilter,OSC1P,"Osc1Pitch");
+	osc2PitchKnob = addNormalKnob(210,70,ownerFilter,OSC2P,"Osc2Pitch");
+	getFilter()->addChangeListener(this);
 }
 
 ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
 {
-//	getFilter()->removeListener(this);
+	getFilter()->removeChangeListener(this);
 	deleteAllChildren();
 }
-
+Knob* ObxdAudioProcessorEditor::addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name)
+	{
+		Knob* knob = new Knob();
+		Label* knobl = new Label();
+		knob->setSliderStyle(Slider::RotaryVerticalDrag);
+		knob->setTextBoxStyle(knob->NoTextBox,true,0,0);
+				knob->setRange(0,1);
+	addAndMakeVisible(knob);
+	addAndMakeVisible(knobl);
+    knob->setBounds(x, y, 40,40);
+	knob->setValue(filter->getParameter(parameter), dontSendNotification);
+		knobl->setJustificationType(Justification::centred);
+		knobl->setBounds(x-10,y+40,60,10);
+	knobl->setText(name,dontSendNotification);
+	knob->setTextBoxIsEditable(false);
+	knob->addListener (this);
+	return knob;
+	}
+	void ObxdAudioProcessorEditor::sliderValueChanged (Slider* c)
+	{
+		ObxdAudioProcessor* flt = getFilter();
+		flt->beginParameterChangeGesture();
+#define sp(T) {flt->beginParameterChangeGesture(T);flt->setParameterNotifyingHost(T,c->getValue());flt->endParameterChangeGesture(T);}
+		if(c == cutoffKnob)
+		{sp(CUTOFF);}
+		else if(c == resonanceKnob)
+		{sp(RESONANCE);}
+		else if(c == portamentoKnob)
+		{sp(PORTAMENTO);}
+		else if(c == volumeKnob)
+		{sp(VOLUME);}
+		else if(c == osc1PitchKnob)
+		{sp(OSC1P);}
+		else if (c == osc2PitchKnob)
+		{sp(OSC2P);}
+	}
 //==============================================================================
+	void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source)
+		{
+			ObxdAudioProcessor* filter = getFilter();
+			float pr[PARAM_COUNT];
+			filter->getCallbackLock().enter();
+			for(int i = 0 ; i < PARAM_COUNT;++i)
+				pr[i] = filter->parameters.values[i];
+			filter->getCallbackLock().exit();
+#define rn(T,P) (T->setValue(pr[P],dontSendNotification))
+			rn(cutoffKnob,CUTOFF);
+			rn(resonanceKnob,RESONANCE);
+			rn(portamentoKnob,PORTAMENTO);
+			rn(volumeKnob,VOLUME);
+			rn(osc1PitchKnob,OSC1P);
+			rn(osc2PitchKnob,OSC2P);
+
+			
+	}
 void ObxdAudioProcessorEditor::paint (Graphics& g)
 {
     g.fillAll (Colours::white);
-    g.setColour (Colours::black);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!",
-                      0, 0, getWidth(), getHeight(),
-                      Justification::centred, 1);
+   // g.setColour (Colours::black);
+    //g.setFont (15.0f);
+    //g.drawFittedText ("Hello World!",
+      //                0, 0, getWidth(), getHeight(),
+      //                Justification::centred, 1);
 }

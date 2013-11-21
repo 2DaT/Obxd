@@ -230,6 +230,7 @@ void ObxdAudioProcessor::setParameter (int index, float newValue)
 		synth->processPan(newValue,8);
 		break;
 	}
+	sendChangeMessage();
 }
 const String ObxdAudioProcessor::getParameterName (int index)
 {
@@ -480,6 +481,7 @@ bool ObxdAudioProcessor::getNextEvent(MidiBuffer::Iterator* iter,const int sampl
 void ObxdAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
 	MidiBuffer::Iterator ppp(midiMessages);
+	const ScopedLock sl (this->getCallbackLock());
 	hasMidiMessage = ppp.getNextEvent(*nextMidi,midiEventPos);
 	int samplePos = 0;
 	int numSamples = buffer.getNumSamples();
@@ -498,13 +500,13 @@ void ObxdAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& mi
 //==============================================================================
 bool ObxdAudioProcessor::hasEditor() const
 {
-	return false; // (change this to false if you choose to not supply an editor)
+	return true; // (change this to false if you choose to not supply an editor)
 }
 
 AudioProcessorEditor* ObxdAudioProcessor::createEditor()
 {
-	// return new ObxdAudioProcessorEditor (this);
-	return NULL;
+	 return new ObxdAudioProcessorEditor (this);
+	//return NULL;
 }
 
 //==============================================================================

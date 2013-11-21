@@ -21,12 +21,12 @@
 /**
 */
 class ObxdAudioProcessorEditor  :
-	public AudioProcessorEditor//,
-                    //      public ChangeListener,
-                    //      public SliderListener,
+	public AudioProcessorEditor,
+                          public ChangeListener,
+                          public SliderListener//,
 					//	  public ButtonListener,
 					//	  public ComboBoxListener,
-					//	  public AudioProcessorListener
+						//  public AudioProcessorListener
 
 {
 public:
@@ -37,7 +37,11 @@ public:
     /** Our demo filter is a ChangeBroadcaster, and will call us back when one of
         its parameters changes.
     */
-    int changeListenerCallback (void* source);
+
+	void changeListenerCallback (ChangeBroadcaster* source);
+	int changeListenerCallback (void*){return 0;};
+	Knob* addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name);
+
     void sliderValueChanged (Slider*);
 	void buttonClicked (Button *);
     void comboBoxChanged (ComboBox*);
@@ -48,7 +52,8 @@ public:
 
     /** Standard Juce resize callback. */
     //void resized();
-	Knob* cutoffKnob;
+	Knob* cutoffKnob,*resonanceKnob,*osc1PitchKnob,*osc2PitchKnob,*volumeKnob,
+		*portamentoKnob;
     //==============================================================================
     // This is just a standard Juce paint method...
 //    void paint (Graphics& g);
