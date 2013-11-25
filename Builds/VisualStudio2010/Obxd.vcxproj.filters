@@ -2801,6 +2801,9 @@
     <ClInclude Include="..\..\Source\Engine\APInterpolator.h">
       <Filter>Obxd\Source\Synth</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Gui\TooglableButton.h">
+      <Filter>Obxd\Source\Gui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_basics\juce_module_info">

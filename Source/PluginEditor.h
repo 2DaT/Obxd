@@ -15,6 +15,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 #include "Gui\Knob.h"
+#include "Gui\TooglableButton.h"
 
 
 //==============================================================================
@@ -23,9 +24,9 @@
 class ObxdAudioProcessorEditor  :
 	public AudioProcessorEditor,
                           public ChangeListener,
-                          public SliderListener//,
-					//	  public ButtonListener,
-					//	  public ComboBoxListener,
+                          public SliderListener,
+						  public ButtonListener//,
+						//  public ComboBoxListener,
 						//  public AudioProcessorListener
 
 {
@@ -37,11 +38,11 @@ public:
     /** Our demo filter is a ChangeBroadcaster, and will call us back when one of
         its parameters changes.
     */
-
 	void changeListenerCallback (ChangeBroadcaster* source);
 	int changeListenerCallback (void*){return 0;};
 	Knob* addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name);
-
+	Knob* addTinyKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name);
+	TooglableButton* addNormalTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name);
     void sliderValueChanged (Slider*);
 	void buttonClicked (Button *);
     void comboBoxChanged (ComboBox*);
@@ -52,8 +53,12 @@ public:
 
     /** Standard Juce resize callback. */
     //void resized();
-	Knob* cutoffKnob,*resonanceKnob,*osc1PitchKnob,*osc2PitchKnob,*volumeKnob,
-		*portamentoKnob;
+	Knob* cutoffKnob,*resonanceKnob,*osc1PitchKnob,*osc2PitchKnob,*osc2DetuneKnob,*volumeKnob,
+		*portamentoKnob,*voiceDetuneKnob,*filterEnvelopeAmtKnob,*pulseWidthKnob,*xmodKnob,*multimodeKnob,*attackKnob,*decayKnob,*sustainKnob,*releaseKnob,
+		*fattackKnob,*fdecayKnob,*fsustainKnob,*freleaseKnob,*osc1MixKnob,*osc2MixKnob,*noiseMixKnob;
+
+
+	TooglableButton* hardSyncButton,*osc1WfButton,*osc2WfButton,*filterKeyFollowButton,*unisonButton,*pitchQuantButton;
     //==============================================================================
     // This is just a standard Juce paint method...
 //    void paint (Graphics& g);

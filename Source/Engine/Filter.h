@@ -85,7 +85,7 @@ public:
             float y1 = v*g1 + s1;
 			//y1 = inl(y1/3)*3;
 			//y1 = jlimit(-2.0f,2.0f,y1)*0.98;
-			y1 = jlimit(-1.0f,1.0f,y1) * 0.999;
+			y1 = jlimit(-2.0f,2.0f,y1) * 0.9999;
 			// = y1+nl(y1);
             s1 = v*g1 + y1; 
 

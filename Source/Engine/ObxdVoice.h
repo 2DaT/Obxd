@@ -170,20 +170,6 @@ public:
 	cutoffwas = cutoffcalc;
 	envelopewas = env;
 }
-	float limiting (float x)
-	{
-		x/=10;
-	float r = atan(atan(atan(x)));
-	return r*10;
-	}
-float getHarmonic(float inp,int hn)
-{
-	inp = jmin(1.0f,inp);
-	float amt = 1;
-	for(int i = 0 ; i < hn;i++)
-		amt*=inp;
-	return amt;
-}
 void setEnvDer(float d)
 {
 	env.setUniqueDeriviance(1 + EnvDetune*d);

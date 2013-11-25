@@ -1255,6 +1255,7 @@ c:\VST_Workshop\VstHost\vsthost.exe</Command>
     <ClInclude Include="..\..\Source\Engine\SynthEngine.h" />
     <ClInclude Include="..\..\Source\Engine\VoiceQueue.h" />
     <ClInclude Include="..\..\Source\Gui\Knob.h" />
+    <ClInclude Include="..\..\Source\Gui\TooglableButton.h" />
     <ClInclude Include="..\..\Source\PluginProcessor.h" />
     <ClInclude Include="..\..\Source\PluginEditor.h" />
     <ClInclude Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h" />
