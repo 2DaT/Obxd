@@ -21,25 +21,25 @@ inline static float nlp(float& state,float inp,float cutoff,float sr)
 	state = state + (inp - state) * cutoff +dc;
 	return state;
 };
-inline static float tptlpstatic(float & state , float inp , const float cutoff,float sr)
+inline static float tptlpstatic(float & state , float inp , const float cutoff,float srInv)
 {
-	const float sct =  tan(cutoff / (sr)) * (juce::float_Pi);
+	const float sct =  tan(cutoff * (srInv)* (juce::float_Pi)) ;
 	double v = (inp - state) * sct/ (1 + sct);
 	double res = v + state;
 	state = res + v;
 	return res;
 }
-inline static float tptlpupw(float & state , float inp , float cutoff , float sr)
+inline static float tptlpupw(float & state , float inp , float cutoff , float srInv)
 {
-	cutoff = (cutoff / sr)*juce::float_Pi;
+	cutoff = (cutoff * srInv)*juce::float_Pi;
 	double v = (inp - state) * cutoff / (1 + cutoff);
 	double res = v + state;
 	state = res + v;
 	return res;
 }
-inline static float tptlp(float& state,float inp,float cutoff,float sr)
+inline static float tptlp(float& state,float inp,float cutoff,float srInv)
 {
-	cutoff = tan(cutoff / (sr)) * (juce::float_Pi);
+	cutoff = tan(cutoff * (srInv)* (juce::float_Pi)) ;
 	double v = (inp - state) * cutoff / (1 + cutoff);
 	double res = v + state;
 	state = res + v;

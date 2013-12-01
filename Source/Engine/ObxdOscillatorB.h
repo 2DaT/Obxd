@@ -13,7 +13,6 @@ private:
 	float d1,d2,d3,d4;
 	float pitch1;
 	float pitch2;
-	float Udet;
 	bool pw1t,pw1tw,pw2t,pw2tw;
 	float sampleRateInv;
 
@@ -43,6 +42,10 @@ public:
 	float notePlaying;
 
 
+	float osc1Factor;
+	float osc2Factor;
+	float totalDetune;
+
 	float osc2Det;
 	float pulseWidth;
 	float pw1,pw2;
@@ -70,7 +73,10 @@ public:
 		hsam(Samples),
 		Blep(blep)
 	{
+		totalDetune = 0;
 		wn = Random(Random::getSystemRandom().nextInt64());
+		osc1Factor = wn.nextFloat()-0.5;
+		osc2Factor = wn.nextFloat()-0.5;
 		nmx=0;
 		oct=0;
 		tune=0;
@@ -130,7 +136,7 @@ public:
 	float ProcessSample()
 	{
 		float res = 0;
-		pitch1 = getPitch(notePlaying + (quantizeCw?((int)(osc1p)):osc1p)+ pto1 + tune + oct);
+		pitch1 = getPitch(notePlaying + (quantizeCw?((int)(osc1p)):osc1p)+ pto1 + tune + oct+totalDetune*osc1Factor);
 		if(pitch1 > 21000)
 			pitch1 = 21000;
 		bool hsr = false;
@@ -140,7 +146,7 @@ public:
 		x1+=fs;
 		hsfrac = 0;
 		float osc1mix=0.0f;
-		float pwcalc =jlimit<float>(0.0f,1.0f,(pulseWidth + pw1)*0.5f + 0.5f);
+		float pwcalc =jlimit<float>(0.1f,1.0f,(pulseWidth + pw1)*0.5f + 0.5f);
 		if(!osc1w)
 			pwcalc=0;
 
@@ -190,12 +196,12 @@ public:
 
 
 
-		pitch2 = getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ (osc1mix-0.5)*xmod + tune + oct);
+		pitch2 = getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ (osc1mix-0.5)*xmod + tune + oct + totalDetune +totalDetune*osc2Factor);
 
 		if(pitch2>21000)
 			pitch2=21000;
 		fs = pitch2 * (sampleRateInv);
-		pwcalc = jlimit<float>(0.0f,1.0f,(pulseWidth + pw2)*0.5f + 0.5f);
+		pwcalc = jlimit<float>(0.1f,1.0f,(pulseWidth + pw2)*0.5f + 0.5f);
 		if(!osc2w)
 			pwcalc=0;
 		float osc2mix=0.0f;
@@ -242,13 +248,16 @@ public:
 			}
 			if(x2 >= 1.0f)
 			{
-
+				x2 -= 1.0f;
 				if(((!hsr)||(x2/fs > hsfrac)))//de morgan processed equation
 				{
-					x2 -= 1.0f;
 					if(pw2t)
 						mixInImpulseCenter(buffer2,bP2,x2/fs, 1);
 					pw2t=false;
+				}
+				else
+				{
+					x2+=1;
 				}
 			}
 
@@ -277,13 +286,14 @@ public:
 		float filtration1 = (del1->getDelayedSample() -getNextBlep(buffer1,bP1) - 0.5);
 		float filtration2 = (del2->getDelayedSample() - getNextBlep(buffer2,bP2) -0.5);
 
-		//filtration1 =filtration1 - tptlpstatic(d1,filtration1,1,SampleRate);
-		//filtration2 = filtration2 - tptlpstatic(d3,filtration2,1,SampleRate);
+		//filtration1 =filtration1 - tptlpstatic(d1,filtration1,3,SampleRate);
+		//filtration2 = filtration2 - tptlpstatic(d3,filtration2,3,SampleRate);
 		//filtration1 = filtration1 - tptlp(d1,filtration1,pt1f/8,SampleRate);
 
 		//filtration2 = filtration2 - tptlp(d3,filtration2,pt2f/8,SampleRate);
 
-		res+=o1mx*filtration1 + o2mx *filtration2 + (wn.nextFloat()-0.5)*(nmx*1.3 + 0.001);
+		res+=o1mx*filtration1 + o2mx *filtration2 + (wn.nextFloat()-0.5)*(nmx*1.3);
+		//res = res - tptlpupw(d1,res,5,sampleRateInv);
 		//res = tptlp(d2,res,br,SampleRate);
 		return res*3;
 		//return sin(x1 * float_Pi*2 - float_Pi);

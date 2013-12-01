@@ -24,9 +24,9 @@
 class ObxdAudioProcessorEditor  :
 	public AudioProcessorEditor,
                           public ChangeListener,
-                          public SliderListener,
-						  public ButtonListener//,
-						//  public ComboBoxListener,
+						  public Slider::Listener,
+						  public Button::Listener//,
+						 // public ComboBox::Listener//,
 						//  public AudioProcessorListener
 
 {
@@ -42,10 +42,11 @@ public:
 	int changeListenerCallback (void*){return 0;};
 	Knob* addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name);
 	Knob* addTinyKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name);
+	void placeLabel(int x , int y,String text);
 	TooglableButton* addNormalTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name);
     void sliderValueChanged (Slider*);
 	void buttonClicked (Button *);
-    void comboBoxChanged (ComboBox*);
+    void comboBoxChanged(ComboBox*);
 
     //==============================================================================
     /** Standard Juce paint callback. */
@@ -55,10 +56,15 @@ public:
     //void resized();
 	Knob* cutoffKnob,*resonanceKnob,*osc1PitchKnob,*osc2PitchKnob,*osc2DetuneKnob,*volumeKnob,
 		*portamentoKnob,*voiceDetuneKnob,*filterEnvelopeAmtKnob,*pulseWidthKnob,*xmodKnob,*multimodeKnob,*attackKnob,*decayKnob,*sustainKnob,*releaseKnob,
-		*fattackKnob,*fdecayKnob,*fsustainKnob,*freleaseKnob,*osc1MixKnob,*osc2MixKnob,*noiseMixKnob;
+		*fattackKnob,*fdecayKnob,*fsustainKnob,*freleaseKnob,*osc1MixKnob,*osc2MixKnob,*noiseMixKnob,
+		*filterDetuneKnob,*envelopeDetuneKnob,*portamentoDetuneKnob,
+		*lfoFrequencyKnob,*lfoAmt1Knob,*lfoAmt2Knob,
+		*pan1Knob,*pan2Knob,*pan3Knob,*pan4Knob,*pan5Knob,*pan6Knob,*pan7Knob,*pan8Knob;
 
-
-	TooglableButton* hardSyncButton,*osc1WfButton,*osc2WfButton,*filterKeyFollowButton,*unisonButton,*pitchQuantButton;
+	TooglableButton* hardSyncButton,*osc1WfButton,*osc2WfButton,*filterKeyFollowButton,*unisonButton,*pitchQuantButton,
+		*filterHQButton,*filterBPBlendButton,
+		*lfoSinButton,*lfoSquareButton,*lfoSHButton,*lfoOsc1Button,*lfoOsc2Button,*lfoFilterButton,
+		*lfoPwm1Button,*lfoPwm2Button;
     //==============================================================================
     // This is just a standard Juce paint method...
 //    void paint (Graphics& g);

@@ -141,7 +141,7 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->lfoa1 = logsc(param,0,60,140);
+			synth->voices[i]->lfoa1 = logsc(logsc(param,0,1),0,60,30);
 		}
 	}
 	void processLfoOsc1(float param)
@@ -190,7 +190,7 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->UdetuneAmt = logsc(param,0.003,0.90);
+			synth->voices[i]->osc.totalDetune = logsc(param,0.003,0.90);
 		}
 	}
 	void processPulseWidth(float param)
@@ -253,7 +253,7 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->osc.nmx = param;
+			synth->voices[i]->osc.nmx = logsc(param,0,1);
 		}
 	}
 	void processBrightness(float param)
@@ -294,6 +294,14 @@ public:
 			synth->voices[i]->cutoff = linsc(param,0,120);
 		}
 	}
+	void processBandpassSw(float param)
+	{
+		for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		{
+			//synth->voices[i]->cutoff = logsc(param,60,19000,30);
+			synth->voices[i]->flt.bandPassSw = param>0.5;
+		}
+	}
 	void processResonance(float param)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
@@ -331,21 +339,21 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->env.setAttack(logsc(param,5,60000,190));
+			synth->voices[i]->env.setAttack(logsc(param,5,60000,600));
 		}
 	}
 	void processLoudnessEnvelopeDecay(float param)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->env.setDecay(logsc(param,5,60000,190));
+			synth->voices[i]->env.setDecay(logsc(param,5,60000,600));
 		}
 	}
 	void processLoudnessEnvelopeRelease(float param)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->env.setRelease(logsc(param,5,60000,190));
+			synth->voices[i]->env.setRelease(logsc(param,5,60000,600));
 		}
 	}
 	void processLoudnessEnvelopeSustain(float param)
@@ -359,21 +367,21 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->fenv.setAttack(logsc(param,1,60000,190));
+			synth->voices[i]->fenv.setAttack(logsc(param,1,60000,600));
 		}
 	}
 	void processFilterEnvelopeDecay(float param)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->fenv.setDecay(logsc(param,1,60000,190));
+			synth->voices[i]->fenv.setDecay(logsc(param,1,60000,600));
 		}
 	}
 	void processFilterEnvelopeRelease(float param)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->fenv.setRelease(logsc(param,1,60000,190));
+			synth->voices[i]->fenv.setRelease(logsc(param,1,60000,600));
 		}
 	}
 	void processFilterEnvelopeSustain(float param)

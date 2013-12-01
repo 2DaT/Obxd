@@ -11,6 +11,7 @@ class ObxdVoice
 {
 private:
 	float SampleRate;
+	float sampleRateInv;
 	float Volume;
 	float port;
 
@@ -25,11 +26,10 @@ public:
 	ObxdOscillatorB osc;
 	Filter flt;
 
+	Random ng;
+
 	float cutoff;
 	float fenvamt;
-
-	float Udetune;
-	float UdetuneAmt;
 
 	float EnvDetune;
 	float FenvDetune;
@@ -73,7 +73,8 @@ public:
 	float oscpsw;
 
 	ObxdVoice() 
-		: ap()
+		: ap(),
+		ng()
 	{
 		oscpsw = 0;
 		cutoffwas = envelopewas=0;
@@ -94,12 +95,10 @@ public:
 		fenvamt = 0;
 		Active = false;
 		midiIndx = 30;
-		Udetune = Random::getSystemRandom().nextFloat()-0.5;
 		EnvDetune = Random::getSystemRandom().nextFloat()-0.5;
 		FenvDetune = Random::getSystemRandom().nextFloat()-0.5;
 		FltDetune = Random::getSystemRandom().nextFloat()-0.5;
 		PortaDetune =Random::getSystemRandom().nextFloat()-0.5;
-		UdetuneAmt = 0;
 		lenvd=new DelayLine(Samples);
 		fenvd=new DelayLine(Samples);
 	}
@@ -113,18 +112,17 @@ public:
 	{
 		//portamento on osc input voltage
 		//implements rc circuit
-		
-		float ptNote  =tptlpupw(prtst, midiIndx-81, porta * (1+PortaDetune*PortaDetuneAmt),SampleRate);
-		osc.notePlaying = ptNote + Udetune*UdetuneAmt;
+		float ptNote  =tptlpupw(prtst, midiIndx-81, porta * (1+PortaDetune*PortaDetuneAmt),sampleRateInv);
+		osc.notePlaying = ptNote;
 
 		osc.pw1 = lfopw1?lfoIn*lfoa2:0;
 		osc.pw2 = lfopw2?lfoIn*lfoa2:0;
 
-		osc.pto1 = (!pitchWheelOsc2Only? (pitchWheel*pitchWheelAmt):0 ) + ( lfoo1?lfoIn*lfoa1:0);
-		osc.pto2 = (pitchWheel *pitchWheelAmt) + (lfoo2?lfoIn*lfoa1:0);
+		osc.pto1 =   (!pitchWheelOsc2Only? (pitchWheel*pitchWheelAmt):0 ) + ( lfoo1?lfoIn*lfoa1:0);
+		osc.pto2 =  (pitchWheel *pitchWheelAmt) + (lfoo2?lfoIn*lfoa1:0);
 		//both envelopes needs a delay equal to osc internal delay
 		fenvd->feedDelay(fenv.processSample());
-		float cutoffcalc = jmin(getPitch((lfof?lfoIn*lfoa1:0)+cutoff+FltDetune*FltDetAmt+ fenvamt*fenvd->getDelayedSample() + 20 + (fltKF ? midiIndx - 65 - 50 : -65)), (!Oversample)?(flt.SampleRate*0.5f-120.0f) :(flt.SampleRate*0.25f +8000.0f) );
+		float cutoffcalc = jmin(getPitch((lfof?lfoIn*lfoa1:0)+cutoff+FltDetune*FltDetAmt+ fenvamt*fenvd->getDelayedSample() + 20 + (fltKF ? midiIndx - 65 - 50 : -65)), (flt.SampleRate*0.5f-120.0f));
 		lenvd->feedDelay(env.processSample());
 		//if(lfopw1)
 		//{
@@ -140,12 +138,13 @@ public:
 		float env = lenvd->getDelayedSample();
 
 				float x2 = 0;
-				float oscps = osc.ProcessSample()*filterDrive / (Oversample? 2:1) ;
+				float oscps = osc.ProcessSample() * (Oversample? 1:1) ;
 				if(Oversample)
 		{
 			x2=  oscpsw;
 			x2 = flt.Apply(x2,(cutoffcalc+cutoffwas)*0.5);
-			x2 /= (filterDrive);
+			x2 = x2 - tptlpupw(d1,x2,20,flt.sampleRateInv);
+			//x2 /= (filterDrive);
 			x2 *= (env+envelopewas)*0.5;
 			*(ptr+1) = x2;
 		}
@@ -154,12 +153,13 @@ public:
 		{
 		x1 = oscps;
 		x1 = flt.Apply(x1,(cutoffcalc)); 
+
 		}
 		else
 		{
-			x1 = flt.Apply(ap.getInterp(oscps),(cutoffcalc)); 
+			x1 = flt.Apply(1*ap.getInterp(oscps),(cutoffcalc)); 
 		}
-		x1 /= (filterDrive);
+		x1 = x1 - tptlpupw(d1 , x1 , 20 , flt.sampleRateInv);
 		x1 *= (env);
 		*(ptr)=x1;
 
@@ -182,6 +182,7 @@ void setSampleRate(float sr)
 	env.setSampleRate(sr);
 	fenv.setSampleRate(sr);
 	SampleRate = sr;
+	sampleRateInv = 1 / sr;
 }
 void ResetEnvelope()
 {

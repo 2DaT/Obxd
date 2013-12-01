@@ -22,7 +22,7 @@ public:
 		values[VOLUME]=0.8f;
 		values[OSC1MIX]=1;
 		values[OSC2MIX]=1;
-		values[FILTER_DRIVE]= 0.01;
+//		values[FILTER_DRIVE]= 0.01;
 		values[PAN1]=0.5;
 		values[PAN2]=0.5;
 		values[PAN3]=0.5;

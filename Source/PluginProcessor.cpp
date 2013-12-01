@@ -58,8 +58,8 @@ void ObxdAudioProcessor::setParameter (int index, float newValue)
 	case VOICE_COUNT:
 		synth->setVoiceCount(newValue);
 		break;
-	case FILTER_DRIVE:
-		synth->processFilterDrive(newValue);
+	case BANDPASS:
+		synth->processBandpassSw(newValue);
 		break;
 	case FILTER_WARM:
 		synth->processOversampling(newValue);
@@ -240,8 +240,8 @@ const String ObxdAudioProcessor::getParameterName (int index)
 		return S("PitchQuant");
 	case VOICE_COUNT:
 		return S("VoiceCount");
-	case FILTER_DRIVE:
-		return S("FilterDrive");
+	case BANDPASS:
+		return S("BandpassBlend");
 	case FILTER_WARM:
 		return S("Filter_Warm");
 	case BENDRANGE:
