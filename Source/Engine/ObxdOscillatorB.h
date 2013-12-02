@@ -166,6 +166,15 @@ public:
 		if(osc1w)
 		{
 			float summated = fs- (pwcalc - pw1w);
+			if((pw1t) && x1 >= 1.0f)
+			{
+				x1-=1.0f;
+				hsfrac = x1/fs;
+				if(pw1t)
+					mixInImpulseCenter(buffer1,bP1,x1/fs, 1);
+				pw1t=false;
+				hsr = true;
+			}
 			if(!(pw1t)&& (x1 >= pwcalc))
 			{
 				pw1t=true;
@@ -229,7 +238,21 @@ public:
 		if(osc2w)
 		{
 			float summated = fs- (pwcalc - pw2w);
-			
+			//ADD PRE AND POST CHECK
+			if((pw2t) && x2 >= 1.0f)
+			{
+				x2 -= 1.0f;
+				if(((!hsr)||(x2/fs > hsfrac)))//de morgan processed equation
+				{
+					if(pw2t)
+						mixInImpulseCenter(buffer2,bP2,x2/fs, 1);
+					pw2t=false;
+				}
+				else
+				{
+					x2+=1;
+				}
+			}
 			if(!(pw2t)&& (x2 >= pwcalc))
 			{
 				pw2t=true;
@@ -260,7 +283,6 @@ public:
 					x2+=1;
 				}
 			}
-
 			if(pw2t)
 				osc2mix = 1 - (0.5-pwcalc);
 			else
