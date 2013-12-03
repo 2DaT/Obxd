@@ -2804,6 +2804,9 @@
     <ClInclude Include="..\..\Source\Gui\TooglableButton.h">
       <Filter>Obxd\Source\Gui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Engine\PulseOsc.h">
+      <Filter>Obxd\Source\Synth</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_basics\juce_module_info">

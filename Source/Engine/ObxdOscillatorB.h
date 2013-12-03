@@ -5,6 +5,8 @@
 #include "AudioUtils.h"
 #include "BlepData.h"
 #include "DelayLine.h"
+#include "SawOsc.h"
+#include "PulseOsc.h"
 
 class ObxdOscillatorB
 {
@@ -34,6 +36,8 @@ private:
 	DelayLine *del1,*del2;
 	DelayLine *flt1,*flt2; 
 	Random wn;
+	SawOsc o1s,o2s;
+	PulseOsc o1p,o2p;
 public:
 
 	float tune;//+-1 
@@ -71,7 +75,9 @@ public:
 	ObxdOscillatorB() : 
 		n(Samples*2),
 		hsam(Samples),
-		Blep(blep)
+		Blep(blep),
+		o1s(),o2s(),
+		o1p(),o2p()
 	{
 		totalDetune = 0;
 		wn = Random(Random::getSystemRandom().nextInt64());
@@ -150,62 +156,29 @@ public:
 		if(!osc1w)
 			pwcalc=0;
 
-
-		if(!osc1w)
-		{
-			if(x1 >= 1.0f)
-			{
-				x1-=1.0f;
-				hsfrac = x1/fs;
-				mixInImpulseCenter(buffer1,bP1,x1/fs, 1);
-				hsr = true;
-			}
-		}
-
-		osc1mix=x1;
 		if(osc1w)
-		{
-			float summated = fs- (pwcalc - pw1w);
-			if((pw1t) && x1 >= 1.0f)
-			{
-				x1-=1.0f;
-				hsfrac = x1/fs;
-				if(pw1t)
-					mixInImpulseCenter(buffer1,bP1,x1/fs, 1);
-				pw1t=false;
-				hsr = true;
-			}
-			if(!(pw1t)&& (x1 >= pwcalc))
-			{
-				pw1t=true;
-				float frac  =(x1-pwcalc) / summated;
-				mixInImpulseCenter(buffer1,bP1,frac,-1);
-			}
-			if(x1 >= 1.0f)
-			{
-				x1-=1.0f;
-				hsfrac = x1/fs;
-				if(pw1t)
-					mixInImpulseCenter(buffer1,bP1,x1/fs, 1);
-				pw1t=false;
-				hsr = true;
-			}
+			o1p.processMaster(x1,fs,hsr,hsfrac,pwcalc,pw1w);
+		else
+			o1s.processMaster(x1,fs,hsr,hsfrac);
+		if(x1 >= 1.0f)
+			x1-=1.0f;
 
-
-
-			if(pw1t)
-				osc1mix =  1 - (0.5-pwcalc);
-			else
-				osc1mix = -(0.5-pwcalc);
-		}
 		pw1w = pwcalc;
 
-		del1->feedDelay(osc1mix);
-		hsr&=hardSync;
+		hsr &= hardSync;
+
+		float rxm = (osc1w ? o1p.getValueFast(x1,pwcalc) : o1s.getValueFast(x1));
 
 
+		if(osc1w)
+			osc1mix = o1p.getValue(x1,pwcalc) + o1p.aliasReduction();
+		else
+			osc1mix = o1s.getValue(x1) + o1s.aliasReduction();
 
-		pitch2 = getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ (osc1mix-0.5)*xmod + tune + oct + totalDetune +totalDetune*osc2Factor);
+
+		pitch2 = getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ rxm *xmod + tune + oct + totalDetune +totalDetune*osc2Factor);
+
+
 
 		if(pitch2>21000)
 			pitch2=21000;
@@ -217,96 +190,32 @@ public:
 
 		x2 +=fs;
 
-		if(!osc2w)
-		{
-			if(x2 >= 1.0f)
-			{
-				x2 -= 1.0f;
-				if(((!hsr)||(x2/fs > hsfrac)))//de morgan processed equation
-				{
-					mixInImpulseCenter(buffer2,bP2,x2/fs, 1);
-				}
-				else
-				{
-					//if transition do not ocurred 
-					x2+=1;
-					//x2-=fs;
-				}
-			}
-		}
-		osc2mix=x2;
+		//o2s.processSlave(x2,fs,hsr,hsfrac);
 		if(osc2w)
-		{
-			float summated = fs- (pwcalc - pw2w);
-			//ADD PRE AND POST CHECK
-			if((pw2t) && x2 >= 1.0f)
-			{
-				x2 -= 1.0f;
-				if(((!hsr)||(x2/fs > hsfrac)))//de morgan processed equation
-				{
-					if(pw2t)
-						mixInImpulseCenter(buffer2,bP2,x2/fs, 1);
-					pw2t=false;
-				}
-				else
-				{
-					x2+=1;
-				}
-			}
-			if(!(pw2t)&& (x2 >= pwcalc))
-			{
-				pw2t=true;
-				float frac  =(x2-pwcalc) / summated;
-				if(((!hsr)||(frac > hsfrac)))//de morgan processed equation
-				{
-					//transition to 1
-					mixInImpulseCenter(buffer2,bP2,frac,-1);
-				}
-				else
-				{
-					//if transition do not ocurred 
-					pw2t=false;
-				}
+			o2p.processSlave(x2,fs,hsr,hsfrac,pwcalc,pw2w);
+		else
+			o2s.processSlave(x2,fs,hsr,hsfrac);
 
-			}
-			if(x2 >= 1.0f)
-			{
-				x2 -= 1.0f;
-				if(((!hsr)||(x2/fs > hsfrac)))//de morgan processed equation
-				{
-					if(pw2t)
-						mixInImpulseCenter(buffer2,bP2,x2/fs, 1);
-					pw2t=false;
-				}
-				else
-				{
-					x2+=1;
-				}
-			}
-			if(pw2t)
-				osc2mix = 1 - (0.5-pwcalc);
-			else
-				osc2mix = -(0.5-pwcalc);
-		}
+		if(x2 >= 1.0f)
+			x2-=1.0;
+
 
 		pw2w=pwcalc;
+
 		if(hsr)
 		{
 			float fracMaster = (fs * hsfrac);
-			float trans = osc2w?(pw2t?1 :0):(x2-fracMaster);
-			mixInImpulseCenter(buffer2,bP2,hsfrac,trans);
-			pw2t = false;
 			x2 =fracMaster;
-			osc2mix = osc2w?(pw2t?1- (0.5-pwcalc):-(0.5-pwcalc)):x2;
 		}
 
-		del2->feedDelay(osc2mix);
-		flt1->feedDelay(pitch1);
-		flt2->feedDelay(pitch2);
-		float pt1f = flt1->getDelayedSample();
-		float pt2f = flt2->getDelayedSample();
-		float filtration1 = (del1->getDelayedSample() -getNextBlep(buffer1,bP1) - 0.5);
-		float filtration2 = (del2->getDelayedSample() - getNextBlep(buffer2,bP2) -0.5);
+		if(osc2w)
+			osc2mix = o2p.getValue(x2,pwcalc) + o2p.aliasReduction();
+		else
+			osc2mix = o2s.getValue(x2) + o2s.aliasReduction();
+
+
+		float filtration1 = osc1mix;
+		float filtration2 = osc2mix;
 
 		//filtration1 =filtration1 - tptlpstatic(d1,filtration1,3,SampleRate);
 		//filtration2 = filtration2 - tptlpstatic(d3,filtration2,3,SampleRate);
@@ -320,6 +229,7 @@ public:
 		return res*3;
 		//return sin(x1 * float_Pi*2 - float_Pi);
 	}
+
 #define LERP(A,B,F) ((B-A)*F+A)
 	inline void mixInImpulseCenter(float * buf,int& bpos,float offset, float scale) 
 	{
