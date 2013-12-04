@@ -27,14 +27,14 @@ public:
 		cutoffWas=0;
 		SampleRate = 44000;
 		sampleRateInv = 1 / SampleRate;
-		rcor =1135 / 44000;
+		rcor =560 / 44000;
 		R=1;
 	}
 	void setSampleRate(float sr)
 	{
 		SampleRate = sr;
 		sampleRateInv = 1/SampleRate;
-		rcor = 1135 /sr ;
+		rcor = 560 /sr ;
 	}
 	void setResonance(float res)
 	{

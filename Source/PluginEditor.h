@@ -58,6 +58,7 @@ public:
 		*portamentoKnob,*voiceDetuneKnob,*filterEnvelopeAmtKnob,*pulseWidthKnob,*xmodKnob,*multimodeKnob,*attackKnob,*decayKnob,*sustainKnob,*releaseKnob,
 		*fattackKnob,*fdecayKnob,*fsustainKnob,*freleaseKnob,*osc1MixKnob,*osc2MixKnob,*noiseMixKnob,
 		*filterDetuneKnob,*envelopeDetuneKnob,*portamentoDetuneKnob,
+		*tuneKnob,
 		*lfoFrequencyKnob,*lfoAmt1Knob,*lfoAmt2Knob,
 		*pan1Knob,*pan2Knob,*pan3Knob,*pan4Knob,*pan5Knob,*pan6Knob,*pan7Knob,*pan8Knob;
 

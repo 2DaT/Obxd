@@ -142,7 +142,7 @@ public:
 				if(Oversample)
 		{
 			x2=  oscpsw;
-			x2 = flt.Apply(x2,(cutoffcalc+cutoffwas)*0.5);
+			x2 = flt.Apply(x2*2,(cutoffcalc+cutoffwas)*0.5);
 			x2 = x2 - tptlpupw(d1,x2,20,flt.sampleRateInv);
 			//x2 /= (filterDrive);
 			x2 *= (env+envelopewas)*0.5;
@@ -157,7 +157,7 @@ public:
 		}
 		else
 		{
-			x1 = flt.Apply(1*ap.getInterp(oscps),(cutoffcalc)); 
+			x1 = flt.Apply(2*ap.getInterp(oscps),(cutoffcalc)); 
 		}
 		x1 = x1 - tptlpupw(d1 , x1 , 20 , flt.sampleRateInv);
 		x1 *= (env);

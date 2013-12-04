@@ -146,8 +146,8 @@ public:
 		{
 
 			//Variables are swapped!
-			vl = left.Calc(vlo,vl);
-			vr = right.Calc(vro,vr);
+			vl = 0.5*left.Calc(vlo,vl);
+			vr = 0.5*right.Calc(vro,vr);
 		}
 		*sm1 = vl*Volume;
 		*sm2 = vr*Volume;

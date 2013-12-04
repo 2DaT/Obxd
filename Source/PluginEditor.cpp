@@ -71,6 +71,7 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 
 	filterKeyFollowButton =  addNormalTooglableButton(400+30,115-40,ownerFilter,FLT_KF,"Key");
 	unisonButton = addNormalTooglableButton(40,85,ownerFilter,UNISON,"Uni");
+	tuneKnob = addTinyKnob(45,105,ownerFilter,TUNE,"Tune");
 	voiceDetuneKnob =addNormalKnob(90,85,ownerFilter,UDET,"VoiceDet");
 
 	placeLabel(42,205,"Voice pannings");
@@ -239,6 +240,8 @@ void ObxdAudioProcessorEditor::sliderValueChanged (Slider* c)
 		handleSParam(pan6Knob,PAN6)
 		handleSParam(pan7Knob,PAN7)
 		handleSParam(pan8Knob,PAN8)
+
+		handleSParam(tuneKnob,TUNE)
 		//magic crystal
 	{};
 
@@ -297,6 +300,7 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 		rn(lfoFrequencyKnob,LFOFREQ)
 		rn(lfoAmt1Knob,LFO1AMT)
 		rn(lfoAmt2Knob,LFO2AMT)
+		rn(tuneKnob,TUNE)
 		//buttons
 		rn(hardSyncButton,OSC2HS)
 		rn(osc1WfButton,OSC1W)

@@ -141,7 +141,7 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->lfoa1 = logsc(logsc(param,0,1),0,60,30);
+			synth->voices[i]->lfoa1 = logsc(logsc(param,0,1,13),0,60,19);
 		}
 	}
 	void processLfoOsc1(float param)
@@ -339,21 +339,21 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->env.setAttack(logsc(param,5,60000,600));
+			synth->voices[i]->env.setAttack(logsc(param,4,60000,900));
 		}
 	}
 	void processLoudnessEnvelopeDecay(float param)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->env.setDecay(logsc(param,5,60000,600));
+			synth->voices[i]->env.setDecay(logsc(param,4,60000,900));
 		}
 	}
 	void processLoudnessEnvelopeRelease(float param)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->env.setRelease(logsc(param,5,60000,600));
+			synth->voices[i]->env.setRelease(logsc(param,4,60000,900));
 		}
 	}
 	void processLoudnessEnvelopeSustain(float param)
@@ -367,21 +367,21 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->fenv.setAttack(logsc(param,1,60000,600));
+			synth->voices[i]->fenv.setAttack(logsc(param,1,60000,900));
 		}
 	}
 	void processFilterEnvelopeDecay(float param)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->fenv.setDecay(logsc(param,1,60000,600));
+			synth->voices[i]->fenv.setDecay(logsc(param,1,60000,900));
 		}
 	}
 	void processFilterEnvelopeRelease(float param)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->fenv.setRelease(logsc(param,1,60000,600));
+			synth->voices[i]->fenv.setRelease(logsc(param,1,60000,900));
 		}
 	}
 	void processFilterEnvelopeSustain(float param)
