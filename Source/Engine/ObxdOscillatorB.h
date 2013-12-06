@@ -7,6 +7,7 @@
 #include "DelayLine.h"
 #include "SawOsc.h"
 #include "PulseOsc.h"
+#include "TriangleOsc.h"
 
 class ObxdOscillatorB
 {
@@ -38,6 +39,7 @@ private:
 	Random wn;
 	SawOsc o1s,o2s;
 	PulseOsc o1p,o2p;
+	TriangleOsc o1t,o2t;
 public:
 
 	float tune;//+-1 
@@ -77,7 +79,8 @@ public:
 		hsam(Samples),
 		Blep(blep),
 		o1s(),o2s(),
-		o1p(),o2p()
+		o1p(),o2p(),
+		o1t(),o2t()
 	{
 		totalDetune = 0;
 		wn = Random(Random::getSystemRandom().nextInt64());
@@ -159,7 +162,7 @@ public:
 		if(osc1w)
 			o1p.processMaster(x1,fs,hsr,hsfrac,pwcalc,pw1w);
 		else
-			o1s.processMaster(x1,fs,hsr,hsfrac);
+			o1t.processMaster(x1,fs,hsr,hsfrac);
 		if(x1 >= 1.0f)
 			x1-=1.0f;
 
@@ -167,13 +170,13 @@ public:
 
 		hsr &= hardSync;
 
-		float rxm = (osc1w ? o1p.getValueFast(x1,pwcalc) : o1s.getValueFast(x1));
+		float rxm = (osc1w ? o1p.getValueFast(x1,pwcalc) : o1t.getValueFast(x1,fs));
 
 
 		if(osc1w)
 			osc1mix = o1p.getValue(x1,pwcalc) + o1p.aliasReduction();
 		else
-			osc1mix = o1s.getValue(x1) + o1s.aliasReduction();
+			osc1mix = o1t.getValue(x1,fs) + o1t.aliasReduction(fs);
 
 
 		pitch2 = getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ rxm *xmod + tune + oct + totalDetune +totalDetune*osc2Factor);
@@ -228,54 +231,5 @@ public:
 		//res = tptlp(d2,res,br,SampleRate);
 		return res*3;
 		//return sin(x1 * float_Pi*2 - float_Pi);
-	}
-
-#define LERP(A,B,F) ((B-A)*F+A)
-	inline void mixInImpulseCenter(float * buf,int& bpos,float offset, float scale) 
-	{
-		//offset = fmod(offset,1.0f);
-		int lpIn =(int)(B_OVERSAMPLING*(offset));
-		float frac = offset * B_OVERSAMPLING - lpIn;
-		for(int i = 0 ; i <n;i++)
-		{
-			float mixvalue = 0;
-			//mixvalue = Blep[lpIn] * scale;
-
-			mixvalue = (blep[lpIn]*(1-frac)+blep[lpIn+1]*(frac));
-			if(i>=Samples)
-				mixvalue-=1;
-			buf[(bpos+i)&(n-1)]  += mixvalue*scale;
-			lpIn += B_OVERSAMPLING;
-		}
-	}
-	float getDelayedSample(float* buf,int& dpos)
-	{
-		int idx;
-		idx = dpos-(hsam);
-		if(idx <0)
-			idx+=hsam;
-		return buf[idx];
-	}
-	inline void feedDelay(float* buf,int& dpos,float sm)
-	{
-		buf[dpos] = sm;
-		dpos++;
-		if(dpos >= (hsam))
-			dpos-=(hsam);
-	}
-	inline float getNextBlep(float* buf,int& bpos) 
-	{
-		buf[bpos]= 0.0f;
-		bpos++;
-
-		// Wrap pos
-		if (bpos>=n) 
-		{
-			bpos -= n;
-		}
-		return buf[bpos];
-	}
-	void resetOscInternals()
-	{
 	}
 };

@@ -1254,6 +1254,7 @@ c:\VST_Workshop\VstHost\vsthost.exe</Command>
     <ClInclude Include="..\..\Source\Engine\PulseOsc.h" />
     <ClInclude Include="..\..\Source\Engine\SawOsc.h" />
     <ClInclude Include="..\..\Source\Engine\SynthEngine.h" />
+    <ClInclude Include="..\..\Source\Engine\TriangleOsc.h" />
     <ClInclude Include="..\..\Source\Engine\VoiceQueue.h" />
     <ClInclude Include="..\..\Source\Gui\Knob.h" />
     <ClInclude Include="..\..\Source\Gui\TooglableButton.h" />

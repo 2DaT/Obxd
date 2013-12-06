@@ -138,7 +138,7 @@ public:
 		float env = lenvd->getDelayedSample();
 
 				float x2 = 0;
-				float oscps = osc.ProcessSample() * (Oversample? 1:1) ;
+				float oscps = osc.ProcessSample();
 				if(Oversample)
 		{
 			x2=  oscpsw;
