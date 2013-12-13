@@ -162,7 +162,7 @@ public:
 		if(osc1w)
 			o1p.processMaster(x1,fs,hsr,hsfrac,pwcalc,pw1w);
 		else
-			o1t.processMaster(x1,fs,hsr,hsfrac);
+			o1t.processMaster(x1,fs,hsr,hsfrac,-pitch1);
 		if(x1 >= 1.0f)
 			x1-=1.0f;
 
@@ -170,7 +170,7 @@ public:
 
 		hsr &= hardSync;
 
-		float rxm = (osc1w ? o1p.getValueFast(x1,pwcalc) : o1t.getValueFast(x1,fs));
+		float rxm = (osc1w ? o1p.getValueFast(x1,pwcalc) : o1t.getValueFast(x1));
 
 
 		if(osc1w)
@@ -197,7 +197,7 @@ public:
 		if(osc2w)
 			o2p.processSlave(x2,fs,hsr,hsfrac,pwcalc,pw2w);
 		else
-			o2s.processSlave(x2,fs,hsr,hsfrac);
+			o2t.processSlave(x2,fs,hsr,hsfrac);
 
 		if(x2 >= 1.0f)
 			x2-=1.0;
@@ -214,7 +214,7 @@ public:
 		if(osc2w)
 			osc2mix = o2p.getValue(x2,pwcalc) + o2p.aliasReduction();
 		else
-			osc2mix = o2s.getValue(x2) + o2s.aliasReduction();
+			osc2mix = o2t.getValue(x2,fs) + o2t.aliasReduction(fs);
 
 
 		float filtration1 = osc1mix;

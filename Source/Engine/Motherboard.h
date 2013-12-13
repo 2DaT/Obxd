@@ -115,8 +115,7 @@ public:
 		{
 			for(int i = 0 ; i < MAX_VOICES;i++)
 			{
-				vq.GetNext()->ToogleOversample();
-	
+				voices[i]->ToogleOversample();
 			}
 		}
 		Oversample = over;

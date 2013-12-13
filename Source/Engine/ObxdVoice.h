@@ -122,7 +122,7 @@ public:
 		osc.pto2 =  (pitchWheel *pitchWheelAmt) + (lfoo2?lfoIn*lfoa1:0);
 		//both envelopes needs a delay equal to osc internal delay
 		fenvd->feedDelay(fenv.processSample());
-		float cutoffcalc = jmin(getPitch((lfof?lfoIn*lfoa1:0)+cutoff+FltDetune*FltDetAmt+ fenvamt*fenvd->getDelayedSample() + 20 + (fltKF ? midiIndx - 65 - 50 : -65)), (flt.SampleRate*0.5f-120.0f));
+		float cutoffcalc = jmin(getPitch((lfof?lfoIn*lfoa1:0)+cutoff+FltDetune*FltDetAmt+ fenvamt*fenvd->getDelayedSample() -45 + (fltKF ?ptNote:0)), (flt.SampleRate*0.5f-120.0f));
 		lenvd->feedDelay(env.processSample());
 		//if(lfopw1)
 		//{

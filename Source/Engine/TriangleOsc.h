@@ -15,17 +15,18 @@ class TriangleOsc
 	float aliasint;
 	int bP1,bP2;
 
-	bool pw1tint;
+	bool t1t;
 public:
 	TriangleOsc() : hsam(Samples)
 		, n(Samples*2)
 	{
 		internalSquare = 0;
-		pw1tint = false;
+		t1t = false;
 		statev= 0;
 		stval = 0;
 		intSt = 0;
 		arintSt = 0;
+		aliasint = 0;
 		fall = false;
 		bP1=bP2=0;
 		buffer1= new float[n];
@@ -39,65 +40,111 @@ public:
 	~TriangleOsc()
 	{
 		delete buffer1;
+		delete buffer2;
 		delete del1;
 	}
 	inline float aliasReduction(float fs)
 	{
-		float c2 = triangleIntegration(aliasint,-getNextBlep(buffer1,bP1),fs*0.25)*2;
-		return c2;
+		return -getNextBlep(buffer1,bP1);
 		//return 0;
 	}
-	inline float triangleIntegration(float& state , float input,float delta)
+	inline void processMaster(float x,float delta,bool& hardSyncReset,float& hardSyncFrac,float pitch)
 	{
-	//delta = tan(delta * float_Pi);
-	double v = (input - state) * delta / (1 + delta);
-	double res = v + state;
-	state = res + v;
-	return res;
-	}
-	inline void processMaster(float x,float delta,bool& hardSyncReset,float& hardSyncFrac)
-	{
-		if((pw1tint) && x >= 1.0f)
+		if(x >= 1.0)
 		{
-			x -= 1.0f;
-			if(pw1tint)
-				mixInImpulseCenter(buffer1,bP1,x/delta, 1);
-			pw1tint=false;
+			x-=1.0;
+			hardSyncFrac = x/delta;
+			hardSyncReset = true;
+			mixInBlampCenter(buffer1,bP1,x/delta,-4*Samples*delta);
 		}
-		if((!pw1tint)&& (x >= 0.5))
+		if(x >= 0.5 && x - delta < 0.5)
 		{
-			pw1tint=true;
-			float frac  =(x-0.5) / delta;
-			mixInImpulseCenter(buffer1,bP1,frac,-1);
+			mixInBlampCenter(buffer1,bP1,(x-0.5)/delta,4*Samples*delta);
 		}
-		if((pw1tint) && x >= 1.0f)
+		if(x >= 1.0)
 		{
-			x-=1.0f;
-			if(pw1tint)
-				mixInImpulseCenter(buffer1,bP1,x/delta, 1);
-			pw1tint=false;
+			x-=1.0;
+			hardSyncFrac = x/delta;
+			hardSyncReset = true;
+			mixInBlampCenter(buffer1,bP1,x/delta,-4*Samples*delta);
 		}
-		float oscmix;
-		if(x >= 0.5)
-			oscmix = 1 - (0.5-0.5) - 0.5;
-		else
-			oscmix = -(0.5-0.5) - 0.5;
-		internalSquare = oscmix;
 	}
 	inline float getValue(float x,float fs)
 	{
-		float mix = triangleIntegration(statev,internalSquare,fs*0.25)*2;
+		float mix = x < 0.5 ? 2*x-0.5 : 1.5-2*x;
 		del1->feedDelay(mix);
 		return del1->getDelayedSample();
 	}
-	inline float getValueFast(float x,float fs)
+	inline float getValueFast(float x)
 	{
-		float cpv = statev;
-		return triangleIntegration(cpv,internalSquare,fs*0.25)*2;
+		float mix = x < 0.5 ? 2*x-0.5 : 1.5-2*x;
+		return mix;
 	}
 	inline void processSlave(float x , float delta,bool hardSyncReset,float hardSyncFrac)
 	{
-
+		bool hspass = true;
+		if(x >= 1.0)
+		{
+			x-=1.0;
+			if(((!hardSyncReset)||(x/delta > hardSyncFrac)))//de morgan processed equation
+			{
+				mixInBlampCenter(buffer1,bP1,x/delta,-4*Samples*delta);
+			}
+			else
+			{
+				x+=1;
+				hspass = false;
+			}
+		}
+		if(x >= 0.5 && x - delta < 0.5 &&hspass)
+		{
+			float frac = (x - 0.5) / delta;
+			if(((!hardSyncReset)||(frac > hardSyncFrac)))//de morgan processed equation
+			{
+				mixInBlampCenter(buffer1,bP1,frac,4*Samples*delta);
+			}
+		}
+		if(x >= 1.0 && hspass)
+		{
+			x-=1.0;
+			if(((!hardSyncReset)||(x/delta > hardSyncFrac)))//de morgan processed equation
+			{
+				mixInBlampCenter(buffer1,bP1,x/delta,-4*Samples*delta);
+			}
+			else
+			{
+				//if transition do not ocurred 
+				x+=1;
+				//x2-=fs;
+			}
+		}
+		if(hardSyncReset)
+		{
+			float fracMaster = (delta * hardSyncFrac);
+			float trans = (x-fracMaster);
+			float mix = trans < 0.5 ? 2*trans-0.5 : 1.5-2*trans;
+			if(trans >0.5)
+				mixInBlampCenter(buffer1,bP1,hardSyncFrac,-4*Samples*delta);
+			mixInImpulseCenter(buffer1,bP1,hardSyncFrac,mix+0.5);
+			//x2 =fracMaster;
+			//mix = x;
+		}
+	}
+	inline void mixInBlampCenter(float * buf,int& bpos,float offset, float scale)
+	{
+		int lpIn =(int)(B_OVERSAMPLING*(offset));
+		float frac = offset * B_OVERSAMPLING - lpIn;
+		for(int i = 0 ; i <n;i++)
+		{
+			float mixvalue = 0;
+			//mixvalue = Blep[lpIn] * scale;
+			mixvalue = (blamp[lpIn]*(1-frac)+blamp[lpIn+1]*(frac));
+			//Substract trivial ramp
+			if(i >=Samples) 
+				mixvalue   -=  ((lpIn + frac) / (B_OVERSAMPLING * Samples)) - 1;
+			buf[(bpos+i)&(n-1)]  +=mixvalue*scale;
+			lpIn += B_OVERSAMPLING;
+		}
 	}
 	inline void mixInImpulseCenter(float * buf,int& bpos,float offset, float scale) 
 	{
@@ -116,9 +163,19 @@ public:
 			lpIn += B_OVERSAMPLING;
 		}
 	}
-	inline void mixSincCenter(float * buf,int& pbos,float offset,float scale)
+	inline void mixSincCenter(float * buf,int& bpos,float offset,float scale)
 	{
+		int lpIn =(int)(B_OVERSAMPLING*(offset));
+		float frac = offset * B_OVERSAMPLING - lpIn;
+		for(int i = 0 ; i <n;i++)
+		{
+			float mixvalue = 0;
+			//mixvalue = Blep[lpIn] * scale;
 
+			mixvalue = (sinc[lpIn]*(1-frac)+sinc[lpIn+1]*(frac));
+			buf[(bpos+i)&(n-1)]  += mixvalue*scale;
+			lpIn += B_OVERSAMPLING;
+		}
 	}
 	float getDelayedSample(float* buf,int& dpos)
 	{
