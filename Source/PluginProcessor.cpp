@@ -157,11 +157,17 @@ void ObxdAudioProcessor::setParameter (int index, float newValue)
 	case PW:
 		synth->processPulseWidth(newValue);
 		break;
-	case OSC1W:
-		synth->processOsc1Waveform(newValue);
+	case OSC1Saw:
+		synth->processOsc1Saw(newValue);
 		break;
-	case OSC2W:
-		synth->processOsc2Waveform(newValue);
+	case OSC2Saw:
+		synth->processOsc2Saw(newValue);
+		break;
+	case OSC1Pul:
+		synth->processOsc1Pulse(newValue);
+		break;
+	case OSC2Pul:
+		synth->processOsc2Pulse(newValue);
 		break;
 	case VOLUME:
 		synth->processVolume(newValue);
@@ -322,10 +328,14 @@ const String ObxdAudioProcessor::getParameterName (int index)
 		return S("FilterKeyFollow");
 	case PW:
 		return S("PulseWidth");
-	case OSC2W:
-		return S("Osc2Wave");
-	case OSC1W:
-		return S("Osc1Wave");
+	case OSC2Saw:
+		return S("Osc2Saw");
+	case OSC1Saw:
+		return S("Osc1Saw");
+	case OSC1Pul:
+		return S("Osc1Pulse");
+	case OSC2Pul:
+		return S("Osc2Pulse");
 	case VOLUME:
 		return S("Volume");
 	case UDET:

@@ -62,8 +62,12 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 	lfoPwm2Button = addNormalTooglableButton(710+30,240,ownerFilter,LFOPW2,"Osc2");
 
 	hardSyncButton = addNormalTooglableButton(210+30,115-40,ownerFilter,OSC2HS,"Sync");
-	osc1WfButton = addNormalTooglableButton(160+30,115-40,ownerFilter,OSC1P,"WF1");
-	osc2WfButton = addNormalTooglableButton(260+30,115-40,ownerFilter,OSC2P,"WF2");
+	osc1SawButton = addTinyTooglableButton(160+30,115-40,ownerFilter,OSC1Saw,"S");
+	osc2SawButton = addTinyTooglableButton(260+30,115-40,ownerFilter,OSC2Saw,"S");
+
+	osc1PulButton = addTinyTooglableButton(160+50,115-40,ownerFilter,OSC1Pul,"P");
+	osc2PulButton = addTinyTooglableButton(260+50,115-40,ownerFilter,OSC2Pul,"P");
+
 	pitchQuantButton =  addNormalTooglableButton(160+30,100,ownerFilter,OSCQuantize,"Step");
 
 	filterBPBlendButton = addNormalTooglableButton(460+70,115-15,ownerFilter,BANDPASS,"Bp");
@@ -160,6 +164,17 @@ TooglableButton*  ObxdAudioProcessorEditor::addNormalTooglableButton(int x , int
 	button->addListener(this);
 	return button;
 }
+TooglableButton*  ObxdAudioProcessorEditor::addTinyTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name)
+{
+	TooglableButton* button = new TooglableButton();
+	//	button->setButtonStyle(DrawableButton::ButtonStyle::ImageAboveTextLabel);
+	addAndMakeVisible(button);
+	button->setBounds(x,y,20,20);
+	button->setButtonText(name);
+	button->setValue(filter->getParameter(parameter),0);
+	button->addListener(this);
+	return button;
+}
 void ObxdAudioProcessorEditor::buttonClicked(Button * b)
 {
 	TooglableButton* tb = (TooglableButton*)(b);
@@ -167,8 +182,10 @@ void ObxdAudioProcessorEditor::buttonClicked(Button * b)
 #define bp(T) {flt->setParameterNotifyingHost(T,tb->getValue());}
 #define handleBParam(K,T)  if (tb == K) {bp(T)} else
 	handleBParam(hardSyncButton,OSC2HS)
-		handleBParam(osc1WfButton,OSC1W)
-		handleBParam(osc2WfButton,OSC2W)
+		handleBParam(osc1SawButton,OSC1Saw)
+		handleBParam(osc2SawButton,OSC2Saw)
+		handleBParam(osc1PulButton,OSC1Pul)
+		handleBParam(osc2PulButton,OSC2Pul)
 		handleBParam(filterKeyFollowButton,FLT_KF)
 		handleBParam(pitchQuantButton,OSCQuantize)
 		handleBParam(unisonButton,UNISON)
@@ -303,8 +320,11 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 		rn(tuneKnob,TUNE)
 		//buttons
 		rn(hardSyncButton,OSC2HS)
-		rn(osc1WfButton,OSC1W)
-		rn(osc2WfButton,OSC2W)
+		rn(osc1SawButton,OSC1Saw)
+		rn(osc2SawButton,OSC2Saw)
+		rn(osc1PulButton,OSC1Pul)
+		rn(osc2PulButton,OSC2Pul)
+
 		rn(filterKeyFollowButton,FLT_KF)
 		rn(pitchQuantButton,OSCQuantize)
 		rn(unisonButton,UNISON)

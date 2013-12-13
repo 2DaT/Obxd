@@ -66,8 +66,10 @@ public:
 
 
 	//osc pitches
-	float osc1p,osc2p;
+	float osc1Saw,osc2Saw,
+		osc1Pul,osc2Pul;
 
+	float osc1p,osc2p;
 	bool hardSync;
 	float xmod;
 
@@ -97,7 +99,8 @@ public:
 		pw1=pw2=0;
 		xmod = 0;
 		hardSync = false;
-		osc1p = osc2p=0;
+		osc1p=osc2p=10;
+		osc1Saw=osc2Saw=osc1Pul=osc2Pul=false;
 		osc2Det = 0;
 		notePlaying = 30;
 		d1=d2=d3=d4=0;
@@ -156,13 +159,16 @@ public:
 		hsfrac = 0;
 		float osc1mix=0.0f;
 		float pwcalc =jlimit<float>(0.1f,1.0f,(pulseWidth + pw1)*0.5f + 0.5f);
-		if(!osc1w)
+		if(!osc1Pul)
 			pwcalc=0;
 
-		if(osc1w)
+		if(osc1Pul)
 			o1p.processMaster(x1,fs,hsr,hsfrac,pwcalc,pw1w);
-		else
-			o1t.processMaster(x1,fs,hsr,hsfrac,-pitch1);
+		if(osc1Saw)
+			o1s.processMaster(x1,fs,hsr,hsfrac);
+		if(!osc1Pul && !osc1Saw)
+			o1t.processMaster(x1,fs,hsr,hsfrac);
+
 		if(x1 >= 1.0f)
 			x1-=1.0f;
 
@@ -170,13 +176,15 @@ public:
 
 		hsr &= hardSync;
 
-		float rxm = (osc1w ? o1p.getValueFast(x1,pwcalc) : o1t.getValueFast(x1));
+		float rxm = ((osc1Saw)? o1s.getValueFast(x1) :0) + (osc1Pul ? o1p.getValueFast(x1,pwcalc):0) + ((!osc1Pul && !osc1Saw)?o1t.getValueFast(x1):0);
 
 
-		if(osc1w)
-			osc1mix = o1p.getValue(x1,pwcalc) + o1p.aliasReduction();
-		else
-			osc1mix = o1t.getValue(x1,fs) + o1t.aliasReduction(fs);
+		if(osc1Pul)
+			osc1mix += o1p.getValue(x1,pwcalc) + o1p.aliasReduction();
+		if(osc1Saw)
+			osc1mix += o1s.getValue(x1) + o1s.aliasReduction();
+		if(!osc1Pul && !osc1Saw)
+			osc1mix = o1t.getValue(x1) + o1t.aliasReduction();
 
 
 		pitch2 = getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ rxm *xmod + tune + oct + totalDetune +totalDetune*osc2Factor);
@@ -187,17 +195,20 @@ public:
 			pitch2=21000;
 		fs = pitch2 * (sampleRateInv);
 		pwcalc = jlimit<float>(0.1f,1.0f,(pulseWidth + pw2)*0.5f + 0.5f);
-		if(!osc2w)
-			pwcalc=0;
+
 		float osc2mix=0.0f;
 
 		x2 +=fs;
 
 		//o2s.processSlave(x2,fs,hsr,hsfrac);
-		if(osc2w)
+
+		if(osc2Pul)
 			o2p.processSlave(x2,fs,hsr,hsfrac,pwcalc,pw2w);
-		else
+		if(osc2Saw)
+			o2s.processSlave(x2,fs,hsr,hsfrac);
+		if(!osc2Pul && !osc2Saw)
 			o2t.processSlave(x2,fs,hsr,hsfrac);
+
 
 		if(x2 >= 1.0f)
 			x2-=1.0;
@@ -211,11 +222,13 @@ public:
 			x2 =fracMaster;
 		}
 
-		if(osc2w)
-			osc2mix = o2p.getValue(x2,pwcalc) + o2p.aliasReduction();
-		else
-			osc2mix = o2t.getValue(x2,fs) + o2t.aliasReduction(fs);
 
+		if(osc2Pul)
+			osc2mix += o2p.getValue(x2,pwcalc) + o2p.aliasReduction();
+		if(osc2Saw)
+			osc2mix += o2s.getValue(x2) + o2s.aliasReduction();
+		if(!osc2Pul && !osc2Saw)
+			osc2mix = o2t.getValue(x2) + o2t.aliasReduction();
 
 		float filtration1 = osc1mix;
 		float filtration2 = osc2mix;

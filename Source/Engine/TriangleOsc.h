@@ -43,12 +43,12 @@ public:
 		delete buffer2;
 		delete del1;
 	}
-	inline float aliasReduction(float fs)
+	inline float aliasReduction()
 	{
 		return -getNextBlep(buffer1,bP1);
 		//return 0;
 	}
-	inline void processMaster(float x,float delta,bool& hardSyncReset,float& hardSyncFrac,float pitch)
+	inline void processMaster(float x,float delta,bool& hardSyncReset,float& hardSyncFrac)
 	{
 		if(x >= 1.0)
 		{
@@ -69,7 +69,7 @@ public:
 			mixInBlampCenter(buffer1,bP1,x/delta,-4*Samples*delta);
 		}
 	}
-	inline float getValue(float x,float fs)
+	inline float getValue(float x)
 	{
 		float mix = x < 0.5 ? 2*x-0.5 : 1.5-2*x;
 		del1->feedDelay(mix);

@@ -271,18 +271,32 @@ public:
 		}
 	}
 
-	void processOsc1Waveform(float param)
+	void processOsc1Saw(float param)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->osc.osc1w= param>0.5;
+			synth->voices[i]->osc.osc1Saw = param>0.5;
 		}
 	}
-	void processOsc2Waveform(float param)
+	void processOsc1Pulse(float param)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->osc.osc2w= param>0.5;
+			synth->voices[i]->osc.osc1Pul = param>0.5;
+		}
+	}
+	void processOsc2Saw(float param)
+	{
+		for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		{
+			synth->voices[i]->osc.osc2Saw= param>0.5;
+		}
+	}
+	void processOsc2Pulse(float param)
+	{
+		for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		{
+			synth->voices[i]->osc.osc2Pul= param>0.5;
 		}
 	}
 
