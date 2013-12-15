@@ -3,7 +3,7 @@
 #include "BlepData.h"
 class SawOsc 
 {
-	DelayLine *del1;
+	DelayLine* del1;
 	float *buffer1;
 	const int hsam;
 	const int n;
@@ -13,15 +13,15 @@ public:
 		, n(Samples*2)
 	{
 		bP1=0;
+		del1 = new DelayLine(hsam);
 		buffer1= new float[n];
 		for(int i = 0 ; i < n ; i++)
 			buffer1[i]=0;
-		del1 = new DelayLine(hsam);
 	}
 	~SawOsc()
 	{
-		delete buffer1;
 		delete del1;
+		delete buffer1;
 	}
 	inline float aliasReduction()
 	{
@@ -46,7 +46,7 @@ public:
 	{
 		return x - 0.5;
 	}
-	inline void processSlave(float x , float delta,bool& hardSyncReset,float& hardSyncFrac)
+	inline void processSlave(float x , float delta,bool hardSyncReset,float hardSyncFrac)
 	{
 			if(x >= 1.0f)
 			{

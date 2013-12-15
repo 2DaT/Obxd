@@ -3,7 +3,7 @@
 #include "BlepData.h"
 class PulseOsc 
 {
-	DelayLine *del1;
+	DelayLine* del1;
 	bool pw1t;
 	float *buffer1;
 	const int hsam;
@@ -13,12 +13,12 @@ public:
 	PulseOsc() : hsam(Samples)
 		, n(Samples*2)
 	{
+		del1 = new DelayLine(hsam);
 		pw1t = false;
 		bP1=0;
 		buffer1= new float[n];
 		for(int i = 0 ; i < n ; i++)
 			buffer1[i]=0;
-		del1 = new DelayLine(hsam);
 	}
 	~PulseOsc()
 	{

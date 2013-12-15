@@ -6,7 +6,7 @@ private:
 	float* dl;
 	int iidx;
 	int maxc;
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayLine);
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayLine)
 public:
 	DelayLine() 
 	{
@@ -26,14 +26,14 @@ public:
 	{
 		delete dl;
 	}
-	void feedDelay(float sm)
+	inline void feedDelay(float sm)
 	{
 		dl[iidx] = sm;
 		iidx++;
 		if(iidx >= (maxc))
 			iidx-=(maxc);
 	}
-	float getDelayedSample()
+	inline float getDelayedSample()
 	{
 		int idx;
 		idx = iidx-(maxc);

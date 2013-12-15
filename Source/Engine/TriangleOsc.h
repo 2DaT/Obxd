@@ -3,30 +3,18 @@
 #include "BlepData.h"
 class TriangleOsc 
 {
-	DelayLine *del1;
+	DelayLine* del1;
 	bool fall;
 	float *buffer1,*buffer2;
-	float intSt,arintSt;
 	const int hsam;
 	const int n;
 
-	float statev,stval;
-	float internalSquare;
-	float aliasint;
 	int bP1,bP2;
-
-	bool t1t;
 public:
 	TriangleOsc() : hsam(Samples)
 		, n(Samples*2)
 	{
-		internalSquare = 0;
-		t1t = false;
-		statev= 0;
-		stval = 0;
-		intSt = 0;
-		arintSt = 0;
-		aliasint = 0;
+		del1 =new DelayLine(hsam);
 		fall = false;
 		bP1=bP2=0;
 		buffer1= new float[n];
@@ -35,7 +23,6 @@ public:
 		buffer2= new float[n];
 		for(int i = 0 ; i < n ; i++)
 			buffer2[i]=0;
-		del1 = new DelayLine(hsam);
 	}
 	~TriangleOsc()
 	{

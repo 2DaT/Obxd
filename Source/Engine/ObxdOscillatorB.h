@@ -159,14 +159,12 @@ public:
 		hsfrac = 0;
 		float osc1mix=0.0f;
 		float pwcalc =jlimit<float>(0.1f,1.0f,(pulseWidth + pw1)*0.5f + 0.5f);
-		if(!osc1Pul)
-			pwcalc=0;
 
 		if(osc1Pul)
 			o1p.processMaster(x1,fs,hsr,hsfrac,pwcalc,pw1w);
 		if(osc1Saw)
 			o1s.processMaster(x1,fs,hsr,hsfrac);
-		if(!osc1Pul && !osc1Saw)
+		else if(!osc1Pul)
 			o1t.processMaster(x1,fs,hsr,hsfrac);
 
 		if(x1 >= 1.0f)
@@ -176,15 +174,24 @@ public:
 
 		hsr &= hardSync;
 
-		float rxm = ((osc1Saw)? o1s.getValueFast(x1) :0) + (osc1Pul ? o1p.getValueFast(x1,pwcalc):0) + ((!osc1Pul && !osc1Saw)?o1t.getValueFast(x1):0);
-
+		//float rxm = (osc1Saw? o1s.getValueFast(x1) :((!osc1Pul)?o1t.getValueFast(x1):0)) + (osc1Pul ? o1p.getValueFast(x1,pwcalc):0);
+		float rxm=0;
 
 		if(osc1Pul)
+		{
 			osc1mix += o1p.getValue(x1,pwcalc) + o1p.aliasReduction();
+			rxm+=o1p.getValueFast(x1,pwcalc);
+		}
 		if(osc1Saw)
+		{
 			osc1mix += o1s.getValue(x1) + o1s.aliasReduction();
-		if(!osc1Pul && !osc1Saw)
+			rxm+=o1s.getValueFast(x1);
+		}
+		else if(!osc1Pul)
+		{
 			osc1mix = o1t.getValue(x1) + o1t.aliasReduction();
+			rxm = o1t.getValueFast(x1);
+		}
 
 
 		pitch2 = getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ rxm *xmod + tune + oct + totalDetune +totalDetune*osc2Factor);
@@ -206,7 +213,7 @@ public:
 			o2p.processSlave(x2,fs,hsr,hsfrac,pwcalc,pw2w);
 		if(osc2Saw)
 			o2s.processSlave(x2,fs,hsr,hsfrac);
-		if(!osc2Pul && !osc2Saw)
+		else if(!osc2Pul)
 			o2t.processSlave(x2,fs,hsr,hsfrac);
 
 
@@ -227,7 +234,7 @@ public:
 			osc2mix += o2p.getValue(x2,pwcalc) + o2p.aliasReduction();
 		if(osc2Saw)
 			osc2mix += o2s.getValue(x2) + o2s.aliasReduction();
-		if(!osc2Pul && !osc2Saw)
+		else if(!osc2Pul)
 			osc2mix = o2t.getValue(x2) + o2t.aliasReduction();
 
 		float filtration1 = osc1mix;
