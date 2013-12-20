@@ -73,9 +73,9 @@ public:
 	{
 		float oscmix;
 		if(x >= pulseWidth)
-			oscmix = (1 - (0.5-pulseWidth)) - 0.5;
+			oscmix = 1 - (0.5-pulseWidth) - 0.5;
 		else
-			oscmix = (-(0.5-pulseWidth)) - 0.5;
+			oscmix = -(0.5-pulseWidth) - 0.5;
 		return oscmix;
 	}
 	inline void processSlave(float x , float delta,bool hardSyncReset,float hardSyncFrac,float pulseWidth,float pulseWidthWas)

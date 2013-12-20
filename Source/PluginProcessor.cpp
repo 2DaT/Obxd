@@ -52,6 +52,12 @@ void ObxdAudioProcessor::setParameter (int index, float newValue)
 	parameters.values[index] = newValue;
 	switch(index)
 	{
+	case LEGATOMODE:
+		synth->processLegatoMode(newValue);
+		break;
+	case ENVPITCH:
+		synth->processEnvelopeToPitch(newValue);
+		break;
 	case OSCQuantize:
 		synth->processPitchQuantization(newValue);
 		break;
@@ -242,6 +248,10 @@ const String ObxdAudioProcessor::getParameterName (int index)
 {
 	switch(index)
 	{
+	case LEGATOMODE:
+		return S("LegatoMode");
+	case ENVPITCH:
+		return S("EnvelopeToPitch");
 	case OSCQuantize:
 		return S("PitchQuant");
 	case VOICE_COUNT:
@@ -422,12 +432,12 @@ double ObxdAudioProcessor::getTailLengthSeconds() const
 }
 int ObxdAudioProcessor::getNumPrograms()
 {
-	return 0;
+	return 1;
 }
 
 int ObxdAudioProcessor::getCurrentProgram()
 {
-	return 0;
+	return 1;
 }
 
 void ObxdAudioProcessor::setCurrentProgram (int index)
@@ -437,7 +447,7 @@ void ObxdAudioProcessor::setCurrentProgram (int index)
 
 const String ObxdAudioProcessor::getProgramName (int index)
 {
-	return String::empty;
+	return S("Default");
 }
 
 void ObxdAudioProcessor::changeProgramName (int index, const String& newName)

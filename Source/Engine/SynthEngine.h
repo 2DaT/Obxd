@@ -44,7 +44,7 @@ public:
 	}
 	void setVoiceCount(float param)
 	{
-		synth->setVoiceCount(jmax(1,(int)(param*8)));
+		synth->setVoiceCount(roundToInt((param*7) +1));
 	}
 	void procPitchWheelAmount(float param)
 	{
@@ -69,6 +69,13 @@ public:
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
 			synth->voices[i]->osc.tune = param*2-1;
+		}
+	}
+	void processLegatoMode(float param)
+	{
+		for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		{
+			synth->voices[i]->legatoMode = roundToInt(param*3 + 1) -1;
 		}
 	}
 	void processOctave(float param)
@@ -207,6 +214,13 @@ public:
 			synth->voices[i]->osc.xmod= param*24;
 		}
 	}
+	void processEnvelopeToPitch(float param)
+	{
+		for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		{
+			synth->voices[i]->envpitchmod= param*36;
+		}
+	}
 	void processOsc2HardSync(float param)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
@@ -260,7 +274,7 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->osc.br= linsc(param,10000,21000);
+			synth->voices[i]->setBrightness(  linsc(param,10000,26000));
 		}
 	}
 	void processOsc2Det(float param)

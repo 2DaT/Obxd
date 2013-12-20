@@ -16,6 +16,7 @@
 #include "PluginProcessor.h"
 #include "Gui\Knob.h"
 #include "Gui\TooglableButton.h"
+#include "Gui\ButtonList.h"
 
 
 //==============================================================================
@@ -25,8 +26,8 @@ class ObxdAudioProcessorEditor  :
 	public AudioProcessorEditor,
                           public ChangeListener,
 						  public Slider::Listener,
-						  public Button::Listener//,
-						 // public ComboBox::Listener//,
+						  public Button::Listener,
+						  public ComboBox::Listener//,
 						//  public AudioProcessorListener
 
 {
@@ -45,6 +46,8 @@ public:
 	void placeLabel(int x , int y,String text);
 	TooglableButton* addNormalTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name);
 	TooglableButton* addTinyTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name);
+
+	ButtonList* addNormalButtonList(int x , int y ,int width, ObxdAudioProcessor* filter,int parameter,String name);
     void sliderValueChanged (Slider*);
 	void buttonClicked (Button *);
     void comboBoxChanged(ComboBox*);
@@ -61,12 +64,16 @@ public:
 		*filterDetuneKnob,*envelopeDetuneKnob,*portamentoDetuneKnob,
 		*tuneKnob,
 		*lfoFrequencyKnob,*lfoAmt1Knob,*lfoAmt2Knob,
-		*pan1Knob,*pan2Knob,*pan3Knob,*pan4Knob,*pan5Knob,*pan6Knob,*pan7Knob,*pan8Knob;
+		*pan1Knob,*pan2Knob,*pan3Knob,*pan4Knob,*pan5Knob,*pan6Knob,*pan7Knob,*pan8Knob,
+		*brightnessKnob,*envPitchModKnob;
 
 	TooglableButton* hardSyncButton,*osc1SawButton,*osc2SawButton,*osc1PulButton,*osc2PulButton,*filterKeyFollowButton,*unisonButton,*pitchQuantButton,
 		*filterHQButton,*filterBPBlendButton,
 		*lfoSinButton,*lfoSquareButton,*lfoSHButton,*lfoOsc1Button,*lfoOsc2Button,*lfoFilterButton,
-		*lfoPwm1Button,*lfoPwm2Button;
+		*lfoPwm1Button,*lfoPwm2Button,
+		*bendRangeButton,*bendOsc2OnlyButton;
+
+	ButtonList *voiceSwitch,*legatoSwitch;
     //==============================================================================
     // This is just a standard Juce paint method...
 //    void paint (Graphics& g);

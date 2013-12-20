@@ -35,6 +35,9 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 	xmodKnob = addTinyKnob(215+30,100,ownerFilter,XMOD,"Xmod");
 	osc2DetuneKnob = addTinyKnob(265+30,100,ownerFilter,OSC2_DET,"Detune");
 
+	envPitchModKnob = addTinyKnob(265+30,140,ownerFilter,ENVPITCH,"PEnv");
+	brightnessKnob = addTinyKnob(215+30,140,ownerFilter,BRIGHTNESS,"Bri");
+
 	attackKnob = addNormalKnob(590+30,90,ownerFilter,LATK,"Atk");
 	decayKnob = addNormalKnob(630+30,90,ownerFilter,LDEC,"Dec");
 	sustainKnob = addNormalKnob(670+30,90,ownerFilter,LSUS,"Sus");
@@ -90,6 +93,10 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 	pan7Knob = addTinyKnob(95,260,ownerFilter,PAN7,"7");
 	pan8Knob = addTinyKnob(125,260,ownerFilter,PAN8,"8");
 
+	placeLabel(330,220,"BendControls");
+	bendOsc2OnlyButton = addNormalTooglableButton(340,240,ownerFilter,BENDOSC2,"Osc2");
+	bendRangeButton = addNormalTooglableButton(340,265,ownerFilter,BENDRANGE,"12");
+
 	filterDetuneKnob = addTinyKnob(40,165,ownerFilter,FILTERDER,"Flt");
 	envelopeDetuneKnob = addTinyKnob(70,165,ownerFilter,ENVDER,"Env");
 	portamentoDetuneKnob = addTinyKnob(100,165,ownerFilter,PORTADER,"Port");
@@ -99,7 +106,25 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 	placeLabel(213,5,"Oscillators");
 	placeLabel(327,5,"Mixer");
 	placeLabel(440,5,"Filter");
+	placeLabel(210,220,"VoiceCount");
+	voiceSwitch = addNormalButtonList(240,240,40,ownerFilter,VOICE_COUNT,"VoiceCount");
+	voiceSwitch ->addChoise("1");
+	voiceSwitch ->addChoise("2");
+	voiceSwitch ->addChoise("3");
+	voiceSwitch ->addChoise("4");
+	voiceSwitch ->addChoise("5");
+	voiceSwitch ->addChoise("6");
+	voiceSwitch ->addChoise("7");
+	voiceSwitch ->addChoise("8");
+	voiceSwitch ->setValue(ownerFilter->getParameter(VOICE_COUNT),dontSendNotification);
 
+	placeLabel(440,220,"Legato");
+	legatoSwitch = addNormalButtonList(450,240,90,ownerFilter,LEGATOMODE,"Legato");
+	legatoSwitch ->addChoise("Keep all");
+	legatoSwitch ->addChoise("Keep fenv");
+	legatoSwitch ->addChoise("Keep lenv");
+	legatoSwitch ->addChoise("Retrig");
+	legatoSwitch ->setValue(ownerFilter->getParameter(LEGATOMODE),dontSendNotification);
 	getFilter()->addChangeListener(this);
 }
 void ObxdAudioProcessorEditor::placeLabel(int x , int y , String text)
@@ -109,6 +134,16 @@ void ObxdAudioProcessorEditor::placeLabel(int x , int y , String text)
 	lab->setJustificationType(Justification::centred);
 	lab->setText(text,dontSendNotification);lab->setInterceptsMouseClicks(false,true);
 	addAndMakeVisible(lab);
+}
+ButtonList* ObxdAudioProcessorEditor::addNormalButtonList(int x, int y,int width, ObxdAudioProcessor* filter, int parameter,String name)
+{
+	ButtonList *bl = new ButtonList();
+	bl->setBounds(x, y, width, 20);
+	//bl->setValue(filter->getParameter(parameter),dontSendNotification);
+	addAndMakeVisible(bl);
+    bl->addListener (this);
+	return bl;
+
 }
 ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
 {
@@ -201,12 +236,20 @@ void ObxdAudioProcessorEditor::buttonClicked(Button * b)
 		handleBParam(lfoFilterButton,LFOFILTER)
 		handleBParam(lfoPwm1Button,LFOPW1)
 		handleBParam(lfoPwm2Button,LFOPW2)
+		handleBParam(bendOsc2OnlyButton,BENDOSC2)
+		handleBParam(bendRangeButton,BENDRANGE)
 	{};
 
 }
-void comboBoxChanged (ComboBox* cb)
+void ObxdAudioProcessorEditor::comboBoxChanged (ComboBox* cb)
 {
-
+	ButtonList* bl = (ButtonList*)(cb);
+	ObxdAudioProcessor* flt = getFilter();
+	#define cp(T) {flt->setParameterNotifyingHost(T,bl->getValue());}
+#define handleCParam(K,T)  if (bl == K) {cp(T)} else
+	handleCParam(voiceSwitch,VOICE_COUNT)
+		handleCParam(legatoSwitch,LEGATOMODE)
+	{};
 }
 void ObxdAudioProcessorEditor::sliderValueChanged (Slider* c)
 {
@@ -259,6 +302,8 @@ void ObxdAudioProcessorEditor::sliderValueChanged (Slider* c)
 		handleSParam(pan8Knob,PAN8)
 
 		handleSParam(tuneKnob,TUNE)
+		handleSParam(brightnessKnob,BRIGHTNESS)
+		handleSParam(envPitchModKnob,ENVPITCH)
 		//magic crystal
 	{};
 
@@ -298,6 +343,8 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 		rn(pulseWidthKnob,PW)
 		rn(xmodKnob,XMOD)
 		rn(multimodeKnob,MULTIMODE)
+		rn(brightnessKnob,BRIGHTNESS)
+		rn(envPitchModKnob,ENVPITCH)
 
 		rn(attackKnob,LATK)
 		rn(decayKnob,LDEC)
@@ -339,6 +386,9 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 		rn(lfoSquareButton,LFOSQUAREWAVE)
 		rn(lfoSHButton,LFOSHWAVE)
 
+		rn(bendOsc2OnlyButton,BENDOSC2)
+		rn(bendRangeButton,BENDRANGE)
+
 		rn(lfoOsc1Button,LFOOSC1)
 		rn(lfoOsc2Button,LFOOSC2)
 		rn(lfoFilterButton,LFOFILTER)
@@ -353,6 +403,10 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 		rn(pan6Knob,PAN6)
 		rn(pan7Knob,PAN7)
 		rn(pan8Knob,PAN8)
+
+		rn(voiceSwitch,VOICE_COUNT)
+		rn(legatoSwitch,LEGATOMODE)
+
 }
 void ObxdAudioProcessorEditor::paint (Graphics& g)
 {

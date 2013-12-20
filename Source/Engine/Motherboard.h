@@ -9,6 +9,7 @@ private:
 	VoiceQueue vq;
 	int totalvc;
 	bool wasUni;
+	bool awaitingkeys[110];
 	Decimator9 left,right;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Motherboard)
 public:
@@ -21,6 +22,10 @@ public:
 	bool Oversample;
 	Motherboard()
 	{
+		for(int i = 0 ; i < 110 ; i++)
+		{
+			awaitingkeys[i] = false;
+		}
 		Oversample=false;
 		left = Decimator9();
 		right =  Decimator9();
@@ -59,7 +64,8 @@ public:
 	}
 	void unisonOn()
 	{
-
+		//for(int i = 0 ; i < 110;i++)
+		//	awaitingkeys[i] = false;
 	}
 	void setSampleRate(float sr)
 	{
@@ -76,23 +82,70 @@ public:
 			unisonOn();
 		if (uni)
 		{
-			for (int i = 0; i < totalvc; i++)
+			int minmidi = 110;
+			for(int i = 0 ; i < totalvc; i++)
 			{
-				voices[i]->NoteOn(noteNo);
+				ObxdVoice* p = vq.GetNext();
+				if(p->midiIndx < minmidi && p->Active)
+				{
+					minmidi = p->midiIndx;
+				}
+			}
+			if(minmidi < noteNo)
+			{
+				awaitingkeys[noteNo] = true;
+			}
+			else
+			{
+				for(int i = 0 ; i < totalvc;i++)
+				{
+					ObxdVoice* p = vq.GetNext();
+					if(p->midiIndx > noteNo && p->Active)
+					{
+						awaitingkeys[p->midiIndx] = true;
+					}
+					p->NoteOn(noteNo);
+				}
 			}
 			processed = true;
 		}
-		for (int i = 0; i < totalvc && !processed; i++)
+		else
 		{
-			ObxdVoice* p = vq.GetNext();
-			if (!p->Active)
+			for (int i = 0; i < totalvc && !processed; i++)
 			{
-				p->NoteOn(noteNo);
-				processed = true;
+				ObxdVoice* p = vq.GetNext();
+				if (!p->Active)
+				{
+					p->NoteOn(noteNo);
+					processed = true;
+				}
 			}
 		}
+		// if voice steal occured
 		if(!processed)
-			vq.GetNext()->NoteOn(noteNo);
+		{
+			//
+			int maxmidi = 0;
+			ObxdVoice* highestVoiceAvalible = NULL;
+			for(int i = 0 ; i < totalvc; i++)
+			{
+				ObxdVoice* p = vq.GetNext();
+				if(p->midiIndx > maxmidi)
+				{
+					maxmidi = p->midiIndx;
+					highestVoiceAvalible = p;
+				}
+			}
+			if(maxmidi < noteNo)
+			{
+				awaitingkeys[noteNo] = true;
+			}
+			else
+			{
+				highestVoiceAvalible->NoteOn(noteNo);
+				awaitingkeys[maxmidi] = true;
+			}
+		}
 		wasUni = uni;
 		//  }
 		// WasUni = Params.Unison;
@@ -102,11 +155,38 @@ public:
 
 	void setNoteOff(int noteNo)
 	{
-		for (int i = 0; i < totalvc; i++)
+		awaitingkeys[noteNo] = false;
+		int reallocKey = 0;
+
+		while(reallocKey <= 109 &&(!awaitingkeys[reallocKey]))
 		{
-			ObxdVoice* n = vq.GetNext();
-			if (n->midiIndx==noteNo && n->Active)
-				n->NoteOff();
+			reallocKey++;
+		}
+
+		if(reallocKey !=110)
+		{
+			for(int i = 0 ; i < totalvc; i++)
+			{
+				ObxdVoice* p = vq.GetNext();
+				if((p->midiIndx == noteNo) && (p->Active))
+				{
+					p->NoteOn(reallocKey);
+					awaitingkeys[reallocKey] = false;
+				}
+
+			}
+		}
+		else
+
+		{
+			for (int i = 0; i < totalvc; i++)
+			{
+				ObxdVoice* n = vq.GetNext();
+				if (n->midiIndx==noteNo && n->Active)
+				{
+					n->NoteOff();
+				}
+			}
 		}
 	}
 	void SetOversample(bool over)
