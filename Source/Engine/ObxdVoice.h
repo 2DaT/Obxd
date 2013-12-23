@@ -71,7 +71,7 @@ public:
 	bool stabguard;
 
 	DelayLine *lenvd,*fenvd;
-	
+
 	ApInterpolator ap;
 	float oscpsw;
 	int legatoMode;
@@ -116,7 +116,7 @@ public:
 		delete lenvd;
 		delete fenvd;
 	}
-	void ProcessSample(float* ptr)
+	inline void ProcessSample(float* ptr)
 	{
 		//portamento on osc input voltage
 		//implements rc circuit
@@ -146,9 +146,9 @@ public:
 		//variable sort magic
 		float env = lenvd->getDelayedSample();
 
-				float x2 = 0;
-				float oscps = osc.ProcessSample();
-				if(Oversample)
+		float x2 = 0;
+		float oscps = osc.ProcessSample();
+		if(Oversample)
 		{
 			x2=  oscpsw;
 			x2 = flt.Apply(x2*2,(cutoffcalc+cutoffwas)*0.5);
@@ -161,8 +161,8 @@ public:
 		float x1;
 		if(!Oversample)
 		{
-		x1 = oscps;
-		x1 = flt.Apply(x1,(cutoffcalc)); 
+			x1 = oscps;
+			x1 = flt.Apply(x1,(cutoffcalc)); 
 
 		}
 		else
@@ -175,58 +175,58 @@ public:
 		*(ptr)=x1;
 
 
-	//*(ptr+1)=x1;
-	//
-	oscpsw = oscps;
-	cutoffwas = cutoffcalc;
-	envelopewas = env;
-}
+		//*(ptr+1)=x1;
+		//
+		oscpsw = oscps;
+		cutoffwas = cutoffcalc;
+		envelopewas = env;
+	}
 	void setBrightness(float val)
 	{
 		briHold = val;
 		brightCoef = tan(cutoff *jmin(val,flt.SampleRate*0.5f-10)* (juce::float_Pi));
 
 	}
-void setEnvDer(float d)
-{
-	env.setUniqueDeriviance(1 + EnvDetune*d);
-	fenv.setUniqueDeriviance(1 + FenvDetune*d);
-}
-void setSampleRate(float sr)
-{
-	flt.setSampleRate((Oversample)?2*sr:sr);
-	osc.setSampleRate(sr);
-	env.setSampleRate(sr);
-	fenv.setSampleRate(sr);
-	SampleRate = sr;
-	sampleRateInv = 1 / sr;
-	brightCoef = tan(cutoff *jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi));
-}
-void ResetEnvelope()
-{
-	env.ResetEnvelopeState();
-	fenv.ResetEnvelopeState();
-}
-void ToogleOversample()
-{
-	flt.setSampleRate((Oversample)?SampleRate:2*SampleRate);
-	Oversample = !Oversample;
-	brightCoef = tan(cutoff *jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi));
-}
-void NoteOn(int mididx)
-{
-	//osc.midiIndex = mididx-81;
-	midiIndx = mididx;
-	if((!Active)||(legatoMode&1))
-	env.triggerAttack();
-	if((!Active)||(legatoMode&2))
-	fenv.triggerAttack();
-	Active = true;
-}
-void NoteOff()
-{
-	env.triggerRelease();
-	fenv.triggerRelease();
-	Active = false;
-}
+	void setEnvDer(float d)
+	{
+		env.setUniqueDeriviance(1 + EnvDetune*d);
+		fenv.setUniqueDeriviance(1 + FenvDetune*d);
+	}
+	void setSampleRate(float sr)
+	{
+		flt.setSampleRate((Oversample)?2*sr:sr);
+		osc.setSampleRate(sr);
+		env.setSampleRate(sr);
+		fenv.setSampleRate(sr);
+		SampleRate = sr;
+		sampleRateInv = 1 / sr;
+		brightCoef = tan(cutoff *jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi));
+	}
+	void ResetEnvelope()
+	{
+		env.ResetEnvelopeState();
+		fenv.ResetEnvelopeState();
+	}
+	void ToogleOversample()
+	{
+		flt.setSampleRate((Oversample)?SampleRate:2*SampleRate);
+		Oversample = !Oversample;
+		brightCoef = tan(cutoff *jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi));
+	}
+	void NoteOn(int mididx)
+	{
+		//osc.midiIndex = mididx-81;
+		midiIndx = mididx;
+		if((!Active)||(legatoMode&1))
+			env.triggerAttack();
+		if((!Active)||(legatoMode&2))
+			fenv.triggerAttack();
+		Active = true;
+	}
+	void NoteOff()
+	{
+		env.triggerRelease();
+		fenv.triggerRelease();
+		Active = false;
+	}
 };

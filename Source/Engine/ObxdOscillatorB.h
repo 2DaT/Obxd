@@ -145,7 +145,7 @@ public:
 		SampleRate = sr;
 		sampleRateInv = 1.0f / SampleRate;
 	}
-	float ProcessSample()
+	inline float ProcessSample()
 	{
 		float res = 0;
 		pitch1 = getPitch(notePlaying + (quantizeCw?((int)(osc1p)):osc1p)+ pto1 + tune + oct+totalDetune*osc1Factor);

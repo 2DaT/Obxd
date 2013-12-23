@@ -30,13 +30,13 @@ public:
 		rcor =560 / 44000;
 		R=1;
 	}
-	void setSampleRate(float sr)
+	inline void setSampleRate(float sr)
 	{
 		SampleRate = sr;
 		sampleRateInv = 1/SampleRate;
 		rcor = 560 /sr ;
 	}
-	void setResonance(float res)
+	inline void setResonance(float res)
 	{
 		R = 1-res;
 	}
@@ -85,7 +85,7 @@ public:
 		return 7*pow(y/8,6)/8;
 		//return 0;
 	}
-	float Apply(float sample,float g)
+	inline float Apply(float sample,float g)
         {
 			float g1 = (float)tan(g *sampleRateInv * juce::float_Pi);
 			float g2 = g1;

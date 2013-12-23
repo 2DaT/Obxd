@@ -17,7 +17,7 @@ public:
 		s=sq=sh=0;
 		rg=Random();
 	}
-	float getVal()
+	inline float getVal()
 	{
 		 float Res = 0;
             if((waveForm &1) !=0 )
@@ -33,7 +33,7 @@ public:
 		SampleRate=sr;
 	}
 #define fastsin(x) ((( x + ( x * (-x * x / 6)))))
-	void update()
+	inline void update()
 	{
 		phase+=((Frequency / SampleRate * float_Pi));
 		sq = (phase>0?1:-1);

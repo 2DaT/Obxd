@@ -29,13 +29,13 @@ public:
 	}
 	inline void processMaster(float x,float delta,bool& hardSyncReset,float& hardSyncFrac)
 	{
-			if(x >= 1.0f)
-			{
-				x-=1.0f;
-				hardSyncFrac = x/delta;
-				mixInImpulseCenter(buffer1,bP1,x/delta, 1);
-				hardSyncReset = true;
-			}
+		if(x >= 1.0f)
+		{
+			x-=1.0f;
+			hardSyncFrac = x/delta;
+			mixInImpulseCenter(buffer1,bP1,x/delta, 1);
+			hardSyncReset = true;
+		}
 	}
 	inline float getValue(float x)
 	{
@@ -48,21 +48,21 @@ public:
 	}
 	inline void processSlave(float x , float delta,bool hardSyncReset,float hardSyncFrac)
 	{
-			if(x >= 1.0f)
+		if(x >= 1.0f)
+		{
+			x -= 1.0f;
+			if(((!hardSyncReset)||(x/delta > hardSyncFrac)))//de morgan processed equation
 			{
-				x -= 1.0f;
-				if(((!hardSyncReset)||(x/delta > hardSyncFrac)))//de morgan processed equation
-				{
-					mixInImpulseCenter(buffer1,bP1,x/delta, 1);
-				}
-				else
-				{
-					//if transition do not ocurred 
-					x+=1;
-					//x2-=fs;
-				}
+				mixInImpulseCenter(buffer1,bP1,x/delta, 1);
 			}
-			if(hardSyncReset)
+			else
+			{
+				//if transition do not ocurred 
+				x+=1;
+				//x2-=fs;
+			}
+		}
+		if(hardSyncReset)
 		{
 			float fracMaster = (delta * hardSyncFrac);
 			float trans = (x-fracMaster);
@@ -88,7 +88,7 @@ public:
 			lpIn += B_OVERSAMPLING;
 		}
 	}
-	float getDelayedSample(float* buf,int& dpos)
+	inline float getDelayedSample(float* buf,int& dpos)
 	{
 		int idx;
 		idx = dpos-(hsam);

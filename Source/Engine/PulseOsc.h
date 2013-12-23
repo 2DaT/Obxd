@@ -157,7 +157,7 @@ public:
 			lpIn += B_OVERSAMPLING;
 		}
 	}
-	float getDelayedSample(float* buf,int& dpos)
+	inline float getDelayedSample(float* buf,int& dpos)
 	{
 		int idx;
 		idx = dpos-(hsam);
