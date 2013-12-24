@@ -184,7 +184,7 @@ public:
 	void setBrightness(float val)
 	{
 		briHold = val;
-		brightCoef = tan(cutoff *jmin(val,flt.SampleRate*0.5f-10)* (juce::float_Pi));
+		brightCoef = tan(jmin(val,flt.SampleRate*0.5f-10)* (juce::float_Pi)*flt.sampleRateInv);
 
 	}
 	void setEnvDer(float d)
@@ -200,7 +200,7 @@ public:
 		fenv.setSampleRate(sr);
 		SampleRate = sr;
 		sampleRateInv = 1 / sr;
-		brightCoef = tan(cutoff *jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi));
+		brightCoef = tan(jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi) * flt.sampleRateInv);
 	}
 	void ResetEnvelope()
 	{
@@ -211,7 +211,7 @@ public:
 	{
 		flt.setSampleRate((Oversample)?SampleRate:2*SampleRate);
 		Oversample = !Oversample;
-		brightCoef = tan(cutoff *jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi));
+		brightCoef = tan(jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi)* flt.sampleRateInv);
 	}
 	void NoteOn(int mididx)
 	{
