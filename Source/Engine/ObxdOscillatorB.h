@@ -1,3 +1,26 @@
+/*
+	==============================================================================
+	This file is part of Obxd synthesizer.
+
+	Copyright © 2013-2014 Filatov Vadim
+	
+	Contact author via email :
+	justdat_@_e1.ru
+
+	This file may be licensed under the terms of of the
+	GNU General Public License Version 2 (the ``GPL'').
+
+	Software distributed under the License is distributed
+	on an ``AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, either
+	express or implied. See the GPL for the specific language
+	governing rights and limitations.
+
+	You should have received a copy of the GPL along with this
+	program. If not, go to http://www.gnu.org/licenses/gpl.html
+	or write to the Free Software Foundation, Inc.,  
+	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+	==============================================================================
+ */
 #pragma once
 
 #include "ObxdVoice.h"
@@ -13,29 +36,27 @@ class ObxdOscillatorB
 {
 private:
 	float SampleRate;
-	float d1,d2,d3,d4;
 	float pitch1;
 	float pitch2;
-	bool pw1t,pw1tw,pw2t,pw2tw;
 	float sampleRateInv;
 
 
 	float x1,x2;
-	float x1p,x2p;
 
+	float osc1Factor;
+	float osc2Factor;
 
 	float pw1w,pw2w;
 	//blep const
 	const int n;
 	const int hsam;
 	const float *Blep;
-	float *buffer1,*buffer2;
-	int bP1,bP2;
-	float *dbuffer1,*dbuffer2;
-	int dP1,dP2;
 	//delay line implements fixed sample delay
 	DelayLine *del1,*del2;
-	DelayLine *flt1,*flt2; 
+	DelayLine *xmodd;
+	DelayLineBoolean *syncd;
+	DelayLine *syncFracd;
+	DelayLine *cvd;
 	Random wn;
 	SawOsc o1s,o2s;
 	PulseOsc o1p,o2p;
@@ -48,15 +69,12 @@ public:
 	float notePlaying;
 
 
-	float osc1Factor;
-	float osc2Factor;
 	float totalDetune;
 
 	float osc2Det;
 	float pulseWidth;
 	float pw1,pw2;
 
-	bool osc1w,osc2w;
 
 	bool quantizeCw;
 
@@ -72,8 +90,6 @@ public:
 	float osc1p,osc2p;
 	bool hardSync;
 	float xmod;
-
-	float br;
 
 
 	ObxdOscillatorB() : 
@@ -91,10 +107,7 @@ public:
 		nmx=0;
 		oct=0;
 		tune=0;
-		br=1;
-		x1p=x2p=0;
 		pw1w=pw2w=0;
-		pw1t=pw2t=pw1tw=pw2tw=false;
 		pto1=pto2=0;
 		pw1=pw2=0;
 		xmod = 0;
@@ -103,42 +116,27 @@ public:
 		osc1Saw=osc2Saw=osc1Pul=osc2Pul=false;
 		osc2Det = 0;
 		notePlaying = 30;
-		d1=d2=d3=d4=0;
 		pulseWidth = 0;
-		osc1w=osc2w=false;
 		o1mx=o2mx=0;
 		Blep = blep;
-		bP1 = bP2=0;
-		x1=x2=0;
+		x1=wn.nextFloat();
+		x2=wn.nextFloat();
 
-		buffer1= new float[n];
-		buffer2 = new float[n];
-		dbuffer1= new float[n];
-		dbuffer2 = new float[n];
 		del1 = new DelayLine(hsam);
 		del2 = new DelayLine(hsam);
-		flt1 = new DelayLine(hsam);
-		flt2 = new DelayLine(hsam);
-		//for(int i = 0 ; i < 
-		for(int i = 0 ; i < n;i++)
-		{
-			dbuffer1[i]=0;
-			dbuffer2[i]=0;
-			buffer1[i]=0;
-			buffer2[i]=0;
-		}
-		dP1 = dP2=0;
+		xmodd = new DelayLine(hsam);
+		syncd = new DelayLineBoolean(hsam);
+		syncFracd =  new DelayLine(hsam);
+		cvd = new DelayLine(hsam);
 	}
 	~ObxdOscillatorB()
 	{
-		delete flt1;
-		delete flt2;
 		delete del1;
 		delete del2;
-		delete buffer1;
-		delete buffer2;
-		delete dbuffer1;
-		delete dbuffer2;
+		delete xmodd;
+		delete cvd;
+		delete syncd;
+		delete syncFracd;
 	}
 	void setSampleRate(float sr)
 	{
@@ -147,13 +145,11 @@ public:
 	}
 	inline float ProcessSample()
 	{
-		float res = 0;
 		pitch1 = getPitch(notePlaying + (quantizeCw?((int)(osc1p)):osc1p)+ pto1 + tune + oct+totalDetune*osc1Factor);
 		if(pitch1 > 21000)
 			pitch1 = 21000;
 		bool hsr = false;
 		float hsfrac=0;
-
 		float fs = pitch1*(sampleRateInv);
 		x1+=fs;
 		hsfrac = 0;
@@ -173,41 +169,34 @@ public:
 		pw1w = pwcalc;
 
 		hsr &= hardSync;
-
-		//float rxm = (osc1Saw? o1s.getValueFast(x1) :((!osc1Pul)?o1t.getValueFast(x1):0)) + (osc1Pul ? o1p.getValueFast(x1,pwcalc):0);
-		float rxm=0;
+		//Delaying our hard sync gate signal and frac
+		syncd->feedDelay(hsr);
+		syncFracd ->feedDelay(hsfrac);
+		hsr = syncd->getDelayedSample();
+		hsfrac = syncFracd->getDelayedSample();
 
 		if(osc1Pul)
-		{
 			osc1mix += o1p.getValue(x1,pwcalc) + o1p.aliasReduction();
-			rxm+=o1p.getValueFast(x1,pwcalc);
-		}
 		if(osc1Saw)
-		{
 			osc1mix += o1s.getValue(x1) + o1s.aliasReduction();
-			rxm+=o1s.getValueFast(x1);
-		}
 		else if(!osc1Pul)
-		{
 			osc1mix = o1t.getValue(x1) + o1t.aliasReduction();
-			rxm = o1t.getValueFast(x1);
-		}
-
-
-		pitch2 = getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ rxm *xmod + tune + oct + totalDetune +totalDetune*osc2Factor);
-
+		//Pitch control needs additional delay buffer to compensate
+		//This will give us less aliasing on xmod
+		//Hard sync gate signal delayed too
+		cvd->feedDelay( getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct +totalDetune*osc2Factor));
+		pitch2 = cvd->getDelayedSample();
 
 
 		if(pitch2>21000)
 			pitch2=21000;
 		fs = pitch2 * (sampleRateInv);
+
 		pwcalc = jlimit<float>(0.1f,1.0f,(pulseWidth + pw2)*0.5f + 0.5f);
 
 		float osc2mix=0.0f;
 
 		x2 +=fs;
-
-		//o2s.processSlave(x2,fs,hsr,hsfrac);
 
 		if(osc2Pul)
 			o2p.processSlave(x2,fs,hsr,hsfrac,pwcalc,pw2w);
@@ -222,13 +211,16 @@ public:
 
 
 		pw2w=pwcalc;
-
+		//On hard sync reset slave phase is affected that way
 		if(hsr)
 		{
 			float fracMaster = (fs * hsfrac);
 			x2 =fracMaster;
 		}
-
+		//Delaying osc1 signal
+		xmodd ->feedDelay(osc1mix);
+		//And getting delayed back
+		osc1mix = xmodd->getDelayedSample();
 
 		if(osc2Pul)
 			osc2mix += o2p.getValue(x2,pwcalc) + o2p.aliasReduction();
@@ -237,19 +229,8 @@ public:
 		else if(!osc2Pul)
 			osc2mix = o2t.getValue(x2) + o2t.aliasReduction();
 
-		float filtration1 = osc1mix;
-		float filtration2 = osc2mix;
-
-		//filtration1 =filtration1 - tptlpstatic(d1,filtration1,3,SampleRate);
-		//filtration2 = filtration2 - tptlpstatic(d3,filtration2,3,SampleRate);
-		//filtration1 = filtration1 - tptlp(d1,filtration1,pt1f/8,SampleRate);
-
-		//filtration2 = filtration2 - tptlp(d3,filtration2,pt2f/8,SampleRate);
-
-		res+=o1mx*filtration1 + o2mx *filtration2 + (wn.nextFloat()-0.5)*(nmx*1.3);
-		//res = res - tptlpupw(d1,res,5,sampleRateInv);
-		//res = tptlp(d2,res,br,SampleRate);
+		//mixing 
+		float res =o1mx*osc1mix + o2mx *osc2mix + (wn.nextFloat()-0.5)*(nmx*1.3);
 		return res*3;
-		//return sin(x1 * float_Pi*2 - float_Pi);
 	}
 };

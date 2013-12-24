@@ -41,7 +41,7 @@ bool FileChooser::isPlatformDialogAvailable()
 void FileChooser::showPlatformDialog (Array<File>& results,
                                       const String& title,
                                       const File& file,
-                                      const String& /* filters */,
+                                      const String& filters,
                                       bool isDirectory,
                                       bool /* selectsFiles */,
                                       bool isSave,
@@ -80,9 +80,13 @@ void FileChooser::showPlatformDialog (Array<File>& results,
 
         String startPath;
 
-        if (file.exists() || file.getParentDirectory().exists())
+        if (file.exists())
         {
             startPath = file.getFullPathName();
+        }
+        else if (file.getParentDirectory().exists())
+        {
+            startPath = file.getParentDirectory().getFullPathName();
         }
         else
         {
@@ -93,6 +97,8 @@ void FileChooser::showPlatformDialog (Array<File>& results,
         }
 
         args.add (startPath);
+        args.add (filters.replaceCharacter (';', ' '));
+        args.add ("2>/dev/null");
     }
     else
     {
@@ -126,10 +132,9 @@ void FileChooser::showPlatformDialog (Array<File>& results,
             args.add ("--filename=" + file.getFileName());
     }
 
-    args.add ("2>/dev/null");
-
     ChildProcess child;
-    if (child.start (args))
+
+    if (child.start (args, ChildProcess::wantStdOut))
     {
         const String result (child.readAllProcessOutput().trim());
 
@@ -142,8 +147,8 @@ void FileChooser::showPlatformDialog (Array<File>& results,
             else
                 tokens.add (result);
 
-            for (int i = 0; i < tokens.size(); i++)
-                results.add (File (tokens[i]));
+            for (int i = 0; i < tokens.size(); ++i)
+                results.add (File::getCurrentWorkingDirectory().getChildFile (tokens[i]));
         }
 
         child.waitForProcessToFinish (60 * 1000);

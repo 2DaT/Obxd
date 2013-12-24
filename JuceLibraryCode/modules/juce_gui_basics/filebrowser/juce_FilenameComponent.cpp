@@ -38,7 +38,7 @@ FilenameComponent::FilenameComponent (const String& name,
       wildcard (fileBrowserWildcard),
       enforcedSuffix (suffix)
 {
-    addAndMakeVisible (&filenameBox);
+    addAndMakeVisible (filenameBox);
     filenameBox.setEditableText (canEditFilename);
     filenameBox.addListener (this);
     filenameBox.setTextWhenNothingSelected (textWhenNothingSelected);
@@ -157,7 +157,7 @@ void FilenameComponent::fileDragExit (const StringArray&)
 //==============================================================================
 File FilenameComponent::getCurrentFile() const
 {
-    File f (filenameBox.getText());
+    File f (File::getCurrentWorkingDirectory().getChildFile (filenameBox.getText()));
 
     if (enforcedSuffix.isNotEmpty())
         f = f.withFileExtension (enforcedSuffix);

@@ -9,6 +9,7 @@ It contains the basic startup code for a Juce application.
 */
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "Gui/res.h"
 
 
 //==============================================================================
@@ -16,98 +17,98 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 	: AudioProcessorEditor (ownerFilter)
 {
 	// This is where our plugin's editor size is set.
-	setSize (800, 350);
-	cutoffKnob = addNormalKnob(400+30,20,ownerFilter,CUTOFF,"Cutoff");
-	resonanceKnob = addNormalKnob(450+30,20,ownerFilter,RESONANCE,"Resonance");
-	filterEnvelopeAmtKnob = addNormalKnob(500+30,20,ownerFilter,ENVELOPE_AMT,"Envelope");
-	multimodeKnob = addNormalKnob(450+30,115-40,ownerFilter,MULTIMODE,"Multimode");
+	setSize (1087, 442);
+	cutoffKnob = addNormalKnob(577,40,ownerFilter,CUTOFF,"Cutoff",0.4);
+	resonanceKnob = addNormalKnob(638,40,ownerFilter,RESONANCE,"Resonance",0);
+	filterEnvelopeAmtKnob = addNormalKnob(699,40,ownerFilter,ENVELOPE_AMT,"Envelope",0);
+	multimodeKnob = addTinyKnob(643,106,ownerFilter,MULTIMODE,"Multimode",0.5);
 
-	volumeKnob = addNormalKnob(10+30,20,ownerFilter,VOLUME,"Volume");
-	portamentoKnob = addNormalKnob(60+30,20,ownerFilter,PORTAMENTO,"Portamento");
-	osc1PitchKnob = addNormalKnob(160+30,20,ownerFilter,OSC1P,"Osc1Pitch");
-	pulseWidthKnob = addNormalKnob(210+30,20,ownerFilter,PW,"PW");
-	osc2PitchKnob = addNormalKnob(260+30,20,ownerFilter,OSC2P,"Osc2Pitch");
+	volumeKnob = addNormalKnob(53,120,ownerFilter,VOLUME,"Volume",0.4);
+	portamentoKnob = addNormalKnob(175,241,ownerFilter,PORTAMENTO,"Portamento",0);
+	osc1PitchKnob = addNormalKnob(271,40,ownerFilter,OSC1P,"Osc1Pitch",0);
+	pulseWidthKnob = addNormalKnob(334,40,ownerFilter,PW,"PW",0);
+	osc2PitchKnob = addNormalKnob(397,40,ownerFilter,OSC2P,"Osc2Pitch",0);
 
-	osc1MixKnob = addTinyKnob(340+30,20,ownerFilter,OSC1MIX,"Osc1");
-	osc2MixKnob = addTinyKnob(340+30,60,ownerFilter,OSC2MIX,"Osc2");
-	noiseMixKnob = addTinyKnob(340+30,100,ownerFilter,NOISEMIX,"Noise");
+	osc1MixKnob = addNormalKnob(490,40,ownerFilter,OSC1MIX,"Osc1",1);
+	osc2MixKnob = addNormalKnob(490,132,ownerFilter,OSC2MIX,"Osc2",1);
+	noiseMixKnob = addNormalKnob(490,224,ownerFilter,NOISEMIX,"Noise",0);
 
-	xmodKnob = addTinyKnob(215+30,100,ownerFilter,XMOD,"Xmod");
-	osc2DetuneKnob = addTinyKnob(265+30,100,ownerFilter,OSC2_DET,"Detune");
+	xmodKnob = addNormalKnob(334,168,ownerFilter,XMOD,"Xmod",0);
+	osc2DetuneKnob = addNormalKnob(334,104,ownerFilter,OSC2_DET,"Detune",0);
 
-	envPitchModKnob = addTinyKnob(265+30,140,ownerFilter,ENVPITCH,"PEnv");
-	brightnessKnob = addTinyKnob(215+30,140,ownerFilter,BRIGHTNESS,"Bri");
+	envPitchModKnob = addNormalKnob(376,232,ownerFilter,ENVPITCH,"PEnv",0);
+	brightnessKnob = addNormalKnob(291,232,ownerFilter,BRIGHTNESS,"Bri",1);
 
-	attackKnob = addNormalKnob(590+30,90,ownerFilter,LATK,"Atk");
-	decayKnob = addNormalKnob(630+30,90,ownerFilter,LDEC,"Dec");
-	sustainKnob = addNormalKnob(670+30,90,ownerFilter,LSUS,"Sus");
-	releaseKnob = addNormalKnob(710+30,90,ownerFilter,LREL,"Rel");
+	attackKnob = addNormalKnob(791,132,ownerFilter,LATK,"Atk",0);
+	decayKnob = addNormalKnob(853,132,ownerFilter,LDEC,"Dec",0);
+	sustainKnob = addNormalKnob(916,132,ownerFilter,LSUS,"Sus",1);
+	releaseKnob = addNormalKnob(980,132,ownerFilter,LREL,"Rel",0);
 
-	fattackKnob = addNormalKnob(590+30,20,ownerFilter,FATK,"Atk");
-	fdecayKnob = addNormalKnob(630+30,20,ownerFilter,FDEC,"Dec");
-	fsustainKnob = addNormalKnob(670+30,20,ownerFilter,FSUS,"Sus");
-	freleaseKnob = addNormalKnob(710+30,20,ownerFilter,FREL,"Rel");
+	fattackKnob = addNormalKnob(791,40,ownerFilter,FATK,"Atk",0);
+	fdecayKnob = addNormalKnob(853,40,ownerFilter,FDEC,"Dec",0);
+	fsustainKnob = addNormalKnob(916,40,ownerFilter,FSUS,"Sus",1);
+	freleaseKnob = addNormalKnob(980,40,ownerFilter,FREL,"Rel",0);
 
-	placeLabel(645,145,"LFO");
-	lfoFrequencyKnob = addNormalKnob(590+30,160,ownerFilter,LFOFREQ,"Freq");
-	lfoAmt1Knob = addNormalKnob(650+30,160,ownerFilter,LFO1AMT,"Pitch");
-	lfoAmt2Knob = addNormalKnob(710+30,160,ownerFilter,LFO2AMT,"PWM");
+	lfoFrequencyKnob = addNormalKnob(576,207,ownerFilter,LFOFREQ,"Freq",0);
+	lfoAmt1Knob = addNormalKnob(640,207,ownerFilter,LFO1AMT,"Pitch",0);
+	lfoAmt2Knob = addNormalKnob(704,207,ownerFilter,LFO2AMT,"PWM",0);
 
-	lfoSinButton = addNormalTooglableButton(590+30,215,ownerFilter,LFOSINWAVE,"Sin");
-	lfoSquareButton = addNormalTooglableButton(590+30,240,ownerFilter,LFOSQUAREWAVE,"SQ");
-	lfoSHButton = addNormalTooglableButton(590+30,265,ownerFilter,LFOSHWAVE,"S&H");
+	lfoSinButton = addNormalTooglableButton(587,269,ownerFilter,LFOSINWAVE,"Sin");
+	lfoSquareButton = addNormalTooglableButton(587,323,ownerFilter,LFOSQUAREWAVE,"SQ");
+	lfoSHButton = addNormalTooglableButton(587,378,ownerFilter,LFOSHWAVE,"S&H");
 
-	lfoOsc1Button = addNormalTooglableButton(650+30,215,ownerFilter,LFOOSC1,"Osc1");
-	lfoOsc2Button = addNormalTooglableButton(650+30,240,ownerFilter,LFOOSC2,"Osc2");
-	lfoFilterButton = addNormalTooglableButton(650+30,265,ownerFilter,LFOFILTER,"Filt");
+	lfoOsc1Button = addNormalTooglableButton(651,269,ownerFilter,LFOOSC1,"Osc1");
+	lfoOsc2Button = addNormalTooglableButton(651,323,ownerFilter,LFOOSC2,"Osc2");
+	lfoFilterButton = addNormalTooglableButton(651,378,ownerFilter,LFOFILTER,"Filt");
 
-	lfoPwm1Button = addNormalTooglableButton(710+30,215,ownerFilter,LFOPW1,"Osc1");
-	lfoPwm2Button = addNormalTooglableButton(710+30,240,ownerFilter,LFOPW2,"Osc2");
+	lfoPwm1Button = addNormalTooglableButton(714,269,ownerFilter,LFOPW1,"Osc1");
+	lfoPwm2Button = addNormalTooglableButton(714,323,ownerFilter,LFOPW2,"Osc2");
 
-	hardSyncButton = addNormalTooglableButton(210+30,115-40,ownerFilter,OSC2HS,"Sync");
-	osc1SawButton = addTinyTooglableButton(160+30,115-40,ownerFilter,OSC1Saw,"S");
-	osc2SawButton = addTinyTooglableButton(260+30,115-40,ownerFilter,OSC2Saw,"S");
+	hardSyncButton = addNormalTooglableButton(282,178,ownerFilter,OSC2HS,"Sync");
+	osc1SawButton = addNormalTooglableButton(265,114,ownerFilter,OSC1Saw,"S");
+	osc2SawButton = addNormalTooglableButton(394,114,ownerFilter,OSC2Saw,"S");
 
-	osc1PulButton = addTinyTooglableButton(160+50,115-40,ownerFilter,OSC1Pul,"P");
-	osc2PulButton = addTinyTooglableButton(260+50,115-40,ownerFilter,OSC2Pul,"P");
+	osc1PulButton = addNormalTooglableButton(296,114,ownerFilter,OSC1Pul,"P");
+	osc2PulButton = addNormalTooglableButton(425,114,ownerFilter,OSC2Pul,"P");
 
-	pitchQuantButton =  addNormalTooglableButton(160+30,100,ownerFilter,OSCQuantize,"Step");
+	pitchQuantButton =  addNormalTooglableButton(407,178,ownerFilter,OSCQuantize,"Step");
 
-	filterBPBlendButton = addNormalTooglableButton(460+70,115-15,ownerFilter,BANDPASS,"Bp");
-	filterHQButton = addNormalTooglableButton(440-10,115-15,ownerFilter,FILTER_WARM,"HQ");
+	filterBPBlendButton = addNormalTooglableButton(697,110,ownerFilter,BANDPASS,"Bp");
+	fourPoleButton = addNormalTooglableButton(728,110,ownerFilter,FOURPOLE,"24");
+	filterHQButton = addNormalTooglableButton(604,110,ownerFilter,FILTER_WARM,"HQ");
 
-	filterKeyFollowButton =  addNormalTooglableButton(400+30,115-40,ownerFilter,FLT_KF,"Key");
-	unisonButton = addNormalTooglableButton(40,85,ownerFilter,UNISON,"Uni");
-	tuneKnob = addTinyKnob(45,105,ownerFilter,TUNE,"Tune");
-	voiceDetuneKnob =addNormalKnob(90,85,ownerFilter,UDET,"VoiceDet");
+	filterKeyFollowButton =  addNormalTooglableButton(573,110,ownerFilter,FLT_KF,"Key");
+	unisonButton = addNormalTooglableButton(125,251,ownerFilter,UNISON,"Uni");
+	tuneKnob = addNormalKnob(114,120,ownerFilter,TUNE,"Tune",0.5);
+	voiceDetuneKnob =addNormalKnob(53,241,ownerFilter,UDET,"VoiceDet",0);
 
-	placeLabel(42,205,"Voice pannings");
+	veloAmpEnvKnob = addNormalKnob(486,345,ownerFilter,VAMPENV,"VAE",0);
+	veloFltEnvKnob = addNormalKnob(428,345,ownerFilter,VFLTENV,"VFE",0);
+	midiLearnButton = addNormalTooglableButton(126,372,ownerFilter,MIDILEARN,"LEA");
+	midiUnlearnButton = addNormalTooglableButton(185,372,ownerFilter,UNLEARN,"UNL");
+	transposeKnob = addNormalKnob(176,120,ownerFilter,OCTAVE,"Transpose",0.5);
 
-	pan1Knob = addTinyKnob(35,220,ownerFilter,PAN1,"1");
-	pan2Knob = addTinyKnob(65,220,ownerFilter,PAN2,"2");
-	pan3Knob = addTinyKnob(95,220,ownerFilter,PAN3,"3");
-	pan4Knob = addTinyKnob(125,220,ownerFilter,PAN4,"4");
+	pan1Knob = addTinyKnob(796,318,ownerFilter,PAN1,"1",0.5);
+	pan2Knob = addTinyKnob(858,318,ownerFilter,PAN2,"2",0.5);
+	pan3Knob = addTinyKnob(921,318,ownerFilter,PAN3,"3",0.5);
+	pan4Knob = addTinyKnob(984,318,ownerFilter,PAN4,"4",0.5);
 
-	pan5Knob = addTinyKnob(35,260,ownerFilter,PAN5,"5");
-	pan6Knob = addTinyKnob(65,260,ownerFilter,PAN6,"6");
-	pan7Knob = addTinyKnob(95,260,ownerFilter,PAN7,"7");
-	pan8Knob = addTinyKnob(125,260,ownerFilter,PAN8,"8");
+	pan5Knob = addTinyKnob(796,371,ownerFilter,PAN5,"5",0.5);
+	pan6Knob = addTinyKnob(858,371,ownerFilter,PAN6,"6",0.5);
+	pan7Knob = addTinyKnob(921,371,ownerFilter,PAN7,"7",0.5);
+	pan8Knob = addTinyKnob(984,371,ownerFilter,PAN8,"8",0.5);
 
-	placeLabel(330,220,"BendControls");
-	bendOsc2OnlyButton = addNormalTooglableButton(340,240,ownerFilter,BENDOSC2,"Osc2");
-	bendRangeButton = addNormalTooglableButton(340,265,ownerFilter,BENDRANGE,"12");
+	bendOsc2OnlyButton = addNormalTooglableButton(321,354,ownerFilter,BENDOSC2,"Osc2");
+	bendRangeButton = addNormalTooglableButton(267,354,ownerFilter,BENDRANGE,"12");
+	asPlayedAllocButton = addNormalTooglableButton(65,372,ownerFilter,ASPLAYEDALLOCATION,"APA");
 
-	filterDetuneKnob = addTinyKnob(40,165,ownerFilter,FILTERDER,"Flt");
-	envelopeDetuneKnob = addTinyKnob(70,165,ownerFilter,ENVDER,"Env");
-	portamentoDetuneKnob = addTinyKnob(100,165,ownerFilter,PORTADER,"Port");
-	placeLabel(35,150,"Voice variance");
-	placeLabel(645,5 , "Filter envelope");
-	placeLabel(645,75,"Loudness envelope");
-	placeLabel(213,5,"Oscillators");
-	placeLabel(327,5,"Mixer");
-	placeLabel(440,5,"Filter");
-	placeLabel(210,220,"VoiceCount");
-	voiceSwitch = addNormalButtonList(240,240,40,ownerFilter,VOICE_COUNT,"VoiceCount");
+	filterDetuneKnob = addTinyKnob(817,240,ownerFilter,FILTERDER,"Flt",0.2);
+	envelopeDetuneKnob = addTinyKnob(963,240,ownerFilter,ENVDER,"Env",0.2);
+	portamentoDetuneKnob = addTinyKnob(890,240,ownerFilter,PORTADER,"Port",0.2);
+
+	bendLfoRateKnob = addNormalKnob(364,345,ownerFilter,BENDLFORATE,"ModRate",0.4);
+
+	voiceSwitch = addNormalButtonList(172,321,38,ownerFilter,VOICE_COUNT,"VoiceCount",ImageCache::getFromMemory(res::voices_png,res::voices_pngSize));
 	voiceSwitch ->addChoise("1");
 	voiceSwitch ->addChoise("2");
 	voiceSwitch ->addChoise("3");
@@ -118,13 +119,14 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 	voiceSwitch ->addChoise("8");
 	voiceSwitch ->setValue(ownerFilter->getParameter(VOICE_COUNT),dontSendNotification);
 
-	placeLabel(440,220,"Legato");
-	legatoSwitch = addNormalButtonList(450,240,90,ownerFilter,LEGATOMODE,"Legato");
+	legatoSwitch = addNormalButtonList(65,321,95,ownerFilter,LEGATOMODE,"Legato",ImageCache::getFromMemory(res::legato_png,res::legato_pngSize));
 	legatoSwitch ->addChoise("Keep all");
 	legatoSwitch ->addChoise("Keep fenv");
-	legatoSwitch ->addChoise("Keep lenv");
+	legatoSwitch ->addChoise("Keep aenv");
 	legatoSwitch ->addChoise("Retrig");
 	legatoSwitch ->setValue(ownerFilter->getParameter(LEGATOMODE),dontSendNotification);
+
+
 	getFilter()->addChangeListener(this);
 }
 void ObxdAudioProcessorEditor::placeLabel(int x , int y , String text)
@@ -135,10 +137,10 @@ void ObxdAudioProcessorEditor::placeLabel(int x , int y , String text)
 	lab->setText(text,dontSendNotification);lab->setInterceptsMouseClicks(false,true);
 	addAndMakeVisible(lab);
 }
-ButtonList* ObxdAudioProcessorEditor::addNormalButtonList(int x, int y,int width, ObxdAudioProcessor* filter, int parameter,String name)
+ButtonList* ObxdAudioProcessorEditor::addNormalButtonList(int x, int y,int width, ObxdAudioProcessor* filter, int parameter,String name,Image img)
 {
-	ButtonList *bl = new ButtonList();
-	bl->setBounds(x, y, width, 20);
+	ButtonList *bl = new ButtonList(img,32);
+	bl->setBounds(x, y, width, 32);
 	//bl->setValue(filter->getParameter(parameter),dontSendNotification);
 	addAndMakeVisible(bl);
     bl->addListener (this);
@@ -150,50 +152,52 @@ ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
 	getFilter()->removeChangeListener(this);
 	deleteAllChildren();
 }
-Knob* ObxdAudioProcessorEditor::addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name)
+Knob* ObxdAudioProcessorEditor::addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name,float defval)
 {
-	Knob* knob = new Knob();
-	Label* knobl = new Label();
+	Knob* knob = new Knob(ImageCache::getFromMemory(res::knoblsd_png,res::knoblsd_pngSize),48);
+	//Label* knobl = new Label();
 	knob->setSliderStyle(Slider::RotaryVerticalDrag);
 	knob->setTextBoxStyle(knob->NoTextBox,true,0,0);
 	knob->setRange(0,1);
 	addAndMakeVisible(knob);
-	addAndMakeVisible(knobl);
-	knob->setBounds(x, y, 40,40);
+	//addAndMakeVisible(knobl);
+	knob->setBounds(x, y, 48,48);
 	knob->setValue(filter->getParameter(parameter),dontSendNotification);
-	knobl->setJustificationType(Justification::centred);
-	knobl->setInterceptsMouseClicks(false,true);
-	knobl->setBounds(x-10,y+40,60,10);
-	knobl->setText(name,dontSendNotification);
+	//knobl->setJustificationType(Justification::centred);
+	//knobl->setInterceptsMouseClicks(false,true);
+	//knobl->setBounds(x-10,y+40,60,10);
+	//knobl->setText(name,dontSendNotification);
 	knob->setTextBoxIsEditable(false);
+	knob->setDoubleClickReturnValue(true,defval);
 	knob->addListener (this);
 	return knob;
 }
-Knob* ObxdAudioProcessorEditor::addTinyKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name)
+Knob* ObxdAudioProcessorEditor::addTinyKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name,float defval)
 {
-	Knob* knob = new Knob();
-	Label* knobl = new Label();
+	Knob* knob = new Knob(ImageCache::getFromMemory(res::knobssd_png,res::knobssd_pngSize),42);
+	//Label* knobl = new Label();
 	knob->setSliderStyle(Slider::RotaryVerticalDrag);
 	knob->setTextBoxStyle(knob->NoTextBox,true,0,0);
 	knob->setRange(0,1);
 	addAndMakeVisible(knob);
-	addAndMakeVisible(knobl);
-	knob->setBounds(x, y, 30,30);
+	//addAndMakeVisible(knobl);
+	knob->setBounds(x, y, 42,42);
 	knob->setValue(filter->getParameter(parameter),dontSendNotification);
-	knobl->setJustificationType(Justification::centred);
-	knobl->setInterceptsMouseClicks(false,true);
-	knobl->setBounds(x-10,y+25,50,10);
-	knobl->setText(name,dontSendNotification);
+	//knobl->setJustificationType(Justification::centred);
+	//knobl->setInterceptsMouseClicks(false,true);
+	//knobl->setBounds(x-10,y+25,50,10);
+	//knobl->setText(name,dontSendNotification);
 	knob->setTextBoxIsEditable(false);
+	knob->setDoubleClickReturnValue(true,defval);
 	knob->addListener (this);
 	return knob;
 }
 TooglableButton*  ObxdAudioProcessorEditor::addNormalTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name)
 {
-	TooglableButton* button = new TooglableButton();
+	TooglableButton* button = new TooglableButton(ImageCache::getFromMemory(res::button_png,res::button_pngSize));
 	//	button->setButtonStyle(DrawableButton::ButtonStyle::ImageAboveTextLabel);
 	addAndMakeVisible(button);
-	button->setBounds(x,y,40,20);
+	button->setBounds(x,y,28,35);
 	button->setButtonText(name);
 	button->setValue(filter->getParameter(parameter),0);
 	button->addListener(this);
@@ -201,7 +205,7 @@ TooglableButton*  ObxdAudioProcessorEditor::addNormalTooglableButton(int x , int
 }
 TooglableButton*  ObxdAudioProcessorEditor::addTinyTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name)
 {
-	TooglableButton* button = new TooglableButton();
+	TooglableButton* button = new TooglableButton(ImageCache::getFromMemory(res::button_png,res::button_pngSize));
 	//	button->setButtonStyle(DrawableButton::ButtonStyle::ImageAboveTextLabel);
 	addAndMakeVisible(button);
 	button->setBounds(x,y,20,20);
@@ -238,6 +242,10 @@ void ObxdAudioProcessorEditor::buttonClicked(Button * b)
 		handleBParam(lfoPwm2Button,LFOPW2)
 		handleBParam(bendOsc2OnlyButton,BENDOSC2)
 		handleBParam(bendRangeButton,BENDRANGE)
+		handleBParam(fourPoleButton,FOURPOLE)
+		handleBParam(asPlayedAllocButton,ASPLAYEDALLOCATION)
+		handleBParam(midiLearnButton,MIDILEARN)
+		handleBParam(midiUnlearnButton,UNLEARN)
 	{};
 
 }
@@ -304,6 +312,11 @@ void ObxdAudioProcessorEditor::sliderValueChanged (Slider* c)
 		handleSParam(tuneKnob,TUNE)
 		handleSParam(brightnessKnob,BRIGHTNESS)
 		handleSParam(envPitchModKnob,ENVPITCH)
+
+		handleSParam(bendLfoRateKnob,BENDLFORATE)
+		handleSParam(veloAmpEnvKnob,VAMPENV)
+		handleSParam(veloFltEnvKnob,VFLTENV)
+		handleSParam(transposeKnob,OCTAVE)
 		//magic crystal
 	{};
 
@@ -329,7 +342,7 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 	float pr[PARAM_COUNT];
 	filter->getCallbackLock().enter();
 	for(int i = 0 ; i < PARAM_COUNT;++i)
-		pr[i] = filter->parameters.values[i];
+		pr[i] = filter->programs.currentProgramPtr->values[i];
 	filter->getCallbackLock().exit();
 #define rn(T,P) (T->setValue(pr[P],dontSendNotification));
 	rn(cutoffKnob,CUTOFF)
@@ -365,6 +378,9 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 		rn(lfoAmt1Knob,LFO1AMT)
 		rn(lfoAmt2Knob,LFO2AMT)
 		rn(tuneKnob,TUNE)
+		rn(bendLfoRateKnob,BENDLFORATE)
+		rn(veloAmpEnvKnob,VAMPENV)
+		rn(veloFltEnvKnob,VFLTENV)
 		//buttons
 		rn(hardSyncButton,OSC2HS)
 		rn(osc1SawButton,OSC1Saw)
@@ -394,6 +410,9 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 		rn(lfoFilterButton,LFOFILTER)
 		rn(lfoPwm1Button,LFOPW1)
 		rn(lfoPwm2Button,LFOPW2)
+		rn(fourPoleButton,FOURPOLE)
+
+		rn(transposeKnob,OCTAVE)
 
 		rn(pan1Knob,PAN1)
 		rn(pan2Knob,PAN2)
@@ -406,14 +425,17 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 
 		rn(voiceSwitch,VOICE_COUNT)
 		rn(legatoSwitch,LEGATOMODE)
+		rn(asPlayedAllocButton,ASPLAYEDALLOCATION)
+		rn(midiLearnButton,MIDILEARN)
+		rn(midiUnlearnButton,UNLEARN)
 
 }
 void ObxdAudioProcessorEditor::paint (Graphics& g)
 {
 	g.fillAll (Colours::white);
-	// g.setColour (Colours::black);
-	//g.setFont (15.0f);
-	//g.drawFittedText ("Hello World!",
-	//                0, 0, getWidth(), getHeight(),
-	//                Justification::centred, 1);
+
+	const Image image = ImageCache::getFromMemory(res::background_png,res::background_pngSize);
+    g.drawImage (image,
+                 0, 0, image.getWidth(), image.getHeight(),
+                 0, 0, image.getWidth(), image.getHeight());
 }

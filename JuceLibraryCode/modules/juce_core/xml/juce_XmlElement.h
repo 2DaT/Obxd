@@ -483,9 +483,19 @@ public:
 
         @param tagNameToLookFor     the tag name of the element you want to find
         @returns the first element with this tag name, or nullptr if none is found
-        @see getNextElement, isTextElement, getChildElement
+        @see getNextElement, isTextElement, getChildElement, getChildByAttribute
     */
     XmlElement* getChildByName (StringRef tagNameToLookFor) const noexcept;
+
+    /** Returns the first sub-element which has an attribute that matches the given value.
+
+        @param attributeName     the name of the attribute to check
+        @param attributeValue    the target value of the attribute
+        @returns the first element with this attribute value, or nullptr if none is found
+        @see getChildByName
+    */
+    XmlElement* getChildByAttribute (StringRef attributeName,
+                                     StringRef attributeValue) const noexcept;
 
     //==============================================================================
     /** Appends an element to this element's list of children.
@@ -493,6 +503,10 @@ public:
         Child elements are deleted automatically when their parent is deleted, so
         make sure the object that you pass in will not be deleted by anything else,
         and make sure it's not already the child of another element.
+
+        Note that due to the XmlElement using a singly-linked-list, prependChildElement()
+        is an O(1) operation, but addChildElement() is an O(N) operation - so if
+        you're adding large number of elements, you may prefer to do so in reverse order!
 
         @see getFirstChildElement, getNextElement, getNumChildElements,
              getChildElement, removeChildElement
@@ -505,13 +519,27 @@ public:
         make sure the object that you pass in will not be deleted by anything else,
         and make sure it's not already the child of another element.
 
-        @param newChildNode     the element to add
+        @param newChildElement  the element to add
         @param indexToInsertAt  the index at which to insert the new element - if this is
                                 below zero, it will be added to the end of the list
         @see addChildElement, insertChildElement
     */
-    void insertChildElement (XmlElement* newChildNode,
+    void insertChildElement (XmlElement* newChildElement,
                              int indexToInsertAt) noexcept;
+
+    /** Inserts an element at the beginning of this element's list of children.
+
+        Child elements are deleted automatically when their parent is deleted, so
+        make sure the object that you pass in will not be deleted by anything else,
+        and make sure it's not already the child of another element.
+
+        Note that due to the XmlElement using a singly-linked-list, prependChildElement()
+        is an O(1) operation, but addChildElement() is an O(N) operation - so if
+        you're adding large number of elements, you may prefer to do so in reverse order!
+
+        @see addChildElement, insertChildElement
+    */
+    void prependChildElement (XmlElement* newChildElement) noexcept;
 
     /** Creates a new element with the given name and returns it, after adding it
         as a child element.

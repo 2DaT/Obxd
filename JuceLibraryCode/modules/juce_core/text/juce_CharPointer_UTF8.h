@@ -118,6 +118,7 @@ public:
     /** Moves this pointer along to the next character in the string. */
     CharPointer_UTF8& operator++() noexcept
     {
+        jassert (*data != 0); // trying to advance past the end of the string?
         const signed char n = (signed char) *data++;
 
         if (n < 0)
@@ -170,11 +171,12 @@ public:
 
         while (--numExtraValues >= 0)
         {
-            const uint32 nextByte = (uint32) (uint8) *data++;
+            const uint32 nextByte = (uint32) (uint8) *data;
 
             if ((nextByte & 0xc0) != 0x80)
                 break;
 
+            ++data;
             n <<= 6;
             n |= (nextByte & 0x3f);
         }
@@ -247,16 +249,8 @@ public:
 
             if ((n & 0x80) != 0)
             {
-                uint32 bit = 0x40;
-
-                while ((n & bit) != 0)
-                {
+                while ((*d & 0xc0) == 0x80)
                     ++d;
-                    bit >>= 1;
-
-                    if (bit == 0)
-                        break; // illegal utf-8 sequence
-                }
             }
             else if (n == 0)
                 break;

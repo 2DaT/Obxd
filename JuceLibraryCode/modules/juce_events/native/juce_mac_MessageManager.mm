@@ -237,15 +237,32 @@ void MessageManager::runDispatchLoop()
     }
 }
 
-void MessageManager::stopDispatchLoop()
+static void shutdownNSApp()
 {
-    jassert (isThisTheMessageThread()); // must only be called by the message thread
-
-    quitMessagePosted = true;
-   #if ! JUCE_PROJUCER_LIVE_BUILD
     [NSApp stop: nil];
     [NSApp activateIgnoringOtherApps: YES]; // (if the app is inactive, it sits there and ignores the quit request until the next time it gets activated)
-    [NSEvent startPeriodicEventsAfterDelay: 0 withPeriod: 0.1];
+    [NSEvent startPeriodicEventsAfterDelay: 0  withPeriod: 0.1];
+}
+
+void MessageManager::stopDispatchLoop()
+{
+    quitMessagePosted = true;
+
+   #if ! JUCE_PROJUCER_LIVE_BUILD
+    if (isThisTheMessageThread())
+    {
+        shutdownNSApp();
+    }
+    else
+    {
+        struct QuitCallback  : public CallbackMessage
+        {
+            QuitCallback() {}
+            void messageCallback() override   { shutdownNSApp(); }
+        };
+
+        (new QuitCallback())->post();
+    }
    #endif
 }
 
@@ -327,4 +344,24 @@ void MessageManager::broadcastMessage (const String& message)
     [[NSDistributedNotificationCenter defaultCenter] postNotificationName: AppDelegate::getBroacastEventName()
                                                                    object: nil
                                                                  userInfo: info];
+}
+
+// Special function used by some plugin classes to re-post carbon events
+void repostCurrentNSEvent();
+void repostCurrentNSEvent()
+{
+    struct EventReposter  : public CallbackMessage
+    {
+        EventReposter() : e ([[NSApp currentEvent] retain])  {}
+        ~EventReposter()  { [e release]; }
+
+        void messageCallback() override
+        {
+            [NSApp postEvent: e atStart: YES];
+        }
+
+        NSEvent* e;
+    };
+
+    (new EventReposter())->post();
 }

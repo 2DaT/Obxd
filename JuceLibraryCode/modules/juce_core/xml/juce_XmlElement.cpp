@@ -562,8 +562,21 @@ XmlElement* XmlElement::getChildElement (const int index) const noexcept
 
 XmlElement* XmlElement::getChildByName (StringRef childName) const noexcept
 {
+    jassert (! childName.isEmpty());
+
     for (XmlElement* child = firstChildElement; child != nullptr; child = child->nextListItem)
         if (child->hasTagName (childName))
+            return child;
+
+    return nullptr;
+}
+
+XmlElement* XmlElement::getChildByAttribute (StringRef attributeName, StringRef attributeValue) const noexcept
+{
+    jassert (! attributeName.isEmpty());
+
+    for (XmlElement* child = firstChildElement; child != nullptr; child = child->nextListItem)
+        if (child->compareAttribute (attributeName, attributeValue))
             return child;
 
     return nullptr;
@@ -572,15 +585,33 @@ XmlElement* XmlElement::getChildByName (StringRef childName) const noexcept
 void XmlElement::addChildElement (XmlElement* const newNode) noexcept
 {
     if (newNode != nullptr)
+    {
+        // The element being added must not be a child of another node!
+        jassert (newNode->nextListItem == nullptr);
+
         firstChildElement.append (newNode);
+    }
 }
 
 void XmlElement::insertChildElement (XmlElement* const newNode, int indexToInsertAt) noexcept
 {
     if (newNode != nullptr)
     {
-        removeChildElement (newNode, false);
+        // The element being added must not be a child of another node!
+        jassert (newNode->nextListItem == nullptr);
+
         firstChildElement.insertAtIndex (indexToInsertAt, newNode);
+    }
+}
+
+void XmlElement::prependChildElement (XmlElement* newNode) noexcept
+{
+    if (newNode != nullptr)
+    {
+        // The element being added must not be a child of another node!
+        jassert (newNode->nextListItem == nullptr);
+
+        firstChildElement.insertNext (newNode);
     }
 }
 
@@ -780,6 +811,9 @@ String XmlElement::getAllSubText() const
 {
     if (isTextElement())
         return getText();
+
+    if (getNumChildElements() == 1)
+        return firstChildElement.get()->getAllSubText();
 
     MemoryOutputStream mem (1024);
 

@@ -86,7 +86,8 @@ namespace juce
 #include "code_editor/juce_CodeDocument.cpp"
 #include "code_editor/juce_CodeEditorComponent.cpp"
 #include "code_editor/juce_CPlusPlusCodeTokeniser.cpp"
-#include "lookandfeel/juce_OldSchoolLookAndFeel.cpp"
+#include "code_editor/juce_XMLCodeTokeniser.cpp"
+#include "code_editor/juce_LuaCodeTokeniser.cpp"
 #include "misc/juce_BubbleMessageComponent.cpp"
 #include "misc/juce_ColourSelector.cpp"
 #include "misc/juce_KeyMappingEditorComponent.cpp"
@@ -94,6 +95,7 @@ namespace juce
 #include "misc/juce_RecentlyOpenedFilesList.cpp"
 #include "misc/juce_SplashScreen.cpp"
 #include "misc/juce_SystemTrayIconComponent.cpp"
+#include "misc/juce_LiveConstantEditor.cpp"
 
 }
 
@@ -145,4 +147,9 @@ namespace juce
  #endif
 #endif
 
+#if JUCE_WEB_BROWSER
+ bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
+ void WebBrowserComponent::pageFinishedLoading (const String&) {}
+ void WebBrowserComponent::windowCloseRequest() {}
+#endif
 }

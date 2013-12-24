@@ -1443,6 +1443,9 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.cpp">
       <Filter>Juce Library Code</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Gui\res.cpp">
+      <Filter>Obxd\Source\Gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\PluginEditor.h">
@@ -2756,9 +2759,6 @@
     <ClInclude Include="..\..\Source\Engine\Motherboard.h">
       <Filter>Obxd\Source\Synth</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Engine\ObxdOscillator.h">
-      <Filter>Obxd\Source\Synth</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Engine\ObxdVoice.h">
       <Filter>Obxd\Source\Synth</Filter>
     </ClInclude>
@@ -2795,9 +2795,6 @@
     <ClInclude Include="..\..\Source\Engine\Decimator.h">
       <Filter>Obxd\Source\Synth</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Engine\FirFilter.h">
-      <Filter>Obxd\Source\Synth</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Engine\APInterpolator.h">
       <Filter>Obxd\Source\Synth</Filter>
     </ClInclude>
@@ -2811,6 +2808,18 @@
       <Filter>Obxd\Source\Synth</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Gui\ButtonList.h">
+      <Filter>Obxd\Source\Gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Engine\ParamSmoother.h">
+      <Filter>Obxd\Source\Synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Engine\midiMap.h">
+      <Filter>Obxd\Source\Synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Engine\ObxdBank.h">
+      <Filter>Obxd\Source\Synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Gui\res.h">
       <Filter>Obxd\Source\Gui</Filter>
     </ClInclude>
   </ItemGroup>

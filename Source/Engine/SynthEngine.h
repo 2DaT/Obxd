@@ -1,17 +1,47 @@
+/*
+	==============================================================================
+	This file is part of Obxd synthesizer.
+
+	Copyright © 2013-2014 Filatov Vadim
+	
+	Contact author via email :
+	justdat_@_e1.ru
+
+	This file may be licensed under the terms of of the
+	GNU General Public License Version 2 (the ``GPL'').
+
+	Software distributed under the License is distributed
+	on an ``AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, either
+	express or implied. See the GPL for the specific language
+	governing rights and limitations.
+
+	You should have received a copy of the GPL along with this
+	program. If not, go to http://www.gnu.org/licenses/gpl.html
+	or write to the Free Software Foundation, Inc.,  
+	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+	==============================================================================
+ */
 #pragma once
 
 #include "..\PluginProcessor.h"
 #include "ObxdVoice.h"
 #include "Motherboard.h"
 #include "Params.h"
+#include "ParamSmoother.h"
 
 class SynthEngine
 {
 private:
 	Motherboard * synth;
+	ParamSmoother cutoffSmoother;
+	ParamSmoother pitchWheelSmoother;
+	ParamSmoother modWheelSmoother;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthEngine)
 public:
-	SynthEngine()
+	SynthEngine():
+		cutoffSmoother(),
+		pitchWheelSmoother(),
+		modWheelSmoother()
 	{
 		synth = new Motherboard();
 	}
@@ -21,21 +51,90 @@ public:
 	}
 	void setSampleRate(float sr)
 	{
+		cutoffSmoother.setSampleRate(sr);
+		pitchWheelSmoother.setSampleRate(sr);
+		modWheelSmoother.setSampleRate(sr);
 		synth->setSampleRate(sr);
 	}
 	void processSample(float *left,float *right)
 	{
+		processCutoffSmoothed(cutoffSmoother.smoothStep());
+		procPitchWheelSmoothed(pitchWheelSmoother.smoothStep());
+		procModWheelSmoothed(modWheelSmoother.smoothStep());
+
 		synth->processSample(left,right);
 	}
-	void procNoteOn(int noteNo)
+	void allNotesOff()
 	{
-		synth->setNoteOn(noteNo);
+		for(int i = 0 ;  i < 128;i++)
+			{
+				procNoteOff(i);
+			}
+	}
+	void allSoundOff()
+	{
+		allNotesOff();
+		for(int i = 0 ; i < Motherboard::MAX_VOICES;i++)
+			{
+				synth->voices[i]->ResetEnvelope();
+			}
+	}
+	void sustainOn()
+	{
+		synth->sustainOn();
+	}
+	void sustainOff()
+	{
+		synth->sustainOff();
+	}
+	void procAsPlayedAlloc(float val)
+	{
+		synth->asPlayedMode = val > 0.5;
+	}
+	void procNoteOn(int noteNo,float velocity)
+	{
+		synth->setNoteOn(noteNo,velocity);
 	}
 	void procNoteOff(int noteNo)
 	{
 		synth->setNoteOff(noteNo);
 	}
+	void procAmpVelocityAmount(float val)
+	{
+		for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		{
+			synth->voices[i]->vamp= val;
+		}
+	}
+	void procFltVelocityAmount(float val)
+	{
+		for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		{
+			synth->voices[i]->vflt= val;
+		}
+	}
+	void procModWheel(float val)
+	{
+		modWheelSmoother.setSteep(val);
+	}
+	void procModWheelSmoothed(float val)
+	{
+		synth->vibratoAmount = val;
+	}
+	void procModWheelFrequency(float val)
+	{
+		synth->vibratoLfo.Frequency = logsc(val,3,10);
+		synth->vibratoEnabled = val>0.05;
+	}
 	void procPitchWheel(float val)
+	{
+		pitchWheelSmoother.setSteep(val);
+		//for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		//{
+		//	synth->voices[i]->pitchWheel = val;
+		//}
+	}
+	inline void procPitchWheelSmoothed(float val)
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
@@ -82,7 +181,7 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->osc.oct = ((int)(param*4) - 2)*12;
+			synth->voices[i]->osc.oct = (roundToInt(param*4) -2)*12;
 		}
 	}
 	void processFilterKeyFollow(float param)
@@ -105,7 +204,7 @@ public:
 	}
 	void processVolume(float param)
 	{
-		synth->Volume = linsc(param,0,0.15);
+		synth->Volume = linsc(param,0,0.30);
 	}
 	void processLfoFrequency(float param)
 	{
@@ -148,7 +247,7 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->lfoa1 = logsc(logsc(param,0,1,13),0,60,40);
+			synth->voices[i]->lfoa1 = logsc(logsc(param,0,1,60),0,60,10);
 		}
 	}
 	void processLfoOsc1(float param)
@@ -197,7 +296,7 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->osc.totalDetune = logsc(param,0.003,0.90);
+			synth->voices[i]->osc.totalDetune = logsc(param,0.001,0.90);
 		}
 	}
 	void processPulseWidth(float param)
@@ -281,7 +380,7 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->osc.osc2Det = logsc(param,0.001,0.55);
+			synth->voices[i]->osc.osc2Det = logsc(param,0.001,0.6);
 		}
 	}
 
@@ -316,10 +415,18 @@ public:
 
 	void processCutoff(float param)
 	{
-		for(int i = 0 ; i < synth->MAX_VOICES;i++)
-		{
+		cutoffSmoother.setSteep( linsc(param,0,120));
+	//	for(int i = 0 ; i < synth->MAX_VOICES;i++)
+	//	{
 			//synth->voices[i]->cutoff = logsc(param,60,19000,30);
-			synth->voices[i]->cutoff = linsc(param,0,120);
+		//	synth->voices[i]->cutoff = linsc(param,0,120);
+	//	}
+	}
+	inline void processCutoffSmoothed(float param)
+	{
+			for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		{
+			synth->voices[i]->cutoff = param;
 		}
 	}
 	void processBandpassSw(float param)
@@ -334,7 +441,15 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->flt.setResonance(0.993-logsc(1-param,0,0.993,40));
+			synth->voices[i]->flt.setResonance(0.991-logsc(1-param,0,0.991,40));
+		}
+	}
+	void processFourPole(float param)
+	{
+		for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		{
+			//synth->voices[i]->flt ;
+			synth->voices[i]->fourpole = param>0.5;
 		}
 	}
 	void processMultimode(float param)
@@ -342,7 +457,7 @@ public:
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
 			//synth->voices[i]->flt ;
-			synth->voices[i]->flt.mm = linsc(param,0,1);
+			synth->voices[i]->flt.setMultimode(linsc(param,0,1));
 		}
 	}
 	void processOversampling(float param)

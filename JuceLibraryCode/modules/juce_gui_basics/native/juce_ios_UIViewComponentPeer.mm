@@ -106,6 +106,12 @@ using namespace juce;
 - (BOOL) shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation) interfaceOrientation;
 - (void) willRotateToInterfaceOrientation: (UIInterfaceOrientation) toInterfaceOrientation duration: (NSTimeInterval) duration;
 - (void) didRotateFromInterfaceOrientation: (UIInterfaceOrientation) fromInterfaceOrientation;
+
+- (void) viewDidLoad;
+- (void) viewWillAppear: (BOOL) animated;
+- (void) viewDidAppear: (BOOL) animated;
+- (void) viewWillLayoutSubviews;
+- (void) viewDidLayoutSubviews;
 @end
 
 //==============================================================================
@@ -113,7 +119,6 @@ using namespace juce;
 {
 @private
     UIViewComponentPeer* owner;
-    bool isZooming;
 }
 
 - (void) setOwner: (UIViewComponentPeer*) owner;
@@ -287,11 +292,16 @@ private:
 - (void) willRotateToInterfaceOrientation: (UIInterfaceOrientation) toInterfaceOrientation
                                  duration: (NSTimeInterval) duration
 {
+    (void) toInterfaceOrientation;
+    (void) duration;
+
     [UIView setAnimationsEnabled: NO]; // disable this because it goes the wrong way and looks like crap.
 }
 
 - (void) didRotateFromInterfaceOrientation: (UIInterfaceOrientation) fromInterfaceOrientation
 {
+    (void) fromInterfaceOrientation;
+
     JuceUIView* juceView = (JuceUIView*) [self view];
     jassert (juceView != nil && juceView->owner != nullptr);
     juceView->owner->updateTransformAndScreenBounds();
@@ -308,10 +318,22 @@ private:
 
 - (void) viewWillAppear: (BOOL) animated
 {
+    (void) animated;
     [self viewDidLoad];
 }
 
 - (void) viewDidAppear: (BOOL) animated
+{
+    (void) animated;
+    [self viewDidLoad];
+}
+
+- (void) viewWillLayoutSubviews
+{
+    [self viewDidLoad];
+}
+
+- (void) viewDidLayoutSubviews
 {
     [self viewDidLoad];
 }
@@ -354,18 +376,24 @@ private:
 //==============================================================================
 - (void) touchesBegan: (NSSet*) touches withEvent: (UIEvent*) event
 {
+    (void) touches;
+
     if (owner != nullptr)
         owner->handleTouches (event, true, false, false);
 }
 
 - (void) touchesMoved: (NSSet*) touches withEvent: (UIEvent*) event
 {
+    (void) touches;
+
     if (owner != nullptr)
         owner->handleTouches (event, false, false, false);
 }
 
 - (void) touchesEnded: (NSSet*) touches withEvent: (UIEvent*) event
 {
+    (void) touches;
+
     if (owner != nullptr)
         owner->handleTouches (event, false, true, false);
 }
@@ -402,7 +430,8 @@ private:
 
 - (BOOL) textView: (UITextView*) textView shouldChangeTextInRange: (NSRange) range replacementText: (NSString*) text
 {
-    return owner->textViewReplaceCharacters (Range<int> (range.location, range.location + range.length),
+    (void) textView;
+    return owner->textViewReplaceCharacters (Range<int> ((int) range.location, (int) (range.location + range.length)),
                                              nsStringToJuce (text));
 }
 
@@ -414,7 +443,6 @@ private:
 - (void) setOwner: (UIViewComponentPeer*) peer
 {
     owner = peer;
-    isZooming = false;
 }
 
 - (void) becomeKeyWindow
@@ -432,7 +460,7 @@ private:
 namespace juce
 {
 
-bool KeyPress::isKeyCurrentlyDown (const int keyCode)
+bool KeyPress::isKeyCurrentlyDown (int)
 {
     return false;
 }
@@ -466,7 +494,7 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, const int windowStyle
     view = [[JuceUIView alloc] initWithOwner: this withFrame: r];
 
     view.multipleTouchEnabled = YES;
-    view.hidden = ! component.isVisible();
+    view.hidden = true;
     view.opaque = component.isOpaque();
     view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
     view.transform = CGAffineTransformIdentity;
@@ -478,33 +506,32 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, const int windowStyle
     }
     else
     {
-        controller = [[JuceUIViewController alloc] init];
-        controller.view = view;
-
         r = convertToCGRect (rotatedScreenPosToReal (component.getBounds()));
         r.origin.y = [UIScreen mainScreen].bounds.size.height - (r.origin.y + r.size.height);
 
-        window = [[JuceUIWindow alloc] init];
+        window = [[JuceUIWindow alloc] initWithFrame: r];
+        [((JuceUIWindow*) window) setOwner: this];
+
+        controller = [[JuceUIViewController alloc] init];
+        controller.view = view;
+        window.rootViewController = controller;
+
+        window.hidden = true;
         window.autoresizesSubviews = NO;
-        window.transform = CGAffineTransformIdentity;
-        window.frame = r;
+        window.transform = Orientations::getCGTransformFor (Desktop::getInstance().getCurrentOrientation());
         window.opaque = component.isOpaque();
         window.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
-
-        [((JuceUIWindow*) window) setOwner: this];
 
         if (component.isAlwaysOnTop())
             window.windowLevel = UIWindowLevelAlert;
 
         view.frame = CGRectMake (0, 0, r.size.width, r.size.height);
 
-        window.rootViewController = controller;
         [window addSubview: view];
-
-        window.hidden = view.hidden;
     }
 
     setTitle (component.getName());
+    setVisible (component.isVisible());
 
     Desktop::getInstance().addFocusChangeListener (this);
 }
@@ -528,13 +555,13 @@ UIViewComponentPeer::~UIViewComponentPeer()
 //==============================================================================
 void UIViewComponentPeer::setVisible (bool shouldBeVisible)
 {
-    view.hidden = ! shouldBeVisible;
-
     if (! isSharedWindow)
         window.hidden = ! shouldBeVisible;
+
+    view.hidden = ! shouldBeVisible;
 }
 
-void UIViewComponentPeer::setTitle (const String& title)
+void UIViewComponentPeer::setTitle (const String&)
 {
     // xxx is this possible?
 }
@@ -615,7 +642,7 @@ void UIViewComponentPeer::updateTransformAndScreenBounds()
     const Rectangle<int> oldArea (component.getBounds());
     const Rectangle<int> oldDesktop (desktop.getDisplays().getMainDisplay().userArea);
 
-    const_cast <Desktop::Displays&> (desktop.getDisplays()).refresh();
+    const_cast<Desktop::Displays&> (desktop.getDisplays()).refresh();
 
     window.transform = Orientations::getCGTransformFor (desktop.getCurrentOrientation());
     view.transform = CGAffineTransformIdentity;
@@ -669,7 +696,7 @@ void UIViewComponentPeer::toFront (bool makeActiveWindow)
     if (isSharedWindow)
         [[view superview] bringSubviewToFront: view];
 
-    if (window != nil && component.isVisible())
+    if (makeActiveWindow && window != nil && component.isVisible())
         [window makeKeyAndVisible];
 }
 
@@ -876,14 +903,14 @@ bool UIViewComponentPeer::canBecomeKeyWindow()
 }
 
 //==============================================================================
-void Desktop::setKioskComponent (Component* kioskModeComponent, bool enableOrDisable, bool allowMenusAndBars)
+void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable, bool /*allowMenusAndBars*/)
 {
     [[UIApplication sharedApplication] setStatusBarHidden: enableOrDisable
                                             withAnimation: UIStatusBarAnimationSlide];
 
     displays->refresh();
 
-    if (ComponentPeer* const peer = kioskModeComponent->getPeer())
+    if (ComponentPeer* const peer = kioskModeComp->getPeer())
         peer->setFullScreen (enableOrDisable);
 }
 

@@ -7,22 +7,54 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Performance1.psess = Performance1.psess
 	EndProjectSection
 EndProject
+Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "vsthost", "..\..\..\VstHost\vsthost.exe", "{DFD44760-2541-4026-917F-75304B41B9EF}"
+	ProjectSection(DebuggerProjectSystem) = preProject
+		PortSupplier = 00000000-0000-0000-0000-000000000000
+		Executable = C:\VST_Workshop\VstHost\vsthost.exe
+		RemoteMachine = HP
+		StartingDirectory = C:\VST_Workshop\VstHost
+		Environment = Default
+		LaunchingEngine = 00000000-0000-0000-0000-000000000000
+		LaunchSQLEngine = No
+		AttachLaunchAction = No
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Debug|Mixed Platforms.Build.0 = Debug|Win32
 		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Debug|Win32.ActiveCfg = Debug|Win32
 		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Debug|Win32.Build.0 = Debug|Win32
-		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Debug|x64.ActiveCfg = Debug|x64
-		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Debug|x64.Build.0 = Debug|x64
+		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Debug|x64.ActiveCfg = Debug|Win32
+		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Debug|x64.Build.0 = Debug|Win32
+		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Debug|x86.ActiveCfg = Debug|Win32
+		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Debug|x86.Build.0 = Debug|Win32
+		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Release|Win32.ActiveCfg = Release|Win32
 		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Release|Win32.Build.0 = Release|Win32
 		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Release|x64.ActiveCfg = Release|x64
 		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Release|x64.Build.0 = Release|x64
+		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Release|x86.ActiveCfg = Release|Win32
+		{45C99F43-10AB-46E5-BDBB-9EC865322E3D}.Release|x86.Build.0 = Release|Win32
+		{DFD44760-2541-4026-917F-75304B41B9EF}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{DFD44760-2541-4026-917F-75304B41B9EF}.Debug|Win32.ActiveCfg = Debug|x86
+		{DFD44760-2541-4026-917F-75304B41B9EF}.Debug|x64.ActiveCfg = Debug|x86
+		{DFD44760-2541-4026-917F-75304B41B9EF}.Debug|x86.ActiveCfg = Debug|x86
+		{DFD44760-2541-4026-917F-75304B41B9EF}.Release|Mixed Platforms.ActiveCfg = Debug|x86
+		{DFD44760-2541-4026-917F-75304B41B9EF}.Release|Win32.ActiveCfg = Debug|x86
+		{DFD44760-2541-4026-917F-75304B41B9EF}.Release|x64.ActiveCfg = Debug|x86
+		{DFD44760-2541-4026-917F-75304B41B9EF}.Release|x86.ActiveCfg = Debug|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

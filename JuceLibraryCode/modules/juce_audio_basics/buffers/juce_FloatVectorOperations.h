@@ -47,11 +47,14 @@ public:
     /** Copies a vector of floats, multiplying each value by a given multiplier */
     static void JUCE_CALLTYPE copyWithMultiply (float* dest, const float* src, float multiplier, int numValues) noexcept;
 
+    /** Adds a fixed value to the destination values. */
+    static void JUCE_CALLTYPE add (float* dest, float amount, int numValues) noexcept;
+
     /** Adds the source values to the destination values. */
     static void JUCE_CALLTYPE add (float* dest, const float* src, int numValues) noexcept;
 
-    /** Adds a fixed value to the destination values. */
-    static void JUCE_CALLTYPE add (float* dest, float amount, int numValues) noexcept;
+    /** Subtracts the source values from the destination values. */
+    static void JUCE_CALLTYPE subtract (float* dest, const float* src, int numValues) noexcept;
 
     /** Multiplies each source value by the given multiplier, then adds it to the destination value. */
     static void JUCE_CALLTYPE addWithMultiply (float* dest, const float* src, float multiplier, int numValues) noexcept;
@@ -61,6 +64,9 @@ public:
 
     /** Multiplies each of the destination values by a fixed multiplier. */
     static void JUCE_CALLTYPE multiply (float* dest, float multiplier, int numValues) noexcept;
+
+    /** Copies a source vector to a destination, negating each value. */
+    static void JUCE_CALLTYPE negate (float* dest, const float* src, int numValues) noexcept;
 
     /** Converts a stream of integers to floats, multiplying each one by the given multiplier. */
     static void JUCE_CALLTYPE convertFixedToFloat (float* dest, const int* src, float multiplier, int numValues) noexcept;

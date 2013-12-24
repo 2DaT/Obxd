@@ -56,6 +56,7 @@ void DirectoryContentsList::setDirectory (const File& directory,
     {
         clear();
         root = directory;
+        changed();
 
         // (this forces a refresh when setTypeFlags() is called, rather than triggering two refreshes)
         fileTypeFlags &= ~(File::findDirectories | File::findFiles);
@@ -107,6 +108,12 @@ void DirectoryContentsList::refresh()
     }
 }
 
+void DirectoryContentsList::setFileFilter (const FileFilter* newFileFilter)
+{
+    const ScopedLock sl (fileListLock);
+    fileFilter = newFileFilter;
+}
+
 //==============================================================================
 bool DirectoryContentsList::getFileInfo (const int index,
                                          FileInfo& result) const
@@ -129,7 +136,7 @@ File DirectoryContentsList::getFile (const int index) const
     if (const FileInfo* const info = files [index])
         return root.getChildFile (info->filename);
 
-    return File::nonexistent;
+    return File();
 }
 
 bool DirectoryContentsList::contains (const File& targetFile) const
@@ -224,6 +231,8 @@ bool DirectoryContentsList::addFile (const File& file, const bool isDir,
                                      Time modTime, Time creationTime,
                                      const bool isReadOnly)
 {
+    const ScopedLock sl (fileListLock);
+
     if (fileFilter == nullptr
          || ((! isDir) && fileFilter->isFileSuitable (file))
          || (isDir && fileFilter->isDirectorySuitable (file)))
@@ -236,8 +245,6 @@ bool DirectoryContentsList::addFile (const File& file, const bool isDir,
         info->creationTime = creationTime;
         info->isDirectory = isDir;
         info->isReadOnly = isReadOnly;
-
-        const ScopedLock sl (fileListLock);
 
         for (int i = files.size(); --i >= 0;)
             if (files.getUnchecked(i)->filename == info->filename)

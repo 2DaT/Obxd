@@ -168,7 +168,7 @@ public:
             }
             else
             {
-                undoManager->perform (new SetPropertyAction (this, name, newValue, var::null, true, false));
+                undoManager->perform (new SetPropertyAction (this, name, newValue, var(), true, false));
             }
         }
     }
@@ -188,7 +188,7 @@ public:
         else
         {
             if (properties.contains (name))
-                undoManager->perform (new SetPropertyAction (this, name, var::null, properties [name], false, true));
+                undoManager->perform (new SetPropertyAction (this, name, var(), properties [name], false, true));
         }
     }
 
@@ -206,7 +206,7 @@ public:
         else
         {
             for (int i = properties.size(); --i >= 0;)
-                undoManager->perform (new SetPropertyAction (this, properties.getName(i), var::null,
+                undoManager->perform (new SetPropertyAction (this, properties.getName(i), var(),
                                                              properties.getValueAt(i), false, true));
         }
     }
@@ -230,7 +230,7 @@ public:
                 return ValueTree (s);
         }
 
-        return ValueTree::invalid;
+        return ValueTree();
     }
 
     ValueTree getOrCreateChildWithName (const Identifier typeToMatch, UndoManager* undoManager)
@@ -257,7 +257,7 @@ public:
                 return ValueTree (s);
         }
 
-        return ValueTree::invalid;
+        return ValueTree();
     }
 
     bool isAChildOf (const SharedObject* const possibleParent) const noexcept
@@ -412,8 +412,9 @@ public:
         XmlElement* const xml = new XmlElement (type.toString());
         properties.copyToXmlAttributes (*xml);
 
-        for (int i = 0; i < children.size(); ++i)
-            xml->addChildElement (children.getObjectPointerUnchecked(i)->createXml());
+        // (NB: it's faster to add nodes to XML elements in reverse order)
+        for (int i = children.size(); --i >= 0;)
+            xml->prependChildElement (children.getObjectPointerUnchecked(i)->createXml());
 
         return xml;
     }
@@ -443,7 +444,7 @@ public:
         }
         else
         {
-            output.writeString (String::empty);
+            output.writeString (String());
             output.writeCompressedInt (0);
             output.writeCompressedInt (0);
         }
@@ -845,17 +846,17 @@ ValueTree ValueTree::getChild (int index) const
 
 ValueTree ValueTree::getChildWithName (const Identifier type) const
 {
-    return object != nullptr ? object->getChildWithName (type) : ValueTree::invalid;
+    return object != nullptr ? object->getChildWithName (type) : ValueTree();
 }
 
 ValueTree ValueTree::getOrCreateChildWithName (const Identifier type, UndoManager* undoManager)
 {
-    return object != nullptr ? object->getOrCreateChildWithName (type, undoManager) : ValueTree::invalid;
+    return object != nullptr ? object->getOrCreateChildWithName (type, undoManager) : ValueTree();
 }
 
 ValueTree ValueTree::getChildWithProperty (const Identifier propertyName, const var& propertyValue) const
 {
-    return object != nullptr ? object->getChildWithProperty (propertyName, propertyValue) : ValueTree::invalid;
+    return object != nullptr ? object->getChildWithProperty (propertyName, propertyValue) : ValueTree();
 }
 
 bool ValueTree::isAChildOf (const ValueTree& possibleParent) const
@@ -961,7 +962,7 @@ ValueTree ValueTree::fromXml (const XmlElement& xml)
 String ValueTree::toXmlString() const
 {
     const ScopedPointer<XmlElement> xml (createXml());
-    return xml != nullptr ? xml->createDocument (String::empty) : String::empty;
+    return xml != nullptr ? xml->createDocument ("") : String();
 }
 
 //==============================================================================
@@ -975,7 +976,7 @@ ValueTree ValueTree::readFromStream (InputStream& input)
     const String type (input.readString());
 
     if (type.isEmpty())
-        return ValueTree::invalid;
+        return ValueTree();
 
     ValueTree v (type);
 

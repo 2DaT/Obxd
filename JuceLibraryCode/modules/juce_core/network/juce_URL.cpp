@@ -181,7 +181,7 @@ namespace URLHelpers
                      << "\"; filename=\"" << file.getFileName() << "\"\r\n";
 
                 const String mimeType (url.getMimeTypesOfUploadFiles()
-                                          .getValue (paramName, String::empty));
+                                          .getValue (paramName, String()));
 
                 if (mimeType.isNotEmpty())
                     data << "Content-Type: " << mimeType << "\r\n";
@@ -253,7 +253,7 @@ String URL::getSubPath() const
 {
     const int startOfPath = URLHelpers::findStartOfPath (url);
 
-    return startOfPath <= 0 ? String::empty
+    return startOfPath <= 0 ? String()
                             : url.substring (startOfPath);
 }
 
@@ -292,7 +292,7 @@ URL URL::getChildURL (const String& subPath) const
 //==============================================================================
 bool URL::isProbablyAWebsiteURL (const String& possibleURL)
 {
-    const char* validProtocols[] = { "http:", "ftp:", "https:" };
+    static const char* validProtocols[] = { "http:", "ftp:", "https:" };
 
     for (int i = 0; i < numElementsInArray (validProtocols); ++i)
         if (possibleURL.startsWithIgnoreCase (validProtocols[i]))
@@ -363,7 +363,7 @@ String URL::readEntireTextStream (const bool usePostCommand) const
     if (in != nullptr)
         return in->readEntireStreamAsString();
 
-    return String::empty;
+    return String();
 }
 
 XmlElement* URL::readEntireXmlStream (const bool usePostCommand) const
@@ -470,5 +470,5 @@ bool URL::launchInDefaultBrowser() const
     if (u.containsChar ('@') && ! u.containsChar (':'))
         u = "mailto:" + u;
 
-    return Process::openDocument (u, String::empty);
+    return Process::openDocument (u, String());
 }

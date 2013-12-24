@@ -1,7 +1,32 @@
+/*
+	==============================================================================
+	This file is part of Obxd synthesizer.
+
+	Copyright © 2013-2014 Filatov Vadim
+	
+	Contact author via email :
+	justdat_@_e1.ru
+
+	This file may be licensed under the terms of of the
+	GNU General Public License Version 2 (the ``GPL'').
+
+	Software distributed under the License is distributed
+	on an ``AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, either
+	express or implied. See the GPL for the specific language
+	governing rights and limitations.
+
+	You should have received a copy of the GPL along with this
+	program. If not, go to http://www.gnu.org/licenses/gpl.html
+	or write to the Free Software Foundation, Inc.,  
+	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+	==============================================================================
+ */
 #pragma once
 #include "ObxdVoice.h"
 enum ObxdParameters
 {
+	UNDEFINED,
+	MIDILEARN,
 	VOLUME,
 	VOICE_COUNT,
 	TUNE,
@@ -9,7 +34,11 @@ enum ObxdParameters
 	BENDRANGE,
 	BENDOSC2,
 	LEGATOMODE,
-	//BENDLFORATE,
+	BENDLFORATE,
+	VFLTENV,
+	VAMPENV,
+
+	ASPLAYEDALLOCATION,
 	PORTAMENTO,
 	UNISON,		
 	UDET,
@@ -39,6 +68,7 @@ enum ObxdParameters
 	MULTIMODE,
 	FILTER_WARM,
 	BANDPASS,
+	FOURPOLE,
 	ENVELOPE_AMT,
 	LATK,
 	LDEC,
@@ -50,5 +80,6 @@ enum ObxdParameters
 	FREL,
 	ENVDER,FILTERDER,PORTADER,
 	PAN1,PAN2,PAN3,PAN4,PAN5,PAN6,PAN7,PAN8,
+	UNLEARN,
 	PARAM_COUNT,
 };

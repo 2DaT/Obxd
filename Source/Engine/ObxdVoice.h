@@ -1,10 +1,8 @@
 #pragma once
 #include "ObxdOscillatorB.h"
-#include "ObxdOscillator.h"
 #include "AdsrEnvelope.h"
 #include "Filter.h"
 #include "Decimator.h"
-#include "FirFilter.h"
 #include "APInterpolator.h"
 
 class ObxdVoice
@@ -14,19 +12,22 @@ private:
 	float sampleRateInv;
 	float Volume;
 	float port;
+	float velocityValue;
 
-	UpsampleFIRFilter* upff;
 	float d1,d2;
+	float c1,c2;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObxdVoice)
 public:
-
+	bool sustainHold;
 	AdsrEnvelope env;
 	AdsrEnvelope fenv;
 	ObxdOscillatorB osc;
 	Filter flt;
 
 	Random ng;
+
+	float vamp,vflt;
 
 	float cutoff;
 	float fenvamt;
@@ -53,6 +54,8 @@ public:
 	float cutoffwas,envelopewas;
 
 	float lfoIn;
+	float lfoVibratoIn;
+
 	float pitchWheel;
 	float pitchWheelAmt;
 	bool pitchWheelOsc2Only;
@@ -63,12 +66,10 @@ public:
 
 	bool Oversample;
 
-	float filterDrive;
-
 	float envpitchmod;
 
+	bool fourpole;
 
-	bool stabguard;
 
 	DelayLine *lenvd,*fenvd;
 
@@ -81,21 +82,22 @@ public:
 		: ap(),
 		ng()
 	{
+		sustainHold = false;
+		vamp=vflt=0;
+		velocityValue=0;
+		lfoVibratoIn=0;
+		fourpole = false;
 		legatoMode = 0;
 		brightCoef =briHold= 1;
 		envpitchmod = 0;
 		oscpsw = 0;
 		cutoffwas = envelopewas=0;
 		Oversample= false;
-		d1=d2=0;
-		upff = new UpsampleFIRFilter();
-		filterDrive = 0.1;
+		c1=c2=d1=d2=0;
 		pitchWheel=pitchWheelAmt=0;
 		lfoIn=0;
 		PortaDetuneAmt=0;
 		FltDetAmt=0;
-		//EnvDetune=1;
-		stabguard=  true;
 		porta =0;
 		prtst=0;
 		fltKF= false;
@@ -107,12 +109,11 @@ public:
 		FenvDetune = Random::getSystemRandom().nextFloat()-0.5;
 		FltDetune = Random::getSystemRandom().nextFloat()-0.5;
 		PortaDetune =Random::getSystemRandom().nextFloat()-0.5;
-		lenvd=new DelayLine(Samples);
-		fenvd=new DelayLine(Samples);
+		lenvd=new DelayLine(Samples*2);
+		fenvd=new DelayLine(Samples*2);
 	}
 	~ObxdVoice()
 	{
-		delete upff;
 		delete lenvd;
 		delete fenvd;
 	}
@@ -123,23 +124,15 @@ public:
 		float ptNote  =tptlpupw(prtst, midiIndx-81, porta * (1+PortaDetune*PortaDetuneAmt),sampleRateInv);
 		osc.notePlaying = ptNote;
 		//both envelopes needs a delay equal to osc internal delay
-		float envm = fenv.processSample();
+		float envm = fenv.processSample() * (1 - (1-velocityValue)*vflt);
 		fenvd->feedDelay(envm);
-		float cutoffcalc = jmin(getPitch((lfof?lfoIn*lfoa1:0)+cutoff+FltDetune*FltDetAmt+ fenvamt*fenvd->getDelayedSample() -45 + (fltKF ?ptNote+30:0)), (flt.SampleRate*0.5f-120.0f));
-		lenvd->feedDelay(env.processSample());
+		float cutoffcalc = jmin(getPitch((lfof?lfoIn*lfoa1:0)+cutoff+FltDetune*FltDetAmt+ fenvamt*fenvd->getDelayedSample() -45 + (fltKF ?ptNote+40:0)), (flt.SampleRate*0.5f-120.0f));
+		lenvd->feedDelay(env.processSample() * (1 - (1-velocityValue)*vamp));
 
 		osc.pw1 = lfopw1?lfoIn*lfoa2:0;
 		osc.pw2 = lfopw2?lfoIn*lfoa2:0;
-
-		osc.pto1 =   (!pitchWheelOsc2Only? (pitchWheel*pitchWheelAmt):0 ) + ( lfoo1?lfoIn*lfoa1:0);
-		osc.pto2 =  (pitchWheel *pitchWheelAmt) + (lfoo2?lfoIn*lfoa1:0) + (envpitchmod * envm);
-		//if(lfopw1)
-		//{
-		//filtinput = 2*upff->processUpsamplingFiltreing(filtinput);
-		//filtinput2 = 2*upff->processUpsamplingFiltreing(filtinput2);
-		//	*(ptr) = tptlp(d1,x1,24000,SampleRate*2);
-		//	*(ptr+1)= tptlp(d1,x1,24000,SampleRate*2);
-		//}
+		osc.pto1 =   (!pitchWheelOsc2Only? (pitchWheel*pitchWheelAmt):0 ) + ( lfoo1?lfoIn*lfoa1:0) + lfoVibratoIn;
+		osc.pto2 =  (pitchWheel *pitchWheelAmt) + (lfoo2?lfoIn*lfoa1:0) + (envpitchmod * envm) + lfoVibratoIn;
 
 
 
@@ -148,13 +141,15 @@ public:
 
 		float x2 = 0;
 		float oscps = osc.ProcessSample();
+		oscps = oscps - 0.45*tptlpupw(c1,oscps,15,sampleRateInv);
 		if(Oversample)
 		{
 			x2=  oscpsw;
-			x2 = flt.Apply(x2*2,(cutoffcalc+cutoffwas)*0.5);
-			x2 = x2 - tptlpupw(d1,x2,20,flt.sampleRateInv);
 			x2 = tptpc(d2,x2,brightCoef);
-			//x2 /= (filterDrive);
+			if(fourpole)
+			x2 = flt.Apply4Pole(x2,(cutoffcalc+cutoffwas)*0.5);
+			else
+				x2 = flt.Apply(x2,(cutoffcalc+cutoffwas)*0.5);
 			x2 *= (env+envelopewas)*0.5;
 			*(ptr+1) = x2;
 		}
@@ -162,21 +157,25 @@ public:
 		if(!Oversample)
 		{
 			x1 = oscps;
-			x1 = flt.Apply(x1,(cutoffcalc)); 
+			x1 = tptpc(d2,x1,brightCoef);
+			if(fourpole)
+			x1 = flt.Apply4Pole(x1,(cutoffcalc)); 
+			else
+				x1 = flt.Apply(x1,(cutoffcalc)); 
 
 		}
 		else
 		{
-			x1 = flt.Apply(2*ap.getInterp(oscps),(cutoffcalc)); 
+			x1 = ap.getInterp(oscps);
+			x1 = tptpc(d2,x1,brightCoef);
+			if(fourpole)
+			x1 = flt.Apply4Pole(x1,(cutoffcalc)); 
+			else
+				x1 = flt.Apply(x1,(cutoffcalc)); 
 		}
-		x1 = x1 - tptlpupw(d1 , x1 , 20 , flt.sampleRateInv);
-		x1 = tptpc(d2,x1,brightCoef);
 		x1 *= (env);
 		*(ptr)=x1;
 
-
-		//*(ptr+1)=x1;
-		//
 		oscpsw = oscps;
 		cutoffwas = cutoffcalc;
 		envelopewas = env;
@@ -184,7 +183,7 @@ public:
 	void setBrightness(float val)
 	{
 		briHold = val;
-		brightCoef = tan(cutoff *jmin(val,flt.SampleRate*0.5f-10)* (juce::float_Pi));
+		brightCoef = tan(jmin(val,flt.SampleRate*0.5f-10)* (juce::float_Pi)*flt.sampleRateInv);
 
 	}
 	void setEnvDer(float d)
@@ -200,7 +199,7 @@ public:
 		fenv.setSampleRate(sr);
 		SampleRate = sr;
 		sampleRateInv = 1 / sr;
-		brightCoef = tan(cutoff *jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi));
+		brightCoef = tan(jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi) * flt.sampleRateInv);
 	}
 	void ResetEnvelope()
 	{
@@ -211,11 +210,12 @@ public:
 	{
 		flt.setSampleRate((Oversample)?SampleRate:2*SampleRate);
 		Oversample = !Oversample;
-		brightCoef = tan(cutoff *jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi));
+		brightCoef = tan(jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi)* flt.sampleRateInv);
 	}
-	void NoteOn(int mididx)
+	void NoteOn(int mididx,float velocity)
 	{
-		//osc.midiIndex = mididx-81;
+		if(velocity!=-0.5)
+		velocityValue = velocity;
 		midiIndx = mididx;
 		if((!Active)||(legatoMode&1))
 			env.triggerAttack();
@@ -225,8 +225,25 @@ public:
 	}
 	void NoteOff()
 	{
+		if(!sustainHold)
+		{
 		env.triggerRelease();
 		fenv.triggerRelease();
+		}
 		Active = false;
+	}
+	void sustOn()
+	{
+		sustainHold = true;
+	}
+	void sustOff()
+	{
+		sustainHold = false;
+		if(!Active)
+		{
+			env.triggerRelease();
+			fenv.triggerRelease();
+		}
+
 	}
 };

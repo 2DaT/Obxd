@@ -28,7 +28,7 @@ class ObxdAudioProcessorEditor  :
 						  public Slider::Listener,
 						  public Button::Listener,
 						  public ComboBox::Listener//,
-						//  public AudioProcessorListener
+						 // public AudioProcessorListener
 
 {
 public:
@@ -41,13 +41,17 @@ public:
     */
 	void changeListenerCallback (ChangeBroadcaster* source);
 	int changeListenerCallback (void*){return 0;};
-	Knob* addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name);
-	Knob* addTinyKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name);
+
+
+
+
+	Knob* addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name,float defval);
+	Knob* addTinyKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name,float defval);
 	void placeLabel(int x , int y,String text);
 	TooglableButton* addNormalTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name);
 	TooglableButton* addTinyTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name);
 
-	ButtonList* addNormalButtonList(int x , int y ,int width, ObxdAudioProcessor* filter,int parameter,String name);
+	ButtonList* addNormalButtonList(int x , int y ,int width, ObxdAudioProcessor* filter,int parameter,String name,Image img);
     void sliderValueChanged (Slider*);
 	void buttonClicked (Button *);
     void comboBoxChanged(ComboBox*);
@@ -65,13 +69,16 @@ public:
 		*tuneKnob,
 		*lfoFrequencyKnob,*lfoAmt1Knob,*lfoAmt2Knob,
 		*pan1Knob,*pan2Knob,*pan3Knob,*pan4Knob,*pan5Knob,*pan6Knob,*pan7Knob,*pan8Knob,
-		*brightnessKnob,*envPitchModKnob;
+		*brightnessKnob,*envPitchModKnob,
+		*bendLfoRateKnob
+		,*veloAmpEnvKnob,*veloFltEnvKnob,*transposeKnob;
 
 	TooglableButton* hardSyncButton,*osc1SawButton,*osc2SawButton,*osc1PulButton,*osc2PulButton,*filterKeyFollowButton,*unisonButton,*pitchQuantButton,
 		*filterHQButton,*filterBPBlendButton,
 		*lfoSinButton,*lfoSquareButton,*lfoSHButton,*lfoOsc1Button,*lfoOsc2Button,*lfoFilterButton,
 		*lfoPwm1Button,*lfoPwm2Button,
-		*bendRangeButton,*bendOsc2OnlyButton;
+		*bendRangeButton,*bendOsc2OnlyButton,
+	*fourPoleButton,*asPlayedAllocButton,*midiLearnButton,*midiUnlearnButton;
 
 	ButtonList *voiceSwitch,*legatoSwitch;
     //==============================================================================

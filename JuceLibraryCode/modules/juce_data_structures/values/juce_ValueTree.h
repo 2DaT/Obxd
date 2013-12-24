@@ -317,7 +317,7 @@ public:
     //==============================================================================
     /** Creates an XmlElement that holds a complete image of this node and all its children.
 
-        If this node is invalid, this may return 0. Otherwise, the XML that is produced can
+        If this node is invalid, this may return nullptr. Otherwise, the XML that is produced can
         be used to recreate a similar node by calling fromXml()
         @see fromXml
     */
@@ -492,7 +492,7 @@ public:
 
 private:
     //==============================================================================
-    class SharedObject;
+    JUCE_PUBLIC_IN_DLL_BUILD (class SharedObject)
     friend class SharedObject;
 
     ReferenceCountedObjectPtr<SharedObject> object;

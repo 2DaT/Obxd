@@ -38,6 +38,10 @@
 #ifdef __clang__
  #pragma clang diagnostic push
  #pragma clang diagnostic ignored "-Wshorten-64-to-32"
+ #pragma clang diagnostic ignored "-Wunused-parameter"
+ #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+ #pragma clang diagnostic ignored "-Wsign-conversion"
+ #pragma clang diagnostic ignored "-Wconversion"
 #endif
 
 #include "../utility/juce_IncludeSystemHeaders.h"
@@ -51,6 +55,14 @@
  #define Point CarbonDummyPointName
  #define Component CarbonDummyCompName
 #endif
+
+/*
+    Got an include error here?
+
+    You probably need to install Apple's AU classes - see the
+    juce website for more info on how to get them:
+    http://www.juce.com/forum/topic/aus-xcode
+*/
 #include "AUMIDIEffectBase.h"
 #include "MusicDeviceBase.h"
 #undef Point
@@ -84,7 +96,6 @@
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_CarbonVisibility.h"
-#include "../utility/juce_PluginHostType.h"
 #include "../../juce_core/native/juce_osx_ObjCHelpers.h"
 
 //==============================================================================
@@ -107,12 +118,12 @@ class JuceAUBaseClass   : public AUMIDIEffectBase
 public:
     JuceAUBaseClass (AudioComponentInstance comp)  : AUMIDIEffectBase (comp, false) {}
 
-    OSStatus MIDIEvent (UInt32 inStatus, UInt32 inData1, UInt32 inData2, UInt32 inOffsetSampleFrame) override
+    OSStatus MIDIEvent (UInt32 inStatus, UInt32 inData1, UInt32 inData2, UInt32 inOffsetSampleFrame)
     {
         return AUMIDIBase::MIDIEvent (inStatus, inData1, inData2, inOffsetSampleFrame);
     }
 
-    OSStatus SysEx (const UInt8* inData, UInt32 inLength) override
+    OSStatus SysEx (const UInt8* inData, UInt32 inLength)
     {
         return AUMIDIBase::SysEx (inData, inLength);
     }
@@ -640,7 +651,7 @@ public:
     // (these two slightly different versions are because the definition changed between 10.4 and 10.5)
     ComponentResult StartNote (MusicDeviceInstrumentID, MusicDeviceGroupID, NoteInstanceID&, UInt32, const MusicDeviceNoteParams&) { return noErr; }
     ComponentResult StartNote (MusicDeviceInstrumentID, MusicDeviceGroupID, NoteInstanceID*, UInt32, const MusicDeviceNoteParams&) { return noErr; }
-    ComponentResult StopNote (MusicDeviceGroupID, NoteInstanceID, UInt32) override   { return noErr; }
+    ComponentResult StopNote (MusicDeviceGroupID, NoteInstanceID, UInt32)   { return noErr; }
 
     //==============================================================================
     ComponentResult Initialize() override
@@ -867,19 +878,20 @@ public:
                         ++numPackets;
                     }
 
-                    const size_t packetMembersSize     = sizeof (MIDIPacket)     - sizeof (MIDIPacket::data);
-                    const size_t packetListMembersSize = sizeof (MIDIPacketList) - sizeof (MIDIPacket::data);
+                    MIDIPacket* p;
+                    const size_t packetMembersSize     = sizeof (MIDIPacket)     - sizeof (p->data); // NB: GCC chokes on "sizeof (MidiMessage::data)"
+                    const size_t packetListMembersSize = sizeof (MIDIPacketList) - sizeof (p->data);
 
                     HeapBlock<MIDIPacketList> packetList;
                     packetList.malloc (packetListMembersSize + packetMembersSize * numPackets + dataSize, 1);
                     packetList->numPackets = numPackets;
 
-                    MIDIPacket* p = packetList->packet;
+                    p = packetList->packet;
 
                     for (MidiBuffer::Iterator i (midiEvents); i.getNextEvent (midiEventData, midiEventSize, midiEventPosition);)
                     {
                         p->timeStamp = (MIDITimeStamp) midiEventPosition;
-                        p->length = (size_t) midiEventSize;
+                        p->length = (UInt16) midiEventSize;
                         memcpy (p->data, midiEventData, (size_t) midiEventSize);
                         p = MIDIPacketNext (p);
                     }
@@ -933,9 +945,10 @@ public:
                                      (juce::uint8) inData2 };
 
         incomingEvents.addEvent (data, 3, (int) inStartFrame);
-       #endif
-
         return noErr;
+       #else
+        return kAudioUnitErr_PropertyNotInUse;
+       #endif
     }
 
     OSStatus HandleSysEx (const UInt8* inData, UInt32 inLength) override
@@ -943,8 +956,10 @@ public:
        #if JucePlugin_WantsMidiInput
         const ScopedLock sl (incomingMidiLock);
         incomingEvents.addEvent (inData, (int) inLength, 0);
-       #endif
         return noErr;
+       #else
+        return kAudioUnitErr_PropertyNotInUse;
+       #endif
     }
 
     //==============================================================================
@@ -1357,7 +1372,7 @@ private:
             JUCE_AUTORELEASEPOOL
             {
                 jassert (ed != nullptr);
-                addAndMakeVisible (&editor);
+                addAndMakeVisible (editor);
                 setOpaque (true);
                 setVisible (true);
                 setBroughtToFrontOnMouseClick (true);
@@ -1474,7 +1489,7 @@ private:
                     lastEventTime = eventTime;
 
                     [[hostWindow parentWindow] makeKeyWindow];
-                    [NSApp postEvent: [NSApp currentEvent] atStart: YES];
+                    repostCurrentNSEvent();
                 }
             }
 

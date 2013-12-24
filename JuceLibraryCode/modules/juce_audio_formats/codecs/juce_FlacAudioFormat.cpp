@@ -51,7 +51,19 @@ namespace FlacNamespace
   #pragma clang diagnostic ignored "-Wshadow"
  #endif
 
+ #if JUCE_INTEL
+  #if JUCE_32BIT
+   #define FLAC__CPU_IA32 1
+  #endif
+  #if JUCE_64BIT
+   #define FLAC__CPU_X86_64 1
+  #endif
+  #define FLAC__HAS_X86INTRIN 1
+ #endif
+
  #define __STDC_LIMIT_MACROS 1
+ #define flac_max jmax
+ #define flac_min jmin
  #include "flac/all.h"
  #include "flac/libFLAC/bitmath.c"
  #include "flac/libFLAC/bitreader.c"
@@ -380,7 +392,7 @@ public:
             samplesToWrite = const_cast<const int**> (channels.getData());
         }
 
-        return FLAC__stream_encoder_process (encoder, (const FLAC__int32**) samplesToWrite, (size_t) numSamples) != 0;
+        return FLAC__stream_encoder_process (encoder, (const FLAC__int32**) samplesToWrite, (unsigned) numSamples) != 0;
     }
 
     bool writeData (const void* const data, const int size) const
@@ -536,7 +548,7 @@ AudioFormatWriter* FlacAudioFormat::createWriterFor (OutputStream* out,
 
 StringArray FlacAudioFormat::getQualityOptions()
 {
-    const char* options[] = { "0 (Fastest)", "1", "2", "3", "4", "5 (Default)","6", "7", "8 (Highest quality)", 0 };
+    static const char* options[] = { "0 (Fastest)", "1", "2", "3", "4", "5 (Default)","6", "7", "8 (Highest quality)", 0 };
     return StringArray (options);
 }
 

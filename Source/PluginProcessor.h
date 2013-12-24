@@ -12,11 +12,14 @@
 #define PLUGINPROCESSOR_H_INCLUDED
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Engine\SynthEngine.h"
+#include <stack>
+#include "Engine\midiMap.h"
+#include "Engine\ObxdBank.h"
 
 //==============================================================================
 /**
 */
-class ObxdAudioProcessor  : public AudioProcessor,
+class ObxdAudioProcessor  : public AudioProcessor, //public AudioProcessorListener,
 	 public ChangeBroadcaster
 {
 public:
@@ -34,8 +37,12 @@ public:
     AudioProcessorEditor* createEditor();
     bool hasEditor() const;
 	
+	int lastMovedController,lastUsedParameter;
 
 	MidiMessage* nextMidi,*midiMsg;
+	MidiMap bindings;
+	bool midiControlledParamSet;
+	
 	bool hasMidiMessage;
     int midiEventPos;
 	void ObxdAudioProcessor::processMidiPerSample(MidiBuffer::Iterator* iter,const int samplePos);
@@ -44,7 +51,7 @@ public:
     //==============================================================================
 	SynthEngine* synth;
 	//==============================================
-	ObxdParams parameters;
+	ObxdBank programs;
 	//==============================================
     const String getName() const;
 
@@ -82,6 +89,8 @@ public:
     //==============================================================================
     void getStateInformation (MemoryBlock& destData);
     void setStateInformation (const void* data, int sizeInBytes);
+	void setCurrentProgramStateInformation(const void* data,int sizeInBytes);
+	void getCurrentProgramStateInformation(MemoryBlock& destData);
 
 private:
     //==============================================================================

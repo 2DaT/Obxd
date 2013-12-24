@@ -353,8 +353,11 @@ public:
     */
     bool isHidden() const;
 
-    /** If this file is a link, this returns the file that it points to.
-        If this file isn't actually link, it'll just return itself.
+    /** Returns true if this file is a link or alias that can be followed using getLinkedTarget(). */
+    bool isLink() const;
+
+    /** If this file is a link or alias, this returns the file that it points to.
+        If the file isn't actually link, it'll just return itself.
     */
     File getLinkedTarget() const;
 
@@ -738,7 +741,7 @@ public:
 
         @see revealToUser
     */
-    bool startAsProcess (const String& parameters = String::empty) const;
+    bool startAsProcess (const String& parameters = String()) const;
 
     /** Opens Finder, Explorer, or whatever the OS uses, to show the user this file's location.
         @see startAsProcess

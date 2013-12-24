@@ -173,51 +173,9 @@ private:
     JUCE_DECLARE_NON_COPYABLE (MouseListenerList)
 };
 
-
 //==============================================================================
-struct Component::ComponentHelpers
+struct ScalingHelpers
 {
-   #if JUCE_MODAL_LOOPS_PERMITTED
-    static void* runModalLoopCallback (void* userData)
-    {
-        return (void*) (pointer_sized_int) static_cast <Component*> (userData)->runModalLoop();
-    }
-   #endif
-
-    static Identifier getColourPropertyId (int colourId)
-    {
-        char reversedHex[32];
-        char* t = reversedHex;
-
-        for (unsigned int v = (unsigned int) colourId;;)
-        {
-            *t++ = "0123456789abcdef" [(int) (v & 15)];
-            v >>= 4;
-
-            if (v == 0)
-                break;
-        }
-
-        char destBuffer[32];
-        char* dest = destBuffer;
-        memcpy (dest, "jcclr_", 6);
-        dest += 6;
-
-        while (t > reversedHex)
-            *dest++ = *--t;
-
-        *dest++ = 0;
-        return destBuffer;
-    }
-
-    //==============================================================================
-    static inline bool hitTest (Component& comp, Point<int> localPoint)
-    {
-        return isPositiveAndBelow (localPoint.x, comp.getWidth())
-            && isPositiveAndBelow (localPoint.y, comp.getHeight())
-            && comp.hitTest (localPoint.x, localPoint.y);
-    }
-
     template <typename PointOrRect>
     static PointOrRect unscaledScreenPosToScaled (float scale, PointOrRect pos) noexcept
     {
@@ -271,6 +229,51 @@ struct Component::ComponentHelpers
     {
         return scaledScreenPosToUnscaled (comp.getDesktopScaleFactor(), pos);
     }
+};
+
+//==============================================================================
+struct Component::ComponentHelpers
+{
+   #if JUCE_MODAL_LOOPS_PERMITTED
+    static void* runModalLoopCallback (void* userData)
+    {
+        return (void*) (pointer_sized_int) static_cast <Component*> (userData)->runModalLoop();
+    }
+   #endif
+
+    static Identifier getColourPropertyId (int colourId)
+    {
+        char reversedHex[32];
+        char* t = reversedHex;
+
+        for (unsigned int v = (unsigned int) colourId;;)
+        {
+            *t++ = "0123456789abcdef" [(int) (v & 15)];
+            v >>= 4;
+
+            if (v == 0)
+                break;
+        }
+
+        char destBuffer[32];
+        char* dest = destBuffer;
+        memcpy (dest, "jcclr_", 6);
+        dest += 6;
+
+        while (t > reversedHex)
+            *dest++ = *--t;
+
+        *dest++ = 0;
+        return destBuffer;
+    }
+
+    //==============================================================================
+    static inline bool hitTest (Component& comp, Point<int> localPoint)
+    {
+        return isPositiveAndBelow (localPoint.x, comp.getWidth())
+            && isPositiveAndBelow (localPoint.y, comp.getHeight())
+            && comp.hitTest (localPoint.x, localPoint.y);
+    }
 
     // converts an unscaled position within a peer to the local position within that peer's component
     template <typename PointOrRect>
@@ -279,7 +282,7 @@ struct Component::ComponentHelpers
         if (comp.isTransformed())
             pos = pos.transformedBy (comp.getTransform().inverted());
 
-        return unscaledScreenPosToScaled (comp, pos);
+        return ScalingHelpers::unscaledScreenPosToScaled (comp, pos);
     }
 
     // converts a position within a peer's component to the unscaled position within the peer
@@ -289,7 +292,7 @@ struct Component::ComponentHelpers
         if (comp.isTransformed())
             pos = pos.transformedBy (comp.getTransform());
 
-        return scaledScreenPosToUnscaled (comp, pos);
+        return ScalingHelpers::scaledScreenPosToUnscaled (comp, pos);
     }
 
     template <typename PointOrRect>
@@ -301,7 +304,8 @@ struct Component::ComponentHelpers
         if (comp.isOnDesktop())
         {
             if (ComponentPeer* peer = comp.getPeer())
-                pointInParentSpace = unscaledScreenPosToScaled (comp, peer->globalToLocal (scaledScreenPosToUnscaled (pointInParentSpace)));
+                pointInParentSpace = ScalingHelpers::unscaledScreenPosToScaled
+                                        (comp, peer->globalToLocal (ScalingHelpers::scaledScreenPosToUnscaled (pointInParentSpace)));
             else
                 jassertfalse;
         }
@@ -319,7 +323,8 @@ struct Component::ComponentHelpers
         if (comp.isOnDesktop())
         {
             if (ComponentPeer* peer = comp.getPeer())
-                pointInLocalSpace = unscaledScreenPosToScaled (peer->localToGlobal (scaledScreenPosToUnscaled (comp, pointInLocalSpace)));
+                pointInLocalSpace = ScalingHelpers::unscaledScreenPosToScaled
+                                        (peer->localToGlobal (ScalingHelpers::scaledScreenPosToUnscaled (comp, pointInLocalSpace)));
             else
                 jassertfalse;
         }
@@ -1438,25 +1443,25 @@ Component* Component::getComponentAt (const int x, const int y)
 }
 
 //==============================================================================
-void Component::addChildComponent (Component* const child, int zOrder)
+void Component::addChildComponent (Component& child, int zOrder)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
     CHECK_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN
 
-    if (child != nullptr && child->parentComponent != this)
+    if (child.parentComponent != this)
     {
-        if (child->parentComponent != nullptr)
-            child->parentComponent->removeChildComponent (child);
+        if (child.parentComponent != nullptr)
+            child.parentComponent->removeChildComponent (&child);
         else
-            child->removeFromDesktop();
+            child.removeFromDesktop();
 
-        child->parentComponent = this;
+        child.parentComponent = this;
 
-        if (child->isVisible())
-            child->repaintParent();
+        if (child.isVisible())
+            child.repaintParent();
 
-        if (! child->isAlwaysOnTop())
+        if (! child.isAlwaysOnTop())
         {
             if (zOrder < 0 || zOrder > childComponentList.size())
                 zOrder = childComponentList.size();
@@ -1470,20 +1475,29 @@ void Component::addChildComponent (Component* const child, int zOrder)
             }
         }
 
-        childComponentList.insert (zOrder, child);
+        childComponentList.insert (zOrder, &child);
 
-        child->internalHierarchyChanged();
+        child.internalHierarchyChanged();
         internalChildrenChanged();
     }
+}
+
+void Component::addAndMakeVisible (Component& child, int zOrder)
+{
+    child.setVisible (true);
+    addChildComponent (child, zOrder);
+}
+
+void Component::addChildComponent (Component* const child, int zOrder)
+{
+    if (child != nullptr)
+        addChildComponent (*child, zOrder);
 }
 
 void Component::addAndMakeVisible (Component* const child, int zOrder)
 {
     if (child != nullptr)
-    {
-        child->setVisible (true);
-        addChildComponent (child, zOrder);
-    }
+        addAndMakeVisible (*child, zOrder);
 }
 
 void Component::addChildAndSetID (Component* const child, const String& childID)
@@ -2018,7 +2032,8 @@ void Component::paintEntireComponent (Graphics& g, const bool ignoreAlphaLevel)
                            scaledBounds.getWidth(), scaledBounds.getHeight(), ! flags.opaqueFlag);
         {
             Graphics g2 (effectImage);
-            g2.addTransform (AffineTransform::scale (scale));
+            g2.addTransform (AffineTransform::scale (scaledBounds.getWidth()  / (float) getWidth(),
+                                                     scaledBounds.getHeight() / (float) getHeight()));
             paintComponentAndChildren (g2);
         }
 
@@ -2053,7 +2068,7 @@ void Component::setPaintingIsUnclipped (const bool shouldPaintWithoutClipping) n
 
 //==============================================================================
 Image Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
-                                          const bool clipImageToComponentBounds)
+                                          bool clipImageToComponentBounds, float scaleFactor)
 {
     Rectangle<int> r (areaToGrab);
 
@@ -2063,14 +2078,21 @@ Image Component::createComponentSnapshot (const Rectangle<int>& areaToGrab,
     if (r.isEmpty())
         return Image();
 
-    Image componentImage (flags.opaqueFlag ? Image::RGB : Image::ARGB,
-                          r.getWidth(), r.getHeight(), true);
+    const int w = roundToInt (scaleFactor * r.getWidth());
+    const int h = roundToInt (scaleFactor * r.getHeight());
 
-    Graphics imageContext (componentImage);
-    imageContext.setOrigin (-r.getPosition());
-    paintEntireComponent (imageContext, true);
+    Image image (flags.opaqueFlag ? Image::RGB : Image::ARGB, w, h, true);
 
-    return componentImage;
+    Graphics g (image);
+
+    if (w != getWidth() || h != getHeight())
+        g.addTransform (AffineTransform::scale (w / (float) r.getWidth(),
+                                                h / (float) r.getHeight()));
+    g.setOrigin (-r.getPosition());
+
+    paintEntireComponent (g, true);
+
+    return image;
 }
 
 void Component::setComponentEffect (ImageEffectFilter* const newEffect)
@@ -2266,7 +2288,10 @@ void Component::addComponentListener (ComponentListener* const newListener)
 {
     // if component methods are being called from threads other than the message
     // thread, you'll need to use a MessageManagerLock object to make sure it's thread-safe.
-    CHECK_MESSAGE_MANAGER_IS_LOCKED
+    #if JUCE_DEBUG || JUCE_LOG_ASSERTIONS
+    if (getParentComponent() != nullptr)
+        CHECK_MESSAGE_MANAGER_IS_LOCKED;
+    #endif
 
     componentListeners.add (newListener);
 }

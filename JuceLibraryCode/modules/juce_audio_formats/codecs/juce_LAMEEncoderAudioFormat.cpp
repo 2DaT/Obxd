@@ -28,7 +28,7 @@ class LAMEEncoderAudioFormat::Writer   : public AudioFormatWriter
 {
 public:
     Writer (OutputStream* destStream, const String& formatName,
-            const File& lameApp, int vbr, int cbr,
+            const File& appFile, int vbr, int cbr,
             double sampleRate, unsigned int numberOfChannels,
             unsigned int bitsPerSample, const StringPairArray& metadata)
         : AudioFormatWriter (destStream, formatName, sampleRate,
@@ -43,7 +43,7 @@ public:
             writer = wavFormat.createWriterFor (out, sampleRate, numChannels,
                                                 bitsPerSample, metadata, 0);
 
-            args.add (lameApp.getFullPathName());
+            args.add (appFile.getFullPathName());
 
             args.add ("--quiet");
 
@@ -72,7 +72,7 @@ public:
 
     void addMetadataArg (const StringPairArray& metadata, const char* key, const char* lameFlag)
     {
-        const String value (metadata.getValue (key, String::empty));
+        const String value (metadata.getValue (key, String()));
 
         if (value.isNotEmpty())
         {
@@ -103,11 +103,11 @@ private:
     ScopedPointer<AudioFormatWriter> writer;
     StringArray args;
 
-    bool runLameChildProcess (const TemporaryFile& tempMP3, const StringArray& args) const
+    bool runLameChildProcess (const TemporaryFile& tempMP3, const StringArray& processArgs) const
     {
         ChildProcess cp;
 
-        if (cp.start (args))
+        if (cp.start (processArgs))
         {
             const String childOutput (cp.readAllProcessOutput());
             DBG (childOutput); (void) childOutput;
@@ -180,11 +180,9 @@ bool LAMEEncoderAudioFormat::isCompressed()     { return true; }
 
 StringArray LAMEEncoderAudioFormat::getQualityOptions()
 {
-    const char* vbrOptions[] = { "VBR quality 0 (best)", "VBR quality 1", "VBR quality 2", "VBR quality 3",
-                                 "VBR quality 4 (normal)", "VBR quality 5", "VBR quality 6", "VBR quality 7", "VBR quality 8",
-                                 "VBR quality 9 (smallest)",
-                                 nullptr };
-
+    static const char* vbrOptions[] = { "VBR quality 0 (best)", "VBR quality 1", "VBR quality 2", "VBR quality 3",
+                                        "VBR quality 4 (normal)", "VBR quality 5", "VBR quality 6", "VBR quality 7",
+                                        "VBR quality 8", "VBR quality 9 (smallest)", nullptr };
     StringArray opts (vbrOptions);
 
     const int cbrRates[] = { 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 };
