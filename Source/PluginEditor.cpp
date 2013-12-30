@@ -74,6 +74,7 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 	pitchQuantButton =  addNormalTooglableButton(160+30,100,ownerFilter,OSCQuantize,"Step");
 
 	filterBPBlendButton = addNormalTooglableButton(460+70,115-15,ownerFilter,BANDPASS,"Bp");
+	fourPoleButton = addNormalTooglableButton(460+70,115-40,ownerFilter,FOURPOLE,"24");
 	filterHQButton = addNormalTooglableButton(440-10,115-15,ownerFilter,FILTER_WARM,"HQ");
 
 	filterKeyFollowButton =  addNormalTooglableButton(400+30,115-40,ownerFilter,FLT_KF,"Key");
@@ -125,6 +126,17 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 	legatoSwitch ->addChoise("Keep lenv");
 	legatoSwitch ->addChoise("Retrig");
 	legatoSwitch ->setValue(ownerFilter->getParameter(LEGATOMODE),dontSendNotification);
+
+	placeLabel(440,270,"Transpose");
+	octaveSwitch = addNormalButtonList(450,290,90,ownerFilter,OCTAVE,"Octave");
+
+	octaveSwitch ->addChoise("-2");
+	octaveSwitch ->addChoise("-1");
+	octaveSwitch ->addChoise("0");
+	octaveSwitch ->addChoise("+1");
+	octaveSwitch ->addChoise("+2");
+	octaveSwitch ->setValue(ownerFilter->getParameter(OCTAVE),dontSendNotification);
+
 	getFilter()->addChangeListener(this);
 }
 void ObxdAudioProcessorEditor::placeLabel(int x , int y , String text)
@@ -238,6 +250,7 @@ void ObxdAudioProcessorEditor::buttonClicked(Button * b)
 		handleBParam(lfoPwm2Button,LFOPW2)
 		handleBParam(bendOsc2OnlyButton,BENDOSC2)
 		handleBParam(bendRangeButton,BENDRANGE)
+		handleBParam(fourPoleButton,FOURPOLE)
 	{};
 
 }
@@ -249,6 +262,7 @@ void ObxdAudioProcessorEditor::comboBoxChanged (ComboBox* cb)
 #define handleCParam(K,T)  if (bl == K) {cp(T)} else
 	handleCParam(voiceSwitch,VOICE_COUNT)
 		handleCParam(legatoSwitch,LEGATOMODE)
+		handleCParam(octaveSwitch,OCTAVE)
 	{};
 }
 void ObxdAudioProcessorEditor::sliderValueChanged (Slider* c)
@@ -394,6 +408,7 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 		rn(lfoFilterButton,LFOFILTER)
 		rn(lfoPwm1Button,LFOPW1)
 		rn(lfoPwm2Button,LFOPW2)
+		rn(fourPoleButton,FOURPOLE)
 
 		rn(pan1Knob,PAN1)
 		rn(pan2Knob,PAN2)
@@ -406,6 +421,7 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 
 		rn(voiceSwitch,VOICE_COUNT)
 		rn(legatoSwitch,LEGATOMODE)
+		rn(octaveSwitch,OCTAVE)
 
 }
 void ObxdAudioProcessorEditor::paint (Graphics& g)

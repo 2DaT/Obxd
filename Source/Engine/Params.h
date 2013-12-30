@@ -19,7 +19,7 @@ public:
 		values[OSC2_DET]=0.4;
 		values[LSUS]=1.0f;
 		values[CUTOFF]=0.5f;
-		values[VOLUME]=0.8f;
+		values[VOLUME]=0.5f;
 		values[OSC1MIX]=1;
 		values[OSC2MIX]=1;
 		values[OSC1Saw]=1;

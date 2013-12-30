@@ -18,13 +18,13 @@ public:
 		voices = voicesReference;
 		idx = 0;total = voiceCount;
 	}
-	ObxdVoice* GetNext()
+	inline ObxdVoice* GetNext()
 	{
 		idx = idx + 1;
 		idx %=total;
 		return voices[idx];
 	}
-	void ReInit(int voiceCount)
+	inline void ReInit(int voiceCount)
 	{
 		total = voiceCount;
 		idx = idx%total;

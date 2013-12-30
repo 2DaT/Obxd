@@ -71,9 +71,10 @@ public:
 		*filterHQButton,*filterBPBlendButton,
 		*lfoSinButton,*lfoSquareButton,*lfoSHButton,*lfoOsc1Button,*lfoOsc2Button,*lfoFilterButton,
 		*lfoPwm1Button,*lfoPwm2Button,
-		*bendRangeButton,*bendOsc2OnlyButton;
+		*bendRangeButton,*bendOsc2OnlyButton,
+	*fourPoleButton;
 
-	ButtonList *voiceSwitch,*legatoSwitch;
+	ButtonList *voiceSwitch,*legatoSwitch,*octaveSwitch;
     //==============================================================================
     // This is just a standard Juce paint method...
 //    void paint (Graphics& g);

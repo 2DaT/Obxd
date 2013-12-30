@@ -77,7 +77,7 @@ public:
             coef = (float)((log(0.00001) - log(Value+0.0001)) / (SampleRate * (release) / 1000));
             state = 4;
         }
-	float processSample()
+	inline float processSample()
         {
             switch (state)
             {

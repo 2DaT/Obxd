@@ -82,7 +82,7 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->osc.oct = ((int)(param*4) - 2)*12;
+			synth->voices[i]->osc.oct = (roundToInt(param*4) -2)*12;
 		}
 	}
 	void processFilterKeyFollow(float param)
@@ -105,7 +105,7 @@ public:
 	}
 	void processVolume(float param)
 	{
-		synth->Volume = linsc(param,0,0.15);
+		synth->Volume = linsc(param,0,0.30);
 	}
 	void processLfoFrequency(float param)
 	{
@@ -334,7 +334,15 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->flt.setResonance(0.993-logsc(1-param,0,0.993,40));
+			synth->voices[i]->flt.setResonance(0.991-logsc(1-param,0,0.991,40));
+		}
+	}
+	void processFourPole(float param)
+	{
+		for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		{
+			//synth->voices[i]->flt ;
+			synth->voices[i]->fourpole = param>0.5;
 		}
 	}
 	void processMultimode(float param)

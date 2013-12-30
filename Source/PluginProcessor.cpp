@@ -52,6 +52,9 @@ void ObxdAudioProcessor::setParameter (int index, float newValue)
 	parameters.values[index] = newValue;
 	switch(index)
 	{
+	case FOURPOLE:
+		synth->processFourPole(newValue);
+		break;
 	case LEGATOMODE:
 		synth->processLegatoMode(newValue);
 		break;
@@ -248,6 +251,8 @@ const String ObxdAudioProcessor::getParameterName (int index)
 {
 	switch(index)
 	{
+	case FOURPOLE:
+		return S("FourPole");
 	case LEGATOMODE:
 		return S("LegatoMode");
 	case ENVPITCH:
@@ -469,7 +474,7 @@ void ObxdAudioProcessor::releaseResources()
 {
 
 }
-void ObxdAudioProcessor::processMidiPerSample(MidiBuffer::Iterator* iter,const int samplePos)
+inline void ObxdAudioProcessor::processMidiPerSample(MidiBuffer::Iterator* iter,const int samplePos)
 {
 	while (getNextEvent(iter, samplePos))
 	{

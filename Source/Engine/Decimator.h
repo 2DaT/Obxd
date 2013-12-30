@@ -17,7 +17,7 @@ public:
 	{
 		R1=R2=R3=R4=R5=0.0f;
 	}
-	float Calc(const float x0,const float x1)
+	inline float Calc(const float x0,const float x1)
 	{
 		float h5x0=h5*x0;
 		float h3x0=h3*x0;
@@ -78,7 +78,7 @@ public:
 	{
 		R1=R2=R3=R4=R5=R6=R7=R8=R9=0.0f;
 	}
-	float Calc(const float x0,const float x1)
+	inline float Calc(const float x0,const float x1)
 	{
 		float h9x0=h9*x0;
 		float h7x0=h7*x0;

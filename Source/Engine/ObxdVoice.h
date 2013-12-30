@@ -67,6 +67,8 @@ public:
 
 	float envpitchmod;
 
+	bool fourpole;
+
 
 	bool stabguard;
 
@@ -81,6 +83,7 @@ public:
 		: ap(),
 		ng()
 	{
+		fourpole = false;
 		legatoMode = 0;
 		brightCoef =briHold= 1;
 		envpitchmod = 0;
@@ -151,8 +154,10 @@ public:
 		if(Oversample)
 		{
 			x2=  oscpsw;
-			x2 = flt.Apply(x2*2,(cutoffcalc+cutoffwas)*0.5);
-			x2 = x2 - tptlpupw(d1,x2,20,flt.sampleRateInv);
+			if(fourpole)
+			x2 = flt.Apply4Pole(x2*2,(cutoffcalc+cutoffwas)*0.5);
+			else
+				x2 = flt.Apply(x2*2,(cutoffcalc+cutoffwas)*0.5);
 			x2 = tptpc(d2,x2,brightCoef);
 			//x2 /= (filterDrive);
 			x2 *= (env+envelopewas)*0.5;
@@ -162,14 +167,19 @@ public:
 		if(!Oversample)
 		{
 			x1 = oscps;
-			x1 = flt.Apply(x1,(cutoffcalc)); 
+			if(fourpole)
+			x1 = flt.Apply4Pole(x1,(cutoffcalc)); 
+			else
+				x1 = flt.Apply(x1,(cutoffcalc)); 
 
 		}
 		else
 		{
-			x1 = flt.Apply(2*ap.getInterp(oscps),(cutoffcalc)); 
+			if(fourpole)
+			x1 = flt.Apply4Pole(2*ap.getInterp(oscps),(cutoffcalc)); 
+			else
+				x1 = flt.Apply(2*ap.getInterp(oscps),(cutoffcalc)); 
 		}
-		x1 = x1 - tptlpupw(d1 , x1 , 20 , flt.sampleRateInv);
 		x1 = tptpc(d2,x1,brightCoef);
 		x1 *= (env);
 		*(ptr)=x1;
