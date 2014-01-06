@@ -12,6 +12,7 @@
 #define PLUGINPROCESSOR_H_INCLUDED
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Engine\SynthEngine.h"
+#include <stack>
 
 //==============================================================================
 /**
@@ -36,6 +37,9 @@ public:
 	
 
 	MidiMessage* nextMidi,*midiMsg;
+	std::stack<MidiMessage> sustain;
+	bool sustainOn;
+	
 	bool hasMidiMessage;
     int midiEventPos;
 	void ObxdAudioProcessor::processMidiPerSample(MidiBuffer::Iterator* iter,const int samplePos);

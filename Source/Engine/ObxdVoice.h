@@ -53,6 +53,8 @@ public:
 	float cutoffwas,envelopewas;
 
 	float lfoIn;
+	float lfoVibratoIn;
+
 	float pitchWheel;
 	float pitchWheelAmt;
 	bool pitchWheelOsc2Only;
@@ -83,6 +85,7 @@ public:
 		: ap(),
 		ng()
 	{
+		lfoVibratoIn=0;
 		fourpole = false;
 		legatoMode = 0;
 		brightCoef =briHold= 1;
@@ -110,8 +113,8 @@ public:
 		FenvDetune = Random::getSystemRandom().nextFloat()-0.5;
 		FltDetune = Random::getSystemRandom().nextFloat()-0.5;
 		PortaDetune =Random::getSystemRandom().nextFloat()-0.5;
-		lenvd=new DelayLine(Samples);
-		fenvd=new DelayLine(Samples);
+		lenvd=new DelayLine(Samples*2);
+		fenvd=new DelayLine(Samples*2);
 	}
 	~ObxdVoice()
 	{
@@ -128,14 +131,14 @@ public:
 		//both envelopes needs a delay equal to osc internal delay
 		float envm = fenv.processSample();
 		fenvd->feedDelay(envm);
-		float cutoffcalc = jmin(getPitch((lfof?lfoIn*lfoa1:0)+cutoff+FltDetune*FltDetAmt+ fenvamt*fenvd->getDelayedSample() -45 + (fltKF ?ptNote+30:0)), (flt.SampleRate*0.5f-120.0f));
+		float cutoffcalc = jmin(getPitch((lfof?lfoIn*lfoa1:0)+cutoff+FltDetune*FltDetAmt+ fenvamt*fenvd->getDelayedSample() -45 + (fltKF ?ptNote+40:0)), (flt.SampleRate*0.5f-120.0f));
 		lenvd->feedDelay(env.processSample());
 
 		osc.pw1 = lfopw1?lfoIn*lfoa2:0;
 		osc.pw2 = lfopw2?lfoIn*lfoa2:0;
 
-		osc.pto1 =   (!pitchWheelOsc2Only? (pitchWheel*pitchWheelAmt):0 ) + ( lfoo1?lfoIn*lfoa1:0);
-		osc.pto2 =  (pitchWheel *pitchWheelAmt) + (lfoo2?lfoIn*lfoa1:0) + (envpitchmod * envm);
+		osc.pto1 =   (!pitchWheelOsc2Only? (pitchWheel*pitchWheelAmt):0 ) + ( lfoo1?lfoIn*lfoa1:0) + lfoVibratoIn;
+		osc.pto2 =  (pitchWheel *pitchWheelAmt) + (lfoo2?lfoIn*lfoa1:0) + (envpitchmod * envm) + lfoVibratoIn;
 		//if(lfopw1)
 		//{
 		//filtinput = 2*upff->processUpsamplingFiltreing(filtinput);
@@ -155,9 +158,9 @@ public:
 		{
 			x2=  oscpsw;
 			if(fourpole)
-			x2 = flt.Apply4Pole(x2*2,(cutoffcalc+cutoffwas)*0.5);
+			x2 = flt.Apply4Pole(x2,(cutoffcalc+cutoffwas)*0.5);
 			else
-				x2 = flt.Apply(x2*2,(cutoffcalc+cutoffwas)*0.5);
+				x2 = flt.Apply(x2,(cutoffcalc+cutoffwas)*0.5);
 			x2 = tptpc(d2,x2,brightCoef);
 			//x2 /= (filterDrive);
 			x2 *= (env+envelopewas)*0.5;
@@ -176,14 +179,13 @@ public:
 		else
 		{
 			if(fourpole)
-			x1 = flt.Apply4Pole(2*ap.getInterp(oscps),(cutoffcalc)); 
+			x1 = flt.Apply4Pole(ap.getInterp(oscps),(cutoffcalc)); 
 			else
-				x1 = flt.Apply(2*ap.getInterp(oscps),(cutoffcalc)); 
+				x1 = flt.Apply(ap.getInterp(oscps),(cutoffcalc)); 
 		}
 		x1 = tptpc(d2,x1,brightCoef);
 		x1 *= (env);
 		*(ptr)=x1;
-
 
 		//*(ptr+1)=x1;
 		//

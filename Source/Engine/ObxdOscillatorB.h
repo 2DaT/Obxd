@@ -36,6 +36,10 @@ private:
 	//delay line implements fixed sample delay
 	DelayLine *del1,*del2;
 	DelayLine *flt1,*flt2; 
+	DelayLine *xmodd,*pastXmod;
+	DelayLineBoolean *syncd;
+	DelayLine *syncFracd;
+	DelayLine *cvd;
 	Random wn;
 	SawOsc o1s,o2s;
 	PulseOsc o1p,o2p;
@@ -119,6 +123,11 @@ public:
 		del2 = new DelayLine(hsam);
 		flt1 = new DelayLine(hsam);
 		flt2 = new DelayLine(hsam);
+		xmodd = new DelayLine(hsam);
+		pastXmod = new DelayLine(hsam);
+		syncd = new DelayLineBoolean(hsam);
+		syncFracd =  new DelayLine(hsam);
+		cvd = new DelayLine(hsam);
 		//for(int i = 0 ; i < 
 		for(int i = 0 ; i < n;i++)
 		{
@@ -135,10 +144,15 @@ public:
 		delete flt2;
 		delete del1;
 		delete del2;
+		delete xmodd;
+		delete pastXmod;
 		delete buffer1;
 		delete buffer2;
 		delete dbuffer1;
 		delete dbuffer2;
+		delete cvd;
+		delete syncd;
+		delete syncFracd;
 	}
 	void setSampleRate(float sr)
 	{
@@ -173,29 +187,26 @@ public:
 		pw1w = pwcalc;
 
 		hsr &= hardSync;
-
-		//float rxm = (osc1Saw? o1s.getValueFast(x1) :((!osc1Pul)?o1t.getValueFast(x1):0)) + (osc1Pul ? o1p.getValueFast(x1,pwcalc):0);
-		float rxm=0;
+		syncd->feedDelay(hsr);
+		syncFracd ->feedDelay(hsfrac);
+		hsr = syncd->getDelayedSample();
+		hsfrac = syncFracd->getDelayedSample();
 
 		if(osc1Pul)
 		{
 			osc1mix += o1p.getValue(x1,pwcalc) + o1p.aliasReduction();
-			rxm+=o1p.getValueFast(x1,pwcalc);
 		}
 		if(osc1Saw)
 		{
 			osc1mix += o1s.getValue(x1) + o1s.aliasReduction();
-			rxm+=o1s.getValueFast(x1);
 		}
 		else if(!osc1Pul)
 		{
 			osc1mix = o1t.getValue(x1) + o1t.aliasReduction();
-			rxm = o1t.getValueFast(x1);
 		}
 
-
-		pitch2 = getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ rxm *xmod + tune + oct + totalDetune +totalDetune*osc2Factor);
-
+		cvd->feedDelay( getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct + totalDetune +totalDetune*osc2Factor));
+		pitch2 = cvd->getDelayedSample();
 
 
 		if(pitch2>21000)
@@ -228,7 +239,8 @@ public:
 			float fracMaster = (fs * hsfrac);
 			x2 =fracMaster;
 		}
-
+		xmodd ->feedDelay(osc1mix);
+		osc1mix = xmodd->getDelayedSample();
 
 		if(osc2Pul)
 			osc2mix += o2p.getValue(x2,pwcalc) + o2p.aliasReduction();

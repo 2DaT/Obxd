@@ -226,7 +226,7 @@ c:\VST_Workshop\VstHost\vsthost.exe</Command>
       <ProgramDataBaseFileName>$(IntDir)\</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <FloatingPointModel>Fast</FloatingPointModel>
       <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -288,6 +288,8 @@ c:\VST_Workshop\VstHost\vsthost.exe</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <FloatingPointExceptions>false</FloatingPointExceptions>
       <StringPooling>true</StringPooling>
+      <OmitFramePointers>true</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -1516,6 +1518,7 @@ c:\VST_Workshop\VstHost\vsthost.exe</Command>
     <ClInclude Include="..\..\Source\Engine\ObxdVoice.h" />
     <ClInclude Include="..\..\Source\Engine\Params.h" />
     <ClInclude Include="..\..\Source\Engine\ParamsEnum.h" />
+    <ClInclude Include="..\..\Source\Engine\ParamSmoother.h" />
     <ClInclude Include="..\..\Source\Engine\PulseOsc.h" />
     <ClInclude Include="..\..\Source\Engine\SawOsc.h" />
     <ClInclude Include="..\..\Source\Engine\SynthEngine.h" />

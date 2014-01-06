@@ -9,11 +9,16 @@ private:
 	VoiceQueue vq;
 	int totalvc;
 	bool wasUni;
-	bool awaitingkeys[110];
+	bool awaitingkeys[129];
+	int priorities[129];
 	Decimator9 left,right;
+	int asPlayedCounter;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Motherboard)
 public:
-	Lfo mlfo;
+	bool asPlayedMode;
+	Lfo mlfo,vibratoLfo;
+	float vibratoAmount;
+
 	float Volume;
 	float* pannings;
 	ObxdVoice** voices;
@@ -22,14 +27,20 @@ public:
 	bool Oversample;
 	Motherboard()
 	{
-		for(int i = 0 ; i < 110 ; i++)
+		asPlayedMode = false;
+		asPlayedCounter = 0;
+		for(int i = 0 ; i < 129 ; i++)
 		{
 			awaitingkeys[i] = false;
+			priorities[i] = 0;
 		}
+		vibratoAmount = 0;
 		Oversample=false;
 		left = Decimator9();
 		right =  Decimator9();
 		mlfo= Lfo();
+		vibratoLfo=Lfo();
+		vibratoLfo.waveForm = 1;
 		uni = false;
 		wasUni = false;
 		Volume=0;
@@ -70,6 +81,7 @@ public:
 	void setSampleRate(float sr)
 	{
 		mlfo.setSamlpeRate(sr);
+		vibratoLfo.setSamlpeRate(sr);
 		for(int i = 0 ; i < MAX_VOICES;++i)
 		{
 			voices[i]->setSampleRate(sr);
@@ -77,37 +89,55 @@ public:
 	}
 	void setNoteOn(int noteNo)
 	{
+		asPlayedCounter++;
+		priorities[noteNo] = asPlayedCounter;
 		bool processed=false;
 		if (wasUni != uni)
 			unisonOn();
 		if (uni)
 		{
-			int minmidi = 110;
-			for(int i = 0 ; i < totalvc; i++)
+			if(!asPlayedMode)
 			{
-				ObxdVoice* p = vq.GetNext();
-				if(p->midiIndx < minmidi && p->Active)
+				int minmidi = 129;
+				for(int i = 0 ; i < totalvc; i++)
 				{
-					minmidi = p->midiIndx;
+					ObxdVoice* p = vq.GetNext();
+					if(p->midiIndx < minmidi && p->Active)
+					{
+						minmidi = p->midiIndx;
+					}
 				}
-			}
-			if(minmidi < noteNo)
-			{
-				awaitingkeys[noteNo] = true;
+				if(minmidi < noteNo)
+				{
+					awaitingkeys[noteNo] = true;
+				}
+				else
+				{
+					for(int i = 0 ; i < totalvc;i++)
+					{
+						ObxdVoice* p = vq.GetNext();
+						if(p->midiIndx > noteNo && p->Active)
+						{
+							awaitingkeys[p->midiIndx] = true;
+						}
+						p->NoteOn(noteNo);
+					}
+				}
+				processed = true;
 			}
 			else
 			{
-				for(int i = 0 ; i < totalvc;i++)
+				for(int i = 0 ; i < totalvc; i++)
 				{
 					ObxdVoice* p = vq.GetNext();
-					if(p->midiIndx > noteNo && p->Active)
+					if(p->Active)
 					{
 						awaitingkeys[p->midiIndx] = true;
 					}
 					p->NoteOn(noteNo);
 				}
+				processed = true;
 			}
-			processed = true;
 		}
 		else
 		{
@@ -125,25 +155,44 @@ public:
 		if(!processed)
 		{
 			//
-			int maxmidi = 0;
-			ObxdVoice* highestVoiceAvalible = NULL;
-			for(int i = 0 ; i < totalvc; i++)
+			if(!asPlayedMode)
 			{
-				ObxdVoice* p = vq.GetNext();
-				if(p->midiIndx > maxmidi)
+				int maxmidi = 0;
+				ObxdVoice* highestVoiceAvalible = NULL;
+				for(int i = 0 ; i < totalvc; i++)
 				{
-					maxmidi = p->midiIndx;
-					highestVoiceAvalible = p;
+					ObxdVoice* p = vq.GetNext();
+					if(p->midiIndx > maxmidi)
+					{
+						maxmidi = p->midiIndx;
+						highestVoiceAvalible = p;
+					}
 				}
-			}
-			if(maxmidi < noteNo)
-			{
-				awaitingkeys[noteNo] = true;
+				if(maxmidi < noteNo)
+				{
+					awaitingkeys[noteNo] = true;
+				}
+				else
+				{
+					highestVoiceAvalible->NoteOn(noteNo);
+					awaitingkeys[maxmidi] = true;
+				}
 			}
 			else
 			{
-				highestVoiceAvalible->NoteOn(noteNo);
-				awaitingkeys[maxmidi] = true;
+				int minPriority = INT_MAX;
+				ObxdVoice* minPriorityVoice = NULL;
+				for(int i = 0 ; i < totalvc; i++)
+				{
+					ObxdVoice* p = vq.GetNext();
+					if(priorities[p->midiIndx] <minPriority)
+					{
+						minPriority = priorities[p->midiIndx];
+						minPriorityVoice = p;
+					}
+				}
+				awaitingkeys[minPriorityVoice->midiIndx] = true;
+				minPriorityVoice->NoteOn(noteNo);
 			}
 		}
 		wasUni = uni;
@@ -158,12 +207,27 @@ public:
 		awaitingkeys[noteNo] = false;
 		int reallocKey = 0;
 
-		while(reallocKey <= 109 &&(!awaitingkeys[reallocKey]))
+		if(!asPlayedMode)
 		{
-			reallocKey++;
+			while(reallocKey < 129 &&(!awaitingkeys[reallocKey]))
+			{
+				reallocKey++;
+			}
 		}
-
-		if(reallocKey !=110)
+		else
+		{
+			reallocKey = 129;
+			int maxPriority = INT_MIN;
+			for(int i = 0 ; i < 129;i++)
+			{
+				if(awaitingkeys[i] && (maxPriority < priorities[i]))
+				{
+					reallocKey = i;
+					maxPriority = priorities[i];
+				}
+			}
+		}
+		if(reallocKey !=129)
 		{
 			for(int i = 0 ; i < totalvc; i++)
 			{
@@ -203,13 +267,16 @@ public:
 	void processSample(float* sm1,float* sm2)
 	{
 		mlfo.update();
+		vibratoLfo.update();
 		float vl=0,vr=0;
 		float vlo = 0 , vro = 0 ;
 		float lfovalue = mlfo.getVal();
+		float viblfo = vibratoLfo.getVal() * vibratoAmount;
 		for(int i = 0 ; i < totalvc;i++)
 		{
 			float mem[2] = {0,0};
 			voices[i]->lfoIn=lfovalue;
+			voices[i]->lfoVibratoIn=viblfo;
 			(voices[i]->ProcessSample(mem));
 			float x1 = mem[0];
 			vl+=x1*(1-pannings[i]);
@@ -225,8 +292,8 @@ public:
 		{
 
 			//Variables are swapped!
-			vl = 0.5*left.Calc(vlo,vl);
-			vr = 0.5*right.Calc(vro,vr);
+			vl = left.Calc(vlo,vl);
+			vr = right.Calc(vro,vr);
 		}
 		*sm1 = vl*Volume;
 		*sm2 = vr*Volume;

@@ -101,6 +101,9 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 	filterDetuneKnob = addTinyKnob(40,165,ownerFilter,FILTERDER,"Flt");
 	envelopeDetuneKnob = addTinyKnob(70,165,ownerFilter,ENVDER,"Env");
 	portamentoDetuneKnob = addTinyKnob(100,165,ownerFilter,PORTADER,"Port");
+
+	bendLfoRateKnob = addNormalKnob(240,280,ownerFilter,BENDLFORATE,"ModRate");
+
 	placeLabel(35,150,"Voice variance");
 	placeLabel(645,5 , "Filter envelope");
 	placeLabel(645,75,"Loudness envelope");
@@ -318,6 +321,8 @@ void ObxdAudioProcessorEditor::sliderValueChanged (Slider* c)
 		handleSParam(tuneKnob,TUNE)
 		handleSParam(brightnessKnob,BRIGHTNESS)
 		handleSParam(envPitchModKnob,ENVPITCH)
+
+		handleSParam(bendLfoRateKnob,BENDLFORATE)
 		//magic crystal
 	{};
 
@@ -379,6 +384,7 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 		rn(lfoAmt1Knob,LFO1AMT)
 		rn(lfoAmt2Knob,LFO2AMT)
 		rn(tuneKnob,TUNE)
+		rn(bendLfoRateKnob,BENDLFORATE)
 		//buttons
 		rn(hardSyncButton,OSC2HS)
 		rn(osc1SawButton,OSC1Saw)

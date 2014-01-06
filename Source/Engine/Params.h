@@ -24,6 +24,7 @@ public:
 		values[OSC2MIX]=1;
 		values[OSC1Saw]=1;
 		values[OSC2Saw]=1;
+		values[BENDLFORATE]=0.6;
 
 //		values[FILTER_DRIVE]= 0.01;
 		values[PAN1]=0.5;

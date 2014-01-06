@@ -7,6 +7,7 @@ private:
 	float s, sq, sh;
     Random rg;
 	float SampleRate;
+	float SampleRateInv;
 public:
 	float Frequency;
 	int waveForm;
@@ -31,11 +32,11 @@ public:
 	void setSamlpeRate(float sr)
 	{
 		SampleRate=sr;
+		SampleRateInv = 1 / SampleRate;
 	}
-#define fastsin(x) ((( x + ( x * (-x * x / 6)))))
 	inline void update()
 	{
-		phase+=((Frequency / SampleRate * float_Pi));
+		phase+=((Frequency * SampleRateInv * float_Pi*2));
 		sq = (phase>0?1:-1);
 		s = sin(phase);
 		if(phase > float_Pi)

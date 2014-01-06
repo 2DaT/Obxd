@@ -2813,6 +2813,9 @@
     <ClInclude Include="..\..\Source\Gui\ButtonList.h">
       <Filter>Obxd\Source\Gui</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Engine\ParamSmoother.h">
+      <Filter>Obxd\Source\Synth</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_basics\juce_module_info">

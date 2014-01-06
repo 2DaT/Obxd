@@ -36,7 +36,8 @@ public:
 	{
 		SampleRate = sr;
 		sampleRateInv = 1/SampleRate;
-		rcor = 560 /sr ;
+		//rcor = 560 /sr ;
+		rcor = (480.0 / (SampleRate/44000) / 44000);
 	}
 	inline void setResonance(float res)
 	{

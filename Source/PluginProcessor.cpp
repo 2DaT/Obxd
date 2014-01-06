@@ -10,11 +10,13 @@ It contains the basic startup code for a Juce application.
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "Engine\Params.h"
+#include <stack>
 //==============================================================================
 #define S(T) (juce::String(T))
 Random rnd;
 ObxdAudioProcessor::ObxdAudioProcessor()
 {
+	sustainOn = false;
 	parameters = ObxdParams();
 	synth = new SynthEngine();
 	initAllParams();
@@ -52,6 +54,12 @@ void ObxdAudioProcessor::setParameter (int index, float newValue)
 	parameters.values[index] = newValue;
 	switch(index)
 	{
+	case ASPLAYEDALLOCATION:
+		synth->procAsPlayedAlloc(newValue);
+		break;
+	case BENDLFORATE:
+		synth->procModWheelFrequency(newValue);
+		break;
 	case FOURPOLE:
 		synth->processFourPole(newValue);
 		break;
@@ -251,6 +259,10 @@ const String ObxdAudioProcessor::getParameterName (int index)
 {
 	switch(index)
 	{
+	case ASPLAYEDALLOCATION:
+		return S("AsPlayedAllocation");
+	case BENDLFORATE:
+		return S("VibratoRate");
 	case FOURPOLE:
 		return S("FourPole");
 	case LEGATOMODE:
@@ -484,13 +496,32 @@ inline void ObxdAudioProcessor::processMidiPerSample(MidiBuffer::Iterator* iter,
 		}
 		if (midiMsg->isNoteOff())
 		{
+			if(!sustainOn)
 			synth->procNoteOff(midiMsg->getNoteNumber());
+			else
+				sustain.push(*midiMsg);
 		}
 		if(midiMsg->isPitchWheel())
 		{
 			// [0..16383] center = 8192;
 			synth->procPitchWheel((midiMsg->getPitchWheelValue()-8192) / 8192.0);
 		}
+		if(midiMsg->getControllerNumber()==1)
+			synth->procModWheel(midiMsg->getControllerValue() / 127.0);
+		if(midiMsg->isSustainPedalOn())
+		{
+			sustainOn = true;
+		}
+		if(midiMsg->isSustainPedalOff() || midiMsg->isAllNotesOff())
+		{
+			sustainOn = false;
+			while(!sustain.empty() )
+			{
+				synth->procNoteOff(sustain.top().getNoteNumber());
+				sustain.pop();
+			}
+		}
+
 	}
 }
 bool ObxdAudioProcessor::getNextEvent(MidiBuffer::Iterator* iter,const int samplePos)
