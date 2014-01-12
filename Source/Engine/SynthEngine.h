@@ -45,13 +45,27 @@ public:
 	{
 		synth->asPlayedMode = val > 0.5;
 	}
-	void procNoteOn(int noteNo)
+	void procNoteOn(int noteNo,float velocity)
 	{
-		synth->setNoteOn(noteNo);
+		synth->setNoteOn(noteNo,velocity);
 	}
 	void procNoteOff(int noteNo)
 	{
 		synth->setNoteOff(noteNo);
+	}
+	void procAmpVelocityAmount(float val)
+	{
+		for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		{
+			synth->voices[i]->vamp= val;
+		}
+	}
+	void procFltVelocityAmount(float val)
+	{
+		for(int i = 0 ; i < synth->MAX_VOICES;i++)
+		{
+			synth->voices[i]->vflt= val;
+		}
 	}
 	void procModWheel(float val)
 	{
@@ -64,6 +78,7 @@ public:
 	void procModWheelFrequency(float val)
 	{
 		synth->vibratoLfo.Frequency = logsc(val,3,10);
+		synth->vibratoEnabled = val>0.05;
 	}
 	void procPitchWheel(float val)
 	{

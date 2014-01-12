@@ -63,7 +63,7 @@ public:
 		float S = (lpc*lpc*lpc*s1 + lpc*lpc * s2 + lpc*s3 +s4)*correct;
 		float G = lpc*lpc*lpc*lpc;
 		float y = (sample - R24 * S) / (1 + R24*G);
-
+		//volume compensation
 		return y;
 	}
 	inline float nrfdb(float y,float g1,float g2,float x)
@@ -108,7 +108,11 @@ public:
 
 			float y0 = NR24(sample,g,lpc);
 
-			float y1= tptpc(s1,y0,g);
+			double v = (y0 - s1) * g / (1 + g);
+			double res = v + s1;
+			s1 = res + v;
+			s1 =atan(s1*rcor)/rcor;
+			float y1= res;
 			float y2 = tptpc(s2,y1,g);
 			float y3 = tptpc(s3,y2,g);
 			float y4 = tptpc(s4,y3,g);
@@ -128,7 +132,7 @@ public:
 			//float y4 = v + s4;
 			//s4 = y4 + v;
 
-			return y4;
+			return y4 * (1 + R24 * 0.67);
 	}
 	inline float Apply(float sample,float g)
         {

@@ -5,12 +5,18 @@ class ObxdParams
 {
 public:
 	float* values;
+	String name;
 	ObxdParams()
 	{
+		name = "Default";
 		values = new float[PARAM_COUNT];
-		for(int i = 0 ; i < PARAM_COUNT;++i)
+		setDefaultValues();
+	}
+	void setDefaultValues()
+	{
+		for(int k = 0 ; k < PARAM_COUNT;++k)
 		{
-			values[i] = 0.0f;
+			values[k] = 0.0f;
 		}
 		values[VOICE_COUNT] = 1.0f;
 		values[BRIGHTNESS]=1.0f;
@@ -36,4 +42,9 @@ public:
 		values[PAN7]=0.5;
 		values[PAN8]=0.5;
 	}
+	~ObxdParams()
+	{
+		delete values;
+	}
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdParams)
 };

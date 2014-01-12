@@ -1512,7 +1512,9 @@ c:\VST_Workshop\VstHost\vsthost.exe</Command>
     <ClInclude Include="..\..\Source\Engine\Filter.h" />
     <ClInclude Include="..\..\Source\Engine\FirFilter.h" />
     <ClInclude Include="..\..\Source\Engine\Lfo.h" />
+    <ClInclude Include="..\..\Source\Engine\midiMap.h" />
     <ClInclude Include="..\..\Source\Engine\Motherboard.h" />
+    <ClInclude Include="..\..\Source\Engine\ObxdBank.h" />
     <ClInclude Include="..\..\Source\Engine\ObxdOscillator.h" />
     <ClInclude Include="..\..\Source\Engine\ObxdOscillatorB.h" />
     <ClInclude Include="..\..\Source\Engine\ObxdVoice.h" />

@@ -18,6 +18,7 @@ public:
 	bool asPlayedMode;
 	Lfo mlfo,vibratoLfo;
 	float vibratoAmount;
+	bool vibratoEnabled;
 
 	float Volume;
 	float* pannings;
@@ -27,6 +28,7 @@ public:
 	bool Oversample;
 	Motherboard()
 	{
+		vibratoEnabled = true;
 		asPlayedMode = false;
 		asPlayedCounter = 0;
 		for(int i = 0 ; i < 129 ; i++)
@@ -87,7 +89,7 @@ public:
 			voices[i]->setSampleRate(sr);
 		}
 	}
-	void setNoteOn(int noteNo)
+	void setNoteOn(int noteNo,float velocity)
 	{
 		asPlayedCounter++;
 		priorities[noteNo] = asPlayedCounter;
@@ -120,7 +122,7 @@ public:
 						{
 							awaitingkeys[p->midiIndx] = true;
 						}
-						p->NoteOn(noteNo);
+						p->NoteOn(noteNo,velocity);
 					}
 				}
 				processed = true;
@@ -134,7 +136,7 @@ public:
 					{
 						awaitingkeys[p->midiIndx] = true;
 					}
-					p->NoteOn(noteNo);
+					p->NoteOn(noteNo,velocity);
 				}
 				processed = true;
 			}
@@ -146,7 +148,7 @@ public:
 				ObxdVoice* p = vq.GetNext();
 				if (!p->Active)
 				{
-					p->NoteOn(noteNo);
+					p->NoteOn(noteNo,velocity);
 					processed = true;
 				}
 			}
@@ -174,7 +176,7 @@ public:
 				}
 				else
 				{
-					highestVoiceAvalible->NoteOn(noteNo);
+					highestVoiceAvalible->NoteOn(noteNo,velocity);
 					awaitingkeys[maxmidi] = true;
 				}
 			}
@@ -192,7 +194,7 @@ public:
 					}
 				}
 				awaitingkeys[minPriorityVoice->midiIndx] = true;
-				minPriorityVoice->NoteOn(noteNo);
+				minPriorityVoice->NoteOn(noteNo,velocity);
 			}
 		}
 		wasUni = uni;
@@ -234,7 +236,7 @@ public:
 				ObxdVoice* p = vq.GetNext();
 				if((p->midiIndx == noteNo) && (p->Active))
 				{
-					p->NoteOn(reallocKey);
+					p->NoteOn(reallocKey,-0.5);
 					awaitingkeys[reallocKey] = false;
 				}
 
@@ -271,7 +273,7 @@ public:
 		float vl=0,vr=0;
 		float vlo = 0 , vro = 0 ;
 		float lfovalue = mlfo.getVal();
-		float viblfo = vibratoLfo.getVal() * vibratoAmount;
+		float viblfo = vibratoEnabled?(vibratoLfo.getVal() * vibratoAmount):0;
 		for(int i = 0 ; i < totalvc;i++)
 		{
 			float mem[2] = {0,0};

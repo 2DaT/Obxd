@@ -14,6 +14,7 @@ private:
 	float sampleRateInv;
 	float Volume;
 	float port;
+	float velocityValue;
 
 	UpsampleFIRFilter* upff;
 	float d1,d2;
@@ -27,6 +28,8 @@ public:
 	Filter flt;
 
 	Random ng;
+
+	float vamp,vflt;
 
 	float cutoff;
 	float fenvamt;
@@ -85,6 +88,8 @@ public:
 		: ap(),
 		ng()
 	{
+		vamp=vflt=0;
+		velocityValue=0;
 		lfoVibratoIn=0;
 		fourpole = false;
 		legatoMode = 0;
@@ -129,14 +134,13 @@ public:
 		float ptNote  =tptlpupw(prtst, midiIndx-81, porta * (1+PortaDetune*PortaDetuneAmt),sampleRateInv);
 		osc.notePlaying = ptNote;
 		//both envelopes needs a delay equal to osc internal delay
-		float envm = fenv.processSample();
+		float envm = fenv.processSample() * (1 - (1-velocityValue)*vflt);
 		fenvd->feedDelay(envm);
 		float cutoffcalc = jmin(getPitch((lfof?lfoIn*lfoa1:0)+cutoff+FltDetune*FltDetAmt+ fenvamt*fenvd->getDelayedSample() -45 + (fltKF ?ptNote+40:0)), (flt.SampleRate*0.5f-120.0f));
-		lenvd->feedDelay(env.processSample());
+		lenvd->feedDelay(env.processSample() * (1 - (1-velocityValue)*vamp));
 
 		osc.pw1 = lfopw1?lfoIn*lfoa2:0;
 		osc.pw2 = lfopw2?lfoIn*lfoa2:0;
-
 		osc.pto1 =   (!pitchWheelOsc2Only? (pitchWheel*pitchWheelAmt):0 ) + ( lfoo1?lfoIn*lfoa1:0) + lfoVibratoIn;
 		osc.pto2 =  (pitchWheel *pitchWheelAmt) + (lfoo2?lfoIn*lfoa1:0) + (envpitchmod * envm) + lfoVibratoIn;
 		//if(lfopw1)
@@ -225,8 +229,10 @@ public:
 		Oversample = !Oversample;
 		brightCoef = tan(jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi)* flt.sampleRateInv);
 	}
-	void NoteOn(int mididx)
+	void NoteOn(int mididx,float velocity)
 	{
+		if(velocity!=-0.5)
+		velocityValue = velocity;
 		//osc.midiIndex = mididx-81;
 		midiIndx = mididx;
 		if((!Active)||(legatoMode&1))

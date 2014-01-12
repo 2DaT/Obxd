@@ -2816,6 +2816,12 @@
     <ClInclude Include="..\..\Source\Engine\ParamSmoother.h">
       <Filter>Obxd\Source\Synth</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Engine\midiMap.h">
+      <Filter>Obxd\Source\Synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Engine\ObxdBank.h">
+      <Filter>Obxd\Source\Synth</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\JuceLibraryCode\modules\juce_audio_basics\juce_module_info">

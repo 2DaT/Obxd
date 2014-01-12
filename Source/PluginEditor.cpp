@@ -82,6 +82,11 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 	tuneKnob = addTinyKnob(45,105,ownerFilter,TUNE,"Tune");
 	voiceDetuneKnob =addNormalKnob(90,85,ownerFilter,UDET,"VoiceDet");
 
+	veloAmpEnvKnob = addNormalKnob(340,290,ownerFilter,VAMPENV,"VAE");
+	veloFltEnvKnob = addNormalKnob(390,290,ownerFilter,VFLTENV,"VFE");
+	midiLearnButton = addNormalTooglableButton(440,320,ownerFilter,MIDILEARN,"LEA");
+	midiUnlearnButton = addNormalTooglableButton(495,320,ownerFilter,UNLEARN,"UNL");
+
 	placeLabel(42,205,"Voice pannings");
 
 	pan1Knob = addTinyKnob(35,220,ownerFilter,PAN1,"1");
@@ -97,6 +102,7 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 	placeLabel(330,220,"BendControls");
 	bendOsc2OnlyButton = addNormalTooglableButton(340,240,ownerFilter,BENDOSC2,"Osc2");
 	bendRangeButton = addNormalTooglableButton(340,265,ownerFilter,BENDRANGE,"12");
+	asPlayedAllocButton = addNormalTooglableButton(390,265,ownerFilter,ASPLAYEDALLOCATION,"APA");
 
 	filterDetuneKnob = addTinyKnob(40,165,ownerFilter,FILTERDER,"Flt");
 	envelopeDetuneKnob = addTinyKnob(70,165,ownerFilter,ENVDER,"Env");
@@ -254,6 +260,9 @@ void ObxdAudioProcessorEditor::buttonClicked(Button * b)
 		handleBParam(bendOsc2OnlyButton,BENDOSC2)
 		handleBParam(bendRangeButton,BENDRANGE)
 		handleBParam(fourPoleButton,FOURPOLE)
+		handleBParam(asPlayedAllocButton,ASPLAYEDALLOCATION)
+		handleBParam(midiLearnButton,MIDILEARN)
+		handleBParam(midiUnlearnButton,UNLEARN)
 	{};
 
 }
@@ -323,6 +332,8 @@ void ObxdAudioProcessorEditor::sliderValueChanged (Slider* c)
 		handleSParam(envPitchModKnob,ENVPITCH)
 
 		handleSParam(bendLfoRateKnob,BENDLFORATE)
+		handleSParam(veloAmpEnvKnob,VAMPENV)
+		handleSParam(veloFltEnvKnob,VFLTENV)
 		//magic crystal
 	{};
 
@@ -348,7 +359,7 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 	float pr[PARAM_COUNT];
 	filter->getCallbackLock().enter();
 	for(int i = 0 ; i < PARAM_COUNT;++i)
-		pr[i] = filter->parameters.values[i];
+		pr[i] = filter->programs.currentProgramPtr->values[i];
 	filter->getCallbackLock().exit();
 #define rn(T,P) (T->setValue(pr[P],dontSendNotification));
 	rn(cutoffKnob,CUTOFF)
@@ -385,6 +396,8 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 		rn(lfoAmt2Knob,LFO2AMT)
 		rn(tuneKnob,TUNE)
 		rn(bendLfoRateKnob,BENDLFORATE)
+		rn(veloAmpEnvKnob,VAMPENV)
+		rn(veloFltEnvKnob,VFLTENV)
 		//buttons
 		rn(hardSyncButton,OSC2HS)
 		rn(osc1SawButton,OSC1Saw)
@@ -428,6 +441,9 @@ void ObxdAudioProcessorEditor::changeListenerCallback (ChangeBroadcaster* source
 		rn(voiceSwitch,VOICE_COUNT)
 		rn(legatoSwitch,LEGATOMODE)
 		rn(octaveSwitch,OCTAVE)
+		rn(asPlayedAllocButton,ASPLAYEDALLOCATION)
+		rn(midiLearnButton,MIDILEARN)
+		rn(midiUnlearnButton,UNLEARN)
 
 }
 void ObxdAudioProcessorEditor::paint (Graphics& g)
