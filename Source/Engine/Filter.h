@@ -64,7 +64,7 @@ public:
 		float G = lpc*lpc*lpc*lpc;
 		float y = (sample - R24 * S) / (1 + R24*G);
 		//volume compensation
-		return y;
+		return y + 1e-8;
 	}
 	inline float nrfdb(float y,float g1,float g2,float x)
 	{

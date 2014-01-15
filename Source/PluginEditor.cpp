@@ -174,18 +174,18 @@ ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
 Knob* ObxdAudioProcessorEditor::addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name)
 {
 	Knob* knob = new Knob();
-	Label* knobl = new Label();
+	//Label* knobl = new Label();
 	knob->setSliderStyle(Slider::RotaryVerticalDrag);
 	knob->setTextBoxStyle(knob->NoTextBox,true,0,0);
 	knob->setRange(0,1);
 	addAndMakeVisible(knob);
-	addAndMakeVisible(knobl);
-	knob->setBounds(x, y, 40,40);
+	//addAndMakeVisible(knobl);
+	knob->setBounds(x, y, 48,48);
 	knob->setValue(filter->getParameter(parameter),dontSendNotification);
-	knobl->setJustificationType(Justification::centred);
-	knobl->setInterceptsMouseClicks(false,true);
-	knobl->setBounds(x-10,y+40,60,10);
-	knobl->setText(name,dontSendNotification);
+	//knobl->setJustificationType(Justification::centred);
+	//knobl->setInterceptsMouseClicks(false,true);
+	//knobl->setBounds(x-10,y+40,60,10);
+	//knobl->setText(name,dontSendNotification);
 	knob->setTextBoxIsEditable(false);
 	knob->addListener (this);
 	return knob;

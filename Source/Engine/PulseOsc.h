@@ -32,7 +32,6 @@ public:
 	inline void processMaster(float x,float delta,bool& hardSyncReset,float& hardSyncFrac,float pulseWidth,float pulseWidthWas)
 	{
 		float summated = delta- (pulseWidth - pulseWidthWas);
-		if(summated ==0)
 		if((pw1t) && x >= 1.0f)
 		{
 			x -= 1.0f;

@@ -201,7 +201,7 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->lfoa1 = logsc(logsc(param,0,1,13),0,60,20);
+			synth->voices[i]->lfoa1 = logsc(logsc(param,0,1,60),0,60,10);
 		}
 	}
 	void processLfoOsc1(float param)
@@ -334,7 +334,7 @@ public:
 	{
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
-			synth->voices[i]->osc.osc2Det = logsc(param,0.001,0.55);
+			synth->voices[i]->osc.osc2Det = logsc(param,0.001,0.6);
 		}
 	}
 
