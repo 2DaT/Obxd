@@ -28,7 +28,7 @@ class ObxdAudioProcessorEditor  :
 						  public Slider::Listener,
 						  public Button::Listener,
 						  public ComboBox::Listener//,
-						//  public AudioProcessorListener
+						 // public AudioProcessorListener
 
 {
 public:
@@ -41,13 +41,17 @@ public:
     */
 	void changeListenerCallback (ChangeBroadcaster* source);
 	int changeListenerCallback (void*){return 0;};
+
+
+
+
 	Knob* addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name);
 	Knob* addTinyKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name);
 	void placeLabel(int x , int y,String text);
 	TooglableButton* addNormalTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name);
 	TooglableButton* addTinyTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name);
 
-	ButtonList* addNormalButtonList(int x , int y ,int width, ObxdAudioProcessor* filter,int parameter,String name);
+	ButtonList* addNormalButtonList(int x , int y ,int width, ObxdAudioProcessor* filter,int parameter,String name,Image img);
     void sliderValueChanged (Slider*);
 	void buttonClicked (Button *);
     void comboBoxChanged(ComboBox*);
@@ -67,7 +71,7 @@ public:
 		*pan1Knob,*pan2Knob,*pan3Knob,*pan4Knob,*pan5Knob,*pan6Knob,*pan7Knob,*pan8Knob,
 		*brightnessKnob,*envPitchModKnob,
 		*bendLfoRateKnob
-		,*veloAmpEnvKnob,*veloFltEnvKnob;
+		,*veloAmpEnvKnob,*veloFltEnvKnob,*transposeKnob;
 
 	TooglableButton* hardSyncButton,*osc1SawButton,*osc2SawButton,*osc1PulButton,*osc2PulButton,*filterKeyFollowButton,*unisonButton,*pitchQuantButton,
 		*filterHQButton,*filterBPBlendButton,
@@ -76,7 +80,7 @@ public:
 		*bendRangeButton,*bendOsc2OnlyButton,
 	*fourPoleButton,*asPlayedAllocButton,*midiLearnButton,*midiUnlearnButton;
 
-	ButtonList *voiceSwitch,*legatoSwitch,*octaveSwitch;
+	ButtonList *voiceSwitch,*legatoSwitch;
     //==============================================================================
     // This is just a standard Juce paint method...
 //    void paint (Graphics& g);

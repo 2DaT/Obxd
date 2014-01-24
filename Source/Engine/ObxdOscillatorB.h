@@ -205,7 +205,7 @@ public:
 			osc1mix = o1t.getValue(x1) + o1t.aliasReduction();
 		}
 
-		cvd->feedDelay( getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct + totalDetune +totalDetune*osc2Factor));
+		cvd->feedDelay( getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct +totalDetune*osc2Factor));
 		pitch2 = cvd->getDelayedSample();
 
 

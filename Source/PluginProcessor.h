@@ -19,7 +19,7 @@
 //==============================================================================
 /**
 */
-class ObxdAudioProcessor  : public AudioProcessor,
+class ObxdAudioProcessor  : public AudioProcessor, //public AudioProcessorListener,
 	 public ChangeBroadcaster
 {
 public:

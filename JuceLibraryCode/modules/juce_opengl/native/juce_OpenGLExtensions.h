@@ -89,7 +89,7 @@
     USE_FUNCTION (glUniformMatrix4fv,       void, (GLint p1, GLsizei p2, GLboolean p3, const GLfloat* p4), (p1, p2, p3, p4))
 
 #else
- #define JUCE_GL_EXTENSION_FUNCTIONS1(USE_FUNCTION) JUCE_GL_BASIC_EXTENSION_FUNCTIONS(USE_FUNCTION, EXT_FUNCTION)
+ #define JUCE_GL_EXTENSION_FUNCTIONS1(USE_FUNCTION, EXT_FUNCTION) JUCE_GL_BASIC_EXTENSION_FUNCTIONS(USE_FUNCTION, EXT_FUNCTION)
 #endif
 
 #if JUCE_USE_OPENGL_FIXED_FUNCTION
@@ -122,7 +122,7 @@ struct OpenGLExtensionFunctions
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      typedef returnType (JUCE_GL_STDCALL *type_ ## name) params; type_ ## name name;
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
    #elif JUCE_OPENGL_ES
-    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      inline static returnType name params;
+    #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      static returnType name params;
     JUCE_GL_EXTENSION_FUNCTIONS (JUCE_DECLARE_GL_FUNCTION, JUCE_DECLARE_GL_FUNCTION)
    #else
     #define JUCE_DECLARE_GL_FUNCTION(name, returnType, params, callparams)      inline static returnType name params { return ::name callparams; }

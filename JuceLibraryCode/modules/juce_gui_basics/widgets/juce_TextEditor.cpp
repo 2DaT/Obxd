@@ -556,15 +556,12 @@ public:
         }
     }
 
-    void drawSelection (Graphics& g, const Range<int> selected) const
+    void addSelection (RectangleList<float>& area, const Range<int> selected) const
     {
-        const int startX = roundToInt (indexToX (selected.getStart()));
-        const int endX   = roundToInt (indexToX (selected.getEnd()));
+        const float startX = indexToX (selected.getStart());
+        const float endX   = indexToX (selected.getEnd());
 
-        const int y = roundToInt (lineY);
-        const int nextY = roundToInt (lineY + lineHeight);
-
-        g.fillRect (startX, y, endX - startX, nextY - y);
+        area.add (startX, lineY, endX - startX, lineHeight);
     }
 
     void drawUnderline (Graphics& g, const Range<int> underline, const Colour colour) const
@@ -969,7 +966,12 @@ TextEditor::~TextEditor()
 
     textValue.removeListener (textHolder);
     textValue.referTo (Value());
-    clearInternal (0);
+
+    for (int i = 0; i < sections.size(); ++i)
+        delete sections.getUnchecked(i);
+
+    sections.clear();
+
     viewport = nullptr;
     textHolder = nullptr;
 }
@@ -1186,7 +1188,7 @@ void TextEditor::setScrollBarThickness (const int newThicknessPixels)
 //==============================================================================
 void TextEditor::clear()
 {
-    clearInternal (0);
+    clearInternal (nullptr);
     updateTextHolderSize();
     undoManager.clearUndoHistory();
 }
@@ -1203,7 +1205,7 @@ void TextEditor::setText (const String& newText,
         int oldCursorPos = caretPosition;
         const bool cursorWasAtEnd = oldCursorPos >= getTotalNumChars();
 
-        clearInternal (0);
+        clearInternal (nullptr);
         insert (newText, 0, currentFont, findColour (textColourId), 0, caretPosition);
 
         // if you're adding text with line-feeds to a single-line text editor, it
@@ -1612,25 +1614,24 @@ void TextEditor::drawContent (Graphics& g)
 
         Iterator i (sections, wordWrapWidth, passwordCharacter);
 
-        while (i.lineY + 200.0 < clip.getY() && i.next())
-        {}
-
         if (! selection.isEmpty())
         {
-            g.setColour (findColour (highlightColourId).withMultipliedAlpha (hasKeyboardFocus (true) ? 1.0f : 0.5f));
-
-            selectedTextColour = findColour (highlightedTextColourId);
-
             Iterator i2 (i);
+            RectangleList<float> selectionArea;
 
             while (i2.next() && i2.lineY < clip.getBottom())
             {
                 if (i2.lineY + i2.lineHeight >= clip.getY()
                      && selection.intersects (Range<int> (i2.indexInText, i2.indexInText + i2.atom->numChars)))
                 {
-                    i2.drawSelection (g, selection);
+                    i2.addSelection (selectionArea, selection);
                 }
             }
+
+            g.setColour (findColour (highlightColourId).withMultipliedAlpha (hasKeyboardFocus (true) ? 1.0f : 0.5f));
+            g.fillRectList (selectionArea);
+
+            selectedTextColour = findColour (highlightedTextColourId);
         }
 
         const UniformTextSection* lastSection = nullptr;

@@ -121,8 +121,12 @@ public:
 						if(p->midiIndx > noteNo && p->Active)
 						{
 							awaitingkeys[p->midiIndx] = true;
+							p->NoteOn(noteNo,-0.5);
 						}
-						p->NoteOn(noteNo,velocity);
+						else
+						{
+							p->NoteOn(noteNo,velocity);
+						}
 					}
 				}
 				processed = true;
@@ -135,8 +139,12 @@ public:
 					if(p->Active)
 					{
 						awaitingkeys[p->midiIndx] = true;
+											p->NoteOn(noteNo,-0.5);
 					}
+					else
+					{
 					p->NoteOn(noteNo,velocity);
+					}
 				}
 				processed = true;
 			}
@@ -176,7 +184,7 @@ public:
 				}
 				else
 				{
-					highestVoiceAvalible->NoteOn(noteNo,velocity);
+					highestVoiceAvalible->NoteOn(noteNo,-0.5);
 					awaitingkeys[maxmidi] = true;
 				}
 			}
@@ -194,7 +202,7 @@ public:
 					}
 				}
 				awaitingkeys[minPriorityVoice->midiIndx] = true;
-				minPriorityVoice->NoteOn(noteNo,velocity);
+				minPriorityVoice->NoteOn(noteNo,-0.5);
 			}
 		}
 		wasUni = uni;

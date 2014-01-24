@@ -37,7 +37,8 @@ public:
 		SampleRate = sr;
 		sampleRateInv = 1/SampleRate;
 		//rcor = 560 /sr ;
-		rcor = (480.0 / (SampleRate/44000) / 44000);
+		float rcrate =sqrt((44000/SampleRate));
+		rcor = (480.0 / 44000)*rcrate;
 	}
 	inline void setResonance(float res)
 	{

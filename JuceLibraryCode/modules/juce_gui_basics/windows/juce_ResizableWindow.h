@@ -129,8 +129,9 @@ public:
         If the window's current size is outside these limits, it will be resized to
         make sure it's within them.
 
-        Calling setBounds() on the component will bypass any size checking - it's only when
-        the window is being resized by the user that these values are enforced.
+        A direct call to setBounds() will bypass any constraint checks, but when the
+        window is dragged by the user or resized by other indirect means, the constrainer
+        will limit the numbers involved.
 
         @see setResizable, setFixedAspectRatio
     */
@@ -188,6 +189,11 @@ public:
         @see isMinimised
     */
     void setMinimised (bool shouldMinimise);
+
+    /** Returns true if the window has been placed in kiosk-mode.
+        @see Desktop::setKioskComponent
+    */
+    bool isKioskMode() const;
 
     //==============================================================================
     /** Returns a string which encodes the window's current size and position.
@@ -305,8 +311,23 @@ public:
                                                bool resizeToFit = false));
     using TopLevelWindow::addToDesktop;
 
-protected:
     //==============================================================================
+    /** This abstract base class is implemented by LookAndFeel classes to provide
+        window drawing functionality.
+    */
+    struct JUCE_API  LookAndFeelMethods
+    {
+        virtual ~LookAndFeelMethods() {}
+
+        //==============================================================================
+        virtual void drawCornerResizer (Graphics&, int w, int h, bool isMouseOver, bool isMouseDragging) = 0;
+        virtual void drawResizableFrame (Graphics&, int w, int h, const BorderSize<int>&) = 0;
+
+        virtual void fillResizableWindowBackground (Graphics&, int w, int h, const BorderSize<int>&, ResizableWindow&) = 0;
+        virtual void drawResizableWindowBorder (Graphics&, int w, int h, const BorderSize<int>& border, ResizableWindow&) = 0;
+    };
+
+protected:
     /** @internal */
     void paint (Graphics&) override;
     /** (if overriding this, make sure you call ResizableWindow::moved() in your subclass) */
@@ -363,7 +384,8 @@ private:
     #endif
 
     void initialise (bool addToDesktop);
-    void updateLastPos();
+    void updateLastPosIfNotFullScreen();
+    void updateLastPosIfShowing();
     void setContent (Component*, bool takeOwnership, bool resizeToFit);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE

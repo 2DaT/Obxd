@@ -33,6 +33,7 @@ struct DownloadClickDetectorClass  : public ObjCClass <NSObject>
         addMethod (@selector (webView:decidePolicyForNavigationAction:request:frame:decisionListener:),
                    decidePolicyForNavigationAction, "v@:@@@@@");
         addMethod (@selector (webView:didFinishLoadForFrame:), didFinishLoadForFrame, "v@:@@");
+        addMethod (@selector (webView:willCloseFrame:), willCloseFrame, "v@:@@");
 
         registerClass();
     }
@@ -60,6 +61,11 @@ private:
             getOwner (self)->pageFinishedLoading (nsStringToJuce ([url absoluteString]));
         }
     }
+
+    static void willCloseFrame (id self, SEL, WebView*, WebFrame*)
+    {
+        getOwner (self)->windowCloseRequest();
+    }
 };
 
 #else
@@ -80,6 +86,8 @@ private:
 - (BOOL) gestureRecognizer: (UIGestureRecognizer*) gestureRecognizer
          shouldRecognizeSimultaneouslyWithGestureRecognizer: (UIGestureRecognizer*) otherGestureRecognizer
 {
+    (void) gestureRecognizer;
+    (void) otherGestureRecognizer;
     return YES;
 }
 
@@ -106,6 +114,8 @@ private:
 
 - (BOOL) webView: (UIWebView*) webView shouldStartLoadWithRequest: (NSURLRequest*) request navigationType: (UIWebViewNavigationType) navigationType
 {
+    (void) webView;
+    (void) navigationType;
     return ownerComponent->pageAboutToLoad (nsStringToJuce (request.URL.absoluteString));
 }
 @end
@@ -275,14 +285,14 @@ void WebBrowserComponent::stop()
 
 void WebBrowserComponent::goBack()
 {
-    lastURL = String::empty;
+    lastURL.clear();
     blankPageShown = false;
     browser->goBack();
 }
 
 void WebBrowserComponent::goForward()
 {
-    lastURL = String::empty;
+    lastURL.clear();
     browser->goForward();
 }
 
@@ -324,7 +334,7 @@ void WebBrowserComponent::reloadLastURL()
     if (lastURL.isNotEmpty())
     {
         goToURL (lastURL, &lastHeaders, &lastPostData);
-        lastURL = String::empty;
+        lastURL.clear();
     }
 }
 
@@ -342,6 +352,3 @@ void WebBrowserComponent::visibilityChanged()
 {
     checkWindowAssociation();
 }
-
-bool WebBrowserComponent::pageAboutToLoad (const String&)  { return true; }
-void WebBrowserComponent::pageFinishedLoading (const String&) {}

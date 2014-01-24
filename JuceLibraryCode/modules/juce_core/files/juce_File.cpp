@@ -75,7 +75,7 @@ const File File::nonexistent;
 String File::parseAbsolutePath (const String& p)
 {
     if (p.isEmpty())
-        return String::empty;
+        return String();
 
 #if JUCE_WINDOWS
     // Windows..
@@ -322,7 +322,7 @@ String File::getFileNameWithoutExtension() const
 
 bool File::isAChildOf (const File& potentialParent) const
 {
-    if (potentialParent == File::nonexistent)
+    if (potentialParent.fullPath.isEmpty())
         return false;
 
     const String ourPath (getPathUpToLastSlash());
@@ -482,11 +482,11 @@ bool File::loadFileAsData (MemoryBlock& destBlock) const
 String File::loadFileAsString() const
 {
     if (! existsAsFile())
-        return String::empty;
+        return String();
 
     FileInputStream in (*this);
     return in.openedOk() ? in.readEntireStreamAsString()
-                         : String::empty;
+                         : String();
 }
 
 void File::readLines (StringArray& destLines) const
@@ -500,10 +500,9 @@ int File::findChildFiles (Array<File>& results,
                           const bool searchRecursively,
                           const String& wildCardPattern) const
 {
-    DirectoryIterator di (*this, searchRecursively, wildCardPattern, whatToLookFor);
-
     int total = 0;
-    while (di.next())
+
+    for (DirectoryIterator di (*this, searchRecursively, wildCardPattern, whatToLookFor); di.next();)
     {
         results.add (di.getFile());
         ++total;
@@ -514,10 +513,9 @@ int File::findChildFiles (Array<File>& results,
 
 int File::getNumberOfChildFiles (const int whatToLookFor, const String& wildCardPattern) const
 {
-    DirectoryIterator di (*this, false, wildCardPattern, whatToLookFor);
-
     int total = 0;
-    while (di.next())
+
+    for (DirectoryIterator di (*this, false, wildCardPattern, whatToLookFor); di.next();)
         ++total;
 
     return total;
@@ -600,7 +598,7 @@ String File::getFileExtension() const
     if (indexOfDot > fullPath.lastIndexOfChar (separator))
         return fullPath.substring (indexOfDot);
 
-    return String::empty;
+    return String();
 }
 
 bool File::hasFileExtension (StringRef possibleSuffix) const
@@ -631,7 +629,7 @@ bool File::hasFileExtension (StringRef possibleSuffix) const
 File File::withFileExtension (StringRef newExtension) const
 {
     if (fullPath.isEmpty())
-        return File::nonexistent;
+        return File();
 
     String filePart (getFileName());
 

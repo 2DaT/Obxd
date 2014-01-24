@@ -415,6 +415,7 @@ c:\VST_Workshop\VstHost\vsthost.exe</Command>
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Gui\res.cpp" />
     <ClCompile Include="..\..\Source\PluginProcessor.cpp" />
     <ClCompile Include="..\..\Source\PluginEditor.cpp" />
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_basics\buffers\juce_AudioDataConverters.cpp">
@@ -1528,6 +1529,7 @@ c:\VST_Workshop\VstHost\vsthost.exe</Command>
     <ClInclude Include="..\..\Source\Engine\VoiceQueue.h" />
     <ClInclude Include="..\..\Source\Gui\ButtonList.h" />
     <ClInclude Include="..\..\Source\Gui\Knob.h" />
+    <ClInclude Include="..\..\Source\Gui\res.h" />
     <ClInclude Include="..\..\Source\Gui\TooglableButton.h" />
     <ClInclude Include="..\..\Source\PluginProcessor.h" />
     <ClInclude Include="..\..\Source\PluginEditor.h" />

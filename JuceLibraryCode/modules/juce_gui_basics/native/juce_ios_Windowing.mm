@@ -39,6 +39,7 @@
 
 - (void) applicationDidFinishLaunching: (UIApplication*) application
 {
+    (void) application;
     initialiseJuce_GUI();
 
     JUCEApplicationBase* app = JUCEApplicationBase::createInstance();
@@ -49,17 +50,20 @@
 
 - (void) applicationWillTerminate: (UIApplication*) application
 {
+    (void) application;
     JUCEApplicationBase::appWillTerminateByForce();
 }
 
 - (void) applicationDidEnterBackground: (UIApplication*) application
 {
+    (void) application;
     if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
         app->suspended();
 }
 
 - (void) applicationWillEnterForeground: (UIApplication*) application
 {
+    (void) application;
     if (JUCEApplicationBase* const app = JUCEApplicationBase::getInstance())
         app->resumed();
 }
@@ -69,6 +73,7 @@
 namespace juce
 {
 
+int juce_iOSMain (int argc, const char* argv[]);
 int juce_iOSMain (int argc, const char* argv[])
 {
     return UIApplicationMain (argc, const_cast<char**> (argv), nil, @"JuceAppStartupDelegate");
@@ -86,7 +91,7 @@ class iOSMessageBox;
 
 } // (juce namespace)
 
-@interface JuceAlertBoxDelegate  : NSObject
+@interface JuceAlertBoxDelegate  : NSObject <UIAlertViewDelegate>
 {
 @public
     iOSMessageBox* owner;
@@ -105,7 +110,7 @@ public:
     iOSMessageBox (const String& title, const String& message,
                    NSString* button1, NSString* button2, NSString* button3,
                    ModalComponentManager::Callback* cb, const bool async)
-        : result (0), delegate (nil), alert (nil),
+        : result (0), resultReceived (false), delegate (nil), alert (nil),
           callback (cb), isYesNo (button3 != nil), isAsync (async)
     {
         delegate = [[JuceAlertBoxDelegate alloc] init];
@@ -132,7 +137,7 @@ public:
 
         JUCE_AUTORELEASEPOOL
         {
-            while (! alert.hidden && alert.superview != nil)
+            while (! (alert.hidden || resultReceived))
                 [[NSRunLoop mainRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
         }
 
@@ -142,6 +147,7 @@ public:
     void buttonClicked (const int buttonIndex) noexcept
     {
         result = buttonIndex;
+        resultReceived = true;
 
         if (callback != nullptr)
             callback->modalStateFinished (result);
@@ -152,6 +158,7 @@ public:
 
 private:
     int result;
+    bool resultReceived;
     JuceAlertBoxDelegate* delegate;
     UIAlertView* alert;
     ScopedPointer<ModalComponentManager::Callback> callback;
@@ -177,9 +184,9 @@ namespace juce
 
 //==============================================================================
 #if JUCE_MODAL_LOOPS_PERMITTED
-void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
+void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType /*iconType*/,
                                                      const String& title, const String& message,
-                                                     Component* associatedComponent)
+                                                     Component* /*associatedComponent*/)
 {
     JUCE_AUTORELEASEPOOL
     {
@@ -189,17 +196,17 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType 
 }
 #endif
 
-void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
+void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType /*iconType*/,
                                                           const String& title, const String& message,
-                                                          Component* associatedComponent,
+                                                          Component* /*associatedComponent*/,
                                                           ModalComponentManager::Callback* callback)
 {
     new iOSMessageBox (title, message, @"OK", nil, nil, callback, true);
 }
 
-bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
+bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType /*iconType*/,
                                                       const String& title, const String& message,
-                                                      Component* associatedComponent,
+                                                      Component* /*associatedComponent*/,
                                                       ModalComponentManager::Callback* callback)
 {
     ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"OK",
@@ -212,9 +219,9 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType
     return false;
 }
 
-int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
+int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType /*iconType*/,
                                                         const String& title, const String& message,
-                                                        Component* associatedComponent,
+                                                        Component* /*associatedComponent*/,
                                                         ModalComponentManager::Callback* callback)
 {
     ScopedPointer<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"Yes", @"No", callback, callback != nullptr));
@@ -227,13 +234,13 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconTy
 }
 
 //==============================================================================
-bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& files, const bool canMoveFiles)
+bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray&, bool)
 {
     jassertfalse;    // no such thing on iOS!
     return false;
 }
 
-bool DragAndDropContainer::performExternalDragDropOfText (const String& text)
+bool DragAndDropContainer::performExternalDragDropOfText (const String&)
 {
     jassertfalse;    // no such thing on iOS!
     return false;
@@ -257,7 +264,7 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 }
 
 //==============================================================================
-Image juce_createIconForFile (const File& file)
+Image juce_createIconForFile (const File&)
 {
     return Image::null;
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include "SynthEngine.h"
-const float PSSC = 0.0030;
+const float PSSC = 0.0120;
 class ParamSmoother
 {
 	private:

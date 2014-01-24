@@ -177,21 +177,21 @@ public:
             : program (context)
         {
             JUCE_CHECK_OPENGL_ERROR
-            program.addShader ("attribute vec2 position;"
-                               "attribute vec4 colour;"
-                               "uniform vec4 screenBounds;"
-                               "varying " JUCE_MEDIUMP " vec4 frontColour;"
-                               "varying " JUCE_HIGHP " vec2 pixelPos;"
-                               "void main()"
-                               "{"
-                               " frontColour = colour;"
-                               " vec2 adjustedPos = position - screenBounds.xy;"
-                               " pixelPos = adjustedPos;"
-                               " vec2 scaledPos = adjustedPos / screenBounds.zw;"
-                               " gl_Position = vec4 (scaledPos.x - 1.0, 1.0 - scaledPos.y, 0, 1.0);"
-                               "}", GL_VERTEX_SHADER);
+            program.addVertexShader ("attribute vec2 position;"
+                                     "attribute vec4 colour;"
+                                     "uniform vec4 screenBounds;"
+                                     "varying " JUCE_MEDIUMP " vec4 frontColour;"
+                                     "varying " JUCE_HIGHP " vec2 pixelPos;"
+                                     "void main()"
+                                     "{"
+                                     " frontColour = colour;"
+                                     " vec2 adjustedPos = position - screenBounds.xy;"
+                                     " pixelPos = adjustedPos;"
+                                     " vec2 scaledPos = adjustedPos / screenBounds.zw;"
+                                     " gl_Position = vec4 (scaledPos.x - 1.0, 1.0 - scaledPos.y, 0, 1.0);"
+                                     "}");
 
-            program.addShader (fragmentShader, GL_FRAGMENT_SHADER);
+            program.addFragmentShader (fragmentShader);
             program.link();
             JUCE_CHECK_OPENGL_ERROR
         }
@@ -446,8 +446,9 @@ public:
 
         void setMatrix (const AffineTransform& trans,
                         const int imageWidth, const int imageHeight,
-                        const float fullWidthProportion, const float fullHeightProportion,
-                        const float targetX, const float targetY) const
+                        float fullWidthProportion, float fullHeightProportion,
+                        const float targetX, const float targetY,
+                        const bool isForTiling) const
         {
             const AffineTransform t (trans.translated (-targetX, -targetY)
                                         .inverted().scaled (fullWidthProportion / imageWidth,
@@ -456,16 +457,23 @@ public:
             const GLfloat m[] = { t.mat00, t.mat01, t.mat02, t.mat10, t.mat11, t.mat12 };
             matrix.set (m, 6);
 
+            if (isForTiling)
+            {
+                fullWidthProportion -= 0.5f / imageWidth;
+                fullHeightProportion -= 0.5f / imageHeight;
+            }
+
             imageLimits.set (fullWidthProportion, fullHeightProportion);
         }
 
         void setMatrix (const AffineTransform& trans, const OpenGLTextureFromImage& im,
-                        const float targetX, const float targetY) const
+                        const float targetX, const float targetY,
+                        bool isForTiling) const
         {
             setMatrix (trans,
                        im.imageWidth, im.imageHeight,
                        im.fullWidthProportion, im.fullHeightProportion,
-                       targetX, targetY);
+                       targetX, targetY, isForTiling);
         }
 
         OpenGLShaderProgram::Uniform imageTexture, matrix, imageLimits;
@@ -1015,11 +1023,7 @@ struct StateHelpers
             GLuint colour;
         };
 
-       #if JUCE_MAC || JUCE_ANDROID || JUCE_IOS
         enum { numQuads = 256 };
-       #else
-        enum { numQuads = 64 }; // (had problems with my drivers segfaulting when these buffers are any larger)
-       #endif
 
         GLuint buffers[2];
         VertexInfo vertexData [numQuads * 4];
@@ -1047,7 +1051,7 @@ struct StateHelpers
             : context (c), activeShader (nullptr)
         {
             const char programValueID[] = "GraphicsContextPrograms";
-            programs = static_cast <ShaderPrograms*> (context.getAssociatedObject (programValueID));
+            programs = static_cast<ShaderPrograms*> (context.getAssociatedObject (programValueID));
 
             if (programs == nullptr)
             {
@@ -1056,11 +1060,17 @@ struct StateHelpers
             }
         }
 
+        ~CurrentShader()
+        {
+            jassert (activeShader == nullptr);
+        }
+
         void setShader (const Rectangle<int>& bounds, ShaderQuadQueue& quadQueue, ShaderPrograms::ShaderBase& shader)
         {
             if (activeShader != &shader)
             {
-                quadQueue.flush();
+                clearShader (quadQueue);
+
                 activeShader = &shader;
                 shader.program.use();
                 shader.bindAttributes (context);
@@ -1248,7 +1258,7 @@ public:
     }
 
     void setShaderForTiledImageFill (const OpenGLTextureFromImage& image, const AffineTransform& transform,
-                                     const int maskTextureID, const Rectangle<int>* const maskArea, const bool clampTiledImages)
+                                     const int maskTextureID, const Rectangle<int>* const maskArea, bool isTiledFill)
     {
         blendMode.setPremultipliedBlendingMode (shaderQuadQueue);
 
@@ -1261,17 +1271,17 @@ public:
         {
             activeTextures.setTwoTextureMode (shaderQuadQueue, image.textureID, (GLuint) maskTextureID);
 
-            if (clampTiledImages)
-            {
-                setShader (programs->imageMasked);
-                imageParams = &programs->imageMasked.imageParams;
-                maskParams  = &programs->imageMasked.maskParams;
-            }
-            else
+            if (isTiledFill)
             {
                 setShader (programs->tiledImageMasked);
                 imageParams = &programs->tiledImageMasked.imageParams;
                 maskParams  = &programs->tiledImageMasked.maskParams;
+            }
+            else
+            {
+                setShader (programs->imageMasked);
+                imageParams = &programs->imageMasked.imageParams;
+                maskParams  = &programs->imageMasked.maskParams;
             }
         }
         else
@@ -1279,19 +1289,19 @@ public:
             activeTextures.setSingleTextureMode (shaderQuadQueue);
             activeTextures.bindTexture (image.textureID);
 
-            if (clampTiledImages)
-            {
-                setShader (programs->image);
-                imageParams = &programs->image.imageParams;
-            }
-            else
+            if (isTiledFill)
             {
                 setShader (programs->tiledImage);
                 imageParams = &programs->tiledImage.imageParams;
             }
+            else
+            {
+                setShader (programs->image);
+                imageParams = &programs->image.imageParams;
+            }
         }
 
-        imageParams->setMatrix (transform, image, (float) target.bounds.getX(), (float) target.bounds.getY());
+        imageParams->setMatrix (transform, image, (float) target.bounds.getX(), (float) target.bounds.getY(), isTiledFill);
 
         if (maskParams != nullptr)
             maskParams->setBounds (*maskArea, target, 1);
@@ -1365,14 +1375,14 @@ public:
         }
     }
 
+    typedef RenderingHelpers::GlyphCache <RenderingHelpers::CachedGlyphEdgeTable <SavedState>, SavedState> GlyphCacheType;
+
     void drawGlyph (int glyphNumber, const AffineTransform& trans)
     {
         if (clip != nullptr)
         {
             if (trans.isOnlyTranslation() && ! transform.isRotated)
             {
-                typedef RenderingHelpers::GlyphCache <RenderingHelpers::CachedGlyphEdgeTable <SavedState>, SavedState> GlyphCacheType;
-
                 GlyphCacheType& cache = GlyphCacheType::getInstance();
 
                 Point<float> pos (trans.getTranslationX(), trans.getTranslationY());
@@ -1402,7 +1412,7 @@ public:
                 AffineTransform t (transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
                                                                                .followedBy (trans)));
 
-                const ScopedPointer<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t));
+                const ScopedPointer<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
 
                 if (et != nullptr)
                     fillShape (new EdgeTableRegionType (*et), false);
@@ -1425,7 +1435,7 @@ public:
     {
         state->shaderQuadQueue.flush();
         OpenGLTextureFromImage image (src);
-        state->setShaderForTiledImageFill (image, trans, 0, nullptr, ! tiledFill);
+        state->setShaderForTiledImageFill (image, trans, 0, nullptr, tiledFill);
 
         state->shaderQuadQueue.add (iter, PixelARGB ((uint8) alpha, (uint8) alpha, (uint8) alpha, (uint8) alpha));
         state->shaderQuadQueue.flush();
@@ -1558,4 +1568,10 @@ LowLevelGraphicsContext* createOpenGLGraphicsContext (OpenGLContext& context, un
 {
     using namespace OpenGLRendering;
     return OpenGLRendering::createOpenGLContext (OpenGLRendering::Target (context, frameBufferID, width, height));
+}
+
+void clearOpenGLGlyphCache();
+void clearOpenGLGlyphCache()
+{
+    OpenGLRendering::SavedState::GlyphCacheType::getInstance().reset();
 }

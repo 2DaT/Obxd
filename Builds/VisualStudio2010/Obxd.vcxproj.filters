@@ -1443,6 +1443,9 @@
     <ClCompile Include="..\..\JuceLibraryCode\modules\juce_audio_plugin_client\VST\juce_VST_Wrapper.cpp">
       <Filter>Juce Library Code</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Gui\res.cpp">
+      <Filter>Obxd\Source\Gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\PluginEditor.h">
@@ -2821,6 +2824,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Source\Engine\ObxdBank.h">
       <Filter>Obxd\Source\Synth</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\Gui\res.h">
+      <Filter>Obxd\Source\Gui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
