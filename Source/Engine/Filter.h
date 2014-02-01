@@ -4,13 +4,14 @@
 class Filter
 {
 private:
-	float cutoffWas;
 	float s1,s2,s3,s4;
 	float R;
 	float R24;
 	float rcor;
-	float rezd;
-	float gw;
+	float rcor24;
+	//24 db multimode
+	float mmt;
+	int mmch;
 public:
 	float SampleRate;
 	float sampleRateInv;
@@ -23,14 +24,18 @@ public:
 		newtonRaphson = false;
 		mm=0;
 		s1=s2=s3=s4=0;
-		rezd=0;
-		gw = 0;
-		cutoffWas=0;
 		SampleRate = 44000;
 		sampleRateInv = 1 / SampleRate;
-		rcor =560 / 44000;
+		rcor =560.0 / 44000;
+		rcor24 = 970 / 44000;
 		R=1;
 		R24=0;
+	}
+	void setMultimode(float m)
+	{
+		mm = m;
+		mmch = (int)(mm * 3);
+		mmt = mm*3-mmch;
 	}
 	inline void setSampleRate(float sr)
 	{
@@ -39,23 +44,16 @@ public:
 		//rcor = 560 /sr ;
 		float rcrate =sqrt((44000/SampleRate));
 		rcor = (480.0 / 44000)*rcrate;
+		rcor24 = (970.0 / 44000)*rcrate;
 	}
 	inline void setResonance(float res)
 	{
 		R = 1-res;
-		R24 = 3.5 * res;
+		R24 =( 3.5 * res);
 	}
 	inline float NR(float sample, float g)
 	{ 
-		//float y = ((sample- R * s1*2 - g*s1 - s2)/(1+ R*g*2 + g*g));
 		float y = ((sample- R * s1*2 - g*s1  - s2)/(1+ R*g*2 + g*g)) + dc;
-		//if(newtonRaphson)
-		//{
-		//for(int i = 0 ; i< 1;i++)
-		//{
-//			y -=  nrfdb(y,g1,g2,sample) / nrfdbder(y,g1,g2);
-		//}
-		//}
 		return y;
 	}
 	inline float NR24(float sample,float g,float lpc)
@@ -66,39 +64,6 @@ public:
 		float y = (sample - R24 * S) / (1 + R24*G);
 		//volume compensation
 		return y + 1e-8;
-	}
-	inline float nrfdb(float y,float g1,float g2,float x)
-	{
-		//float fp = inl (y*g1 + s1);
-		//return -( y + 2*R*(y*g1+s) + nl(g1*y + s1) +((g1*y+s1)*g2 + s2)- x);
-		return 0;
-	}
-	inline float nrfdbder(float y,float g1,float g2)
-	{
-		return-( 1 + 2*R*g1 + nld(g1*y + s1)*g1+ g1*g2);
-	}
-	float inl (float y)
-	{
-		//return y;
-		return  atan(y/4)*4;
-	}
-	float inld(float y)
-	{
-		//return 1;
-		y = y/7;
-		return 1.0 / (1 + y *y);
-	}
-	float nl(float y)
-	{
-		//return 0;
-		return pow(y/8,7);
-		//return 0;2.3
-	}
-	float nld(float y)
-	{
-		//return 0;
-		return 7*pow(y/8,6)/8;
-		//return 0;
 	}
 	inline float Apply4Pole(float sample,float g)
 	{
@@ -112,7 +77,7 @@ public:
 			double v = (y0 - s1) * g / (1 + g);
 			double res = v + s1;
 			s1 = res + v;
-			s1 =atan(s1*rcor)/rcor;
+			s1 =atan(s1*rcor24)/rcor24;
 			float y1= res;
 			float y2 = tptpc(s2,y1,g);
 			float y3 = tptpc(s3,y2,g);
@@ -132,8 +97,24 @@ public:
 			//v = (y3 - s4)*lpc;
 			//float y4 = v + s4;
 			//s4 = y4 + v;
-
-			return y4 * (1 + R24 * 0.67);
+			float mc;
+			//mc = (1-mm)*y4 + (mm)*y1;
+			switch(mmch)
+			{
+			case 0:
+				mc = ((1 - mmt) * y4 + (mmt) * y3);
+				break;
+			case 1:
+				mc = ((1 - mmt) * y3 + (mmt) * y2);
+				break;
+			case 2:
+				mc = ((1 - mmt) * y2 + (mmt) * y1);
+				break;
+			case 3:
+				mc = y1;
+				break;
+			}
+			return mc * (1 + R24 * 0.45);
 	}
 	inline float Apply(float sample,float g)
         {

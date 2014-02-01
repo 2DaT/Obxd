@@ -41,6 +41,21 @@ public:
 
 		synth->processSample(left,right);
 	}
+	void allNotesOff()
+	{
+		for(int i = 0 ;  i < 128;i++)
+			{
+				procNoteOff(i);
+			}
+	}
+	void allSoundOff()
+	{
+		allNotesOff();
+		for(int i = 0 ; i < Motherboard::MAX_VOICES;i++)
+			{
+				synth->voices[i]->ResetEnvelope();
+			}
+	}
 	void procAsPlayedAlloc(float val)
 	{
 		synth->asPlayedMode = val > 0.5;
@@ -411,7 +426,7 @@ public:
 		for(int i = 0 ; i < synth->MAX_VOICES;i++)
 		{
 			//synth->voices[i]->flt ;
-			synth->voices[i]->flt.mm = linsc(param,0,1);
+			synth->voices[i]->flt.setMultimode(linsc(param,0,1));
 		}
 	}
 	void processOversampling(float param)

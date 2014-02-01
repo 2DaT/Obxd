@@ -13,6 +13,8 @@ private:
 	int priorities[129];
 	Decimator9 left,right;
 	int asPlayedCounter;
+	float lkl,lkr;
+	float sampleRate,sampleRateInv;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Motherboard)
 public:
 	bool asPlayedMode;
@@ -28,6 +30,7 @@ public:
 	bool Oversample;
 	Motherboard()
 	{
+		lkl=lkr=0;
 		vibratoEnabled = true;
 		asPlayedMode = false;
 		asPlayedCounter = 0;
@@ -82,6 +85,8 @@ public:
 	}
 	void setSampleRate(float sr)
 	{
+		sampleRate = sr;
+		sampleRateInv = 1 / sampleRate;
 		mlfo.setSamlpeRate(sr);
 		vibratoLfo.setSamlpeRate(sr);
 		for(int i = 0 ; i < MAX_VOICES;++i)
@@ -305,6 +310,9 @@ public:
 			vl = left.Calc(vlo,vl);
 			vr = right.Calc(vro,vr);
 		}
+		//DC remove
+		vl = vl - tptlp(lkl,vl,10,sampleRateInv);
+		vr = vr - tptlp(lkr,vr,10,sampleRateInv);
 		*sm1 = vl*Volume;
 		*sm2 = vr*Volume;
 	}

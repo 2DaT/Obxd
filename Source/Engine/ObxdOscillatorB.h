@@ -44,6 +44,8 @@ private:
 	SawOsc o1s,o2s;
 	PulseOsc o1p,o2p;
 	TriangleOsc o1t,o2t;
+
+	bool active;
 public:
 
 	float tune;//+-1 
@@ -88,6 +90,7 @@ public:
 		o1p(),o2p(),
 		o1t(),o2t()
 	{
+		active = false;
 		totalDetune = 0;
 		wn = Random(Random::getSystemRandom().nextInt64());
 		osc1Factor = wn.nextFloat()-0.5;
@@ -204,7 +207,6 @@ public:
 		{
 			osc1mix = o1t.getValue(x1) + o1t.aliasReduction();
 		}
-
 		cvd->feedDelay( getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct +totalDetune*osc2Factor));
 		pitch2 = cvd->getDelayedSample();
 
@@ -212,6 +214,7 @@ public:
 		if(pitch2>21000)
 			pitch2=21000;
 		fs = pitch2 * (sampleRateInv);
+
 		pwcalc = jlimit<float>(0.1f,1.0f,(pulseWidth + pw2)*0.5f + 0.5f);
 
 		float osc2mix=0.0f;
@@ -219,7 +222,6 @@ public:
 		x2 +=fs;
 
 		//o2s.processSlave(x2,fs,hsr,hsfrac);
-
 		if(osc2Pul)
 			o2p.processSlave(x2,fs,hsr,hsfrac,pwcalc,pw2w);
 		if(osc2Saw)
@@ -263,5 +265,13 @@ public:
 		//res = tptlp(d2,res,br,SampleRate);
 		return res*3;
 		//return sin(x1 * float_Pi*2 - float_Pi);
+	}
+	void setActive()
+	{
+		active = true;
+	}
+	void setNotActive()
+	{
+		active = false;
 	}
 };

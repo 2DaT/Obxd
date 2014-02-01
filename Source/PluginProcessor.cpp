@@ -562,7 +562,7 @@ inline void ObxdAudioProcessor::processMidiPerSample(MidiBuffer::Iterator* iter,
 		{
 			sustainOn = true;
 		}
-		if(midiMsg->isSustainPedalOff() || midiMsg->isAllNotesOff())
+		if(midiMsg->isSustainPedalOff() || midiMsg->isAllNotesOff()||midiMsg->isAllSoundOff())
 		{
 			sustainOn = false;
 			while(!sustain.empty() )
@@ -570,6 +570,14 @@ inline void ObxdAudioProcessor::processMidiPerSample(MidiBuffer::Iterator* iter,
 				synth->procNoteOff(sustain.top().getNoteNumber());
 				sustain.pop();
 			}
+		}
+		if(midiMsg->isAllNotesOff())
+		{
+			synth->allNotesOff();
+		}
+		if(midiMsg->isAllSoundOff())
+		{
+			synth->allSoundOff();
 		}
 
 	}

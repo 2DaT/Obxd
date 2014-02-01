@@ -75,6 +75,7 @@ public:
 	bool fourpole;
 
 
+
 	bool stabguard;
 
 	DelayLine *lenvd,*fenvd;
@@ -161,11 +162,11 @@ public:
 		if(Oversample)
 		{
 			x2=  oscpsw;
+			x2 = tptpc(d2,x2,brightCoef);
 			if(fourpole)
 			x2 = flt.Apply4Pole(x2,(cutoffcalc+cutoffwas)*0.5);
 			else
 				x2 = flt.Apply(x2,(cutoffcalc+cutoffwas)*0.5);
-			x2 = tptpc(d2,x2,brightCoef);
 			//x2 /= (filterDrive);
 			x2 *= (env+envelopewas)*0.5;
 			*(ptr+1) = x2;
@@ -174,6 +175,7 @@ public:
 		if(!Oversample)
 		{
 			x1 = oscps;
+			x1 = tptpc(d2,x1,brightCoef);
 			if(fourpole)
 			x1 = flt.Apply4Pole(x1,(cutoffcalc)); 
 			else
@@ -182,12 +184,13 @@ public:
 		}
 		else
 		{
+			x1 = ap.getInterp(oscps);
+			x1 = tptpc(d2,x1,brightCoef);
 			if(fourpole)
-			x1 = flt.Apply4Pole(ap.getInterp(oscps),(cutoffcalc)); 
+			x1 = flt.Apply4Pole(x1,(cutoffcalc)); 
 			else
-				x1 = flt.Apply(ap.getInterp(oscps),(cutoffcalc)); 
+				x1 = flt.Apply(x1,(cutoffcalc)); 
 		}
-		x1 = tptpc(d2,x1,brightCoef);
 		x1 *= (env);
 		*(ptr)=x1;
 
