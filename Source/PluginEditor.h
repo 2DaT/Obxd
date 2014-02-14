@@ -45,8 +45,8 @@ public:
 
 
 
-	Knob* addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name);
-	Knob* addTinyKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name);
+	Knob* addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name,float defval);
+	Knob* addTinyKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name,float defval);
 	void placeLabel(int x , int y,String text);
 	TooglableButton* addNormalTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name);
 	TooglableButton* addTinyTooglableButton(int x , int y , ObxdAudioProcessor* filter,int parameter,String name);

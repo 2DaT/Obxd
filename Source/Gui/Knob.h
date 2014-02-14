@@ -16,9 +16,8 @@ public:
 		w2 = k.getWidth();
 		numFr = k.getHeight() / h2;
 		kni = k;
-
 	};
-
+	
 	void paint(Graphics& g)
 	{
 		int ofs = (int)((getValue() - getMinimum()) / (getMaximum() - getMinimum()) * (numFr - 1));

@@ -42,8 +42,6 @@ public:
 	MidiMessage* nextMidi,*midiMsg;
 	MidiMap bindings;
 	bool midiControlledParamSet;
-	std::stack<MidiMessage> sustain;
-	bool sustainOn;
 	
 	bool hasMidiMessage;
     int midiEventPos;

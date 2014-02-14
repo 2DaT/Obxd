@@ -18,40 +18,40 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 {
 	// This is where our plugin's editor size is set.
 	setSize (1087, 442);
-	cutoffKnob = addNormalKnob(577,40,ownerFilter,CUTOFF,"Cutoff");
-	resonanceKnob = addNormalKnob(638,40,ownerFilter,RESONANCE,"Resonance");
-	filterEnvelopeAmtKnob = addNormalKnob(699,40,ownerFilter,ENVELOPE_AMT,"Envelope");
-	multimodeKnob = addTinyKnob(643,106,ownerFilter,MULTIMODE,"Multimode");
+	cutoffKnob = addNormalKnob(577,40,ownerFilter,CUTOFF,"Cutoff",0.4);
+	resonanceKnob = addNormalKnob(638,40,ownerFilter,RESONANCE,"Resonance",0);
+	filterEnvelopeAmtKnob = addNormalKnob(699,40,ownerFilter,ENVELOPE_AMT,"Envelope",0);
+	multimodeKnob = addTinyKnob(643,106,ownerFilter,MULTIMODE,"Multimode",0.5);
 
-	volumeKnob = addNormalKnob(53,120,ownerFilter,VOLUME,"Volume");
-	portamentoKnob = addNormalKnob(175,241,ownerFilter,PORTAMENTO,"Portamento");
-	osc1PitchKnob = addNormalKnob(271,40,ownerFilter,OSC1P,"Osc1Pitch");
-	pulseWidthKnob = addNormalKnob(334,40,ownerFilter,PW,"PW");
-	osc2PitchKnob = addNormalKnob(397,40,ownerFilter,OSC2P,"Osc2Pitch");
+	volumeKnob = addNormalKnob(53,120,ownerFilter,VOLUME,"Volume",0.4);
+	portamentoKnob = addNormalKnob(175,241,ownerFilter,PORTAMENTO,"Portamento",0);
+	osc1PitchKnob = addNormalKnob(271,40,ownerFilter,OSC1P,"Osc1Pitch",0);
+	pulseWidthKnob = addNormalKnob(334,40,ownerFilter,PW,"PW",0);
+	osc2PitchKnob = addNormalKnob(397,40,ownerFilter,OSC2P,"Osc2Pitch",0);
 
-	osc1MixKnob = addNormalKnob(490,40,ownerFilter,OSC1MIX,"Osc1");
-	osc2MixKnob = addNormalKnob(490,132,ownerFilter,OSC2MIX,"Osc2");
-	noiseMixKnob = addNormalKnob(490,224,ownerFilter,NOISEMIX,"Noise");
+	osc1MixKnob = addNormalKnob(490,40,ownerFilter,OSC1MIX,"Osc1",1);
+	osc2MixKnob = addNormalKnob(490,132,ownerFilter,OSC2MIX,"Osc2",1);
+	noiseMixKnob = addNormalKnob(490,224,ownerFilter,NOISEMIX,"Noise",0);
 
-	xmodKnob = addNormalKnob(334,168,ownerFilter,XMOD,"Xmod");
-	osc2DetuneKnob = addNormalKnob(334,104,ownerFilter,OSC2_DET,"Detune");
+	xmodKnob = addNormalKnob(334,168,ownerFilter,XMOD,"Xmod",0);
+	osc2DetuneKnob = addNormalKnob(334,104,ownerFilter,OSC2_DET,"Detune",0);
 
-	envPitchModKnob = addNormalKnob(376,232,ownerFilter,ENVPITCH,"PEnv");
-	brightnessKnob = addNormalKnob(291,232,ownerFilter,BRIGHTNESS,"Bri");
+	envPitchModKnob = addNormalKnob(376,232,ownerFilter,ENVPITCH,"PEnv",0);
+	brightnessKnob = addNormalKnob(291,232,ownerFilter,BRIGHTNESS,"Bri",1);
 
-	attackKnob = addNormalKnob(791,132,ownerFilter,LATK,"Atk");
-	decayKnob = addNormalKnob(853,132,ownerFilter,LDEC,"Dec");
-	sustainKnob = addNormalKnob(916,132,ownerFilter,LSUS,"Sus");
-	releaseKnob = addNormalKnob(980,132,ownerFilter,LREL,"Rel");
+	attackKnob = addNormalKnob(791,132,ownerFilter,LATK,"Atk",0);
+	decayKnob = addNormalKnob(853,132,ownerFilter,LDEC,"Dec",0);
+	sustainKnob = addNormalKnob(916,132,ownerFilter,LSUS,"Sus",1);
+	releaseKnob = addNormalKnob(980,132,ownerFilter,LREL,"Rel",0);
 
-	fattackKnob = addNormalKnob(791,40,ownerFilter,FATK,"Atk");
-	fdecayKnob = addNormalKnob(853,40,ownerFilter,FDEC,"Dec");
-	fsustainKnob = addNormalKnob(916,40,ownerFilter,FSUS,"Sus");
-	freleaseKnob = addNormalKnob(980,40,ownerFilter,FREL,"Rel");
+	fattackKnob = addNormalKnob(791,40,ownerFilter,FATK,"Atk",0);
+	fdecayKnob = addNormalKnob(853,40,ownerFilter,FDEC,"Dec",0);
+	fsustainKnob = addNormalKnob(916,40,ownerFilter,FSUS,"Sus",1);
+	freleaseKnob = addNormalKnob(980,40,ownerFilter,FREL,"Rel",0);
 
-	lfoFrequencyKnob = addNormalKnob(576,207,ownerFilter,LFOFREQ,"Freq");
-	lfoAmt1Knob = addNormalKnob(640,207,ownerFilter,LFO1AMT,"Pitch");
-	lfoAmt2Knob = addNormalKnob(704,207,ownerFilter,LFO2AMT,"PWM");
+	lfoFrequencyKnob = addNormalKnob(576,207,ownerFilter,LFOFREQ,"Freq",0);
+	lfoAmt1Knob = addNormalKnob(640,207,ownerFilter,LFO1AMT,"Pitch",0);
+	lfoAmt2Knob = addNormalKnob(704,207,ownerFilter,LFO2AMT,"PWM",0);
 
 	lfoSinButton = addNormalTooglableButton(587,269,ownerFilter,LFOSINWAVE,"Sin");
 	lfoSquareButton = addNormalTooglableButton(587,323,ownerFilter,LFOSQUAREWAVE,"SQ");
@@ -79,34 +79,34 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 
 	filterKeyFollowButton =  addNormalTooglableButton(573,110,ownerFilter,FLT_KF,"Key");
 	unisonButton = addNormalTooglableButton(125,251,ownerFilter,UNISON,"Uni");
-	tuneKnob = addNormalKnob(114,120,ownerFilter,TUNE,"Tune");
-	voiceDetuneKnob =addNormalKnob(53,241,ownerFilter,UDET,"VoiceDet");
+	tuneKnob = addNormalKnob(114,120,ownerFilter,TUNE,"Tune",0.5);
+	voiceDetuneKnob =addNormalKnob(53,241,ownerFilter,UDET,"VoiceDet",0);
 
-	veloAmpEnvKnob = addNormalKnob(486,345,ownerFilter,VAMPENV,"VAE");
-	veloFltEnvKnob = addNormalKnob(428,345,ownerFilter,VFLTENV,"VFE");
+	veloAmpEnvKnob = addNormalKnob(486,345,ownerFilter,VAMPENV,"VAE",0);
+	veloFltEnvKnob = addNormalKnob(428,345,ownerFilter,VFLTENV,"VFE",0);
 	midiLearnButton = addNormalTooglableButton(126,372,ownerFilter,MIDILEARN,"LEA");
 	midiUnlearnButton = addNormalTooglableButton(185,372,ownerFilter,UNLEARN,"UNL");
-	transposeKnob = addNormalKnob(176,120,ownerFilter,OCTAVE,"Transpose");
+	transposeKnob = addNormalKnob(176,120,ownerFilter,OCTAVE,"Transpose",0.5);
 
-	pan1Knob = addTinyKnob(796,318,ownerFilter,PAN1,"1");
-	pan2Knob = addTinyKnob(858,318,ownerFilter,PAN2,"2");
-	pan3Knob = addTinyKnob(921,318,ownerFilter,PAN3,"3");
-	pan4Knob = addTinyKnob(984,318,ownerFilter,PAN4,"4");
+	pan1Knob = addTinyKnob(796,318,ownerFilter,PAN1,"1",0.5);
+	pan2Knob = addTinyKnob(858,318,ownerFilter,PAN2,"2",0.5);
+	pan3Knob = addTinyKnob(921,318,ownerFilter,PAN3,"3",0.5);
+	pan4Knob = addTinyKnob(984,318,ownerFilter,PAN4,"4",0.5);
 
-	pan5Knob = addTinyKnob(796,371,ownerFilter,PAN5,"5");
-	pan6Knob = addTinyKnob(858,371,ownerFilter,PAN6,"6");
-	pan7Knob = addTinyKnob(921,371,ownerFilter,PAN7,"7");
-	pan8Knob = addTinyKnob(984,371,ownerFilter,PAN8,"8");
+	pan5Knob = addTinyKnob(796,371,ownerFilter,PAN5,"5",0.5);
+	pan6Knob = addTinyKnob(858,371,ownerFilter,PAN6,"6",0.5);
+	pan7Knob = addTinyKnob(921,371,ownerFilter,PAN7,"7",0.5);
+	pan8Knob = addTinyKnob(984,371,ownerFilter,PAN8,"8",0.5);
 
 	bendOsc2OnlyButton = addNormalTooglableButton(321,354,ownerFilter,BENDOSC2,"Osc2");
 	bendRangeButton = addNormalTooglableButton(267,354,ownerFilter,BENDRANGE,"12");
 	asPlayedAllocButton = addNormalTooglableButton(65,372,ownerFilter,ASPLAYEDALLOCATION,"APA");
 
-	filterDetuneKnob = addTinyKnob(817,240,ownerFilter,FILTERDER,"Flt");
-	envelopeDetuneKnob = addTinyKnob(963,240,ownerFilter,ENVDER,"Env");
-	portamentoDetuneKnob = addTinyKnob(890,240,ownerFilter,PORTADER,"Port");
+	filterDetuneKnob = addTinyKnob(817,240,ownerFilter,FILTERDER,"Flt",0.2);
+	envelopeDetuneKnob = addTinyKnob(963,240,ownerFilter,ENVDER,"Env",0.2);
+	portamentoDetuneKnob = addTinyKnob(890,240,ownerFilter,PORTADER,"Port",0.2);
 
-	bendLfoRateKnob = addNormalKnob(364,345,ownerFilter,BENDLFORATE,"ModRate");
+	bendLfoRateKnob = addNormalKnob(364,345,ownerFilter,BENDLFORATE,"ModRate",0.4);
 
 	voiceSwitch = addNormalButtonList(172,321,38,ownerFilter,VOICE_COUNT,"VoiceCount",ImageCache::getFromMemory(res::voices_png,res::voices_pngSize));
 	voiceSwitch ->addChoise("1");
@@ -152,7 +152,7 @@ ObxdAudioProcessorEditor::~ObxdAudioProcessorEditor()
 	getFilter()->removeChangeListener(this);
 	deleteAllChildren();
 }
-Knob* ObxdAudioProcessorEditor::addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name)
+Knob* ObxdAudioProcessorEditor::addNormalKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name,float defval)
 {
 	Knob* knob = new Knob(ImageCache::getFromMemory(res::knoblsd_png,res::knoblsd_pngSize),48);
 	//Label* knobl = new Label();
@@ -168,10 +168,11 @@ Knob* ObxdAudioProcessorEditor::addNormalKnob(int x , int y ,ObxdAudioProcessor*
 	//knobl->setBounds(x-10,y+40,60,10);
 	//knobl->setText(name,dontSendNotification);
 	knob->setTextBoxIsEditable(false);
+	knob->setDoubleClickReturnValue(true,defval);
 	knob->addListener (this);
 	return knob;
 }
-Knob* ObxdAudioProcessorEditor::addTinyKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name)
+Knob* ObxdAudioProcessorEditor::addTinyKnob(int x , int y ,ObxdAudioProcessor* filter, int parameter,String name,float defval)
 {
 	Knob* knob = new Knob(ImageCache::getFromMemory(res::knobssd_png,res::knobssd_pngSize),42);
 	//Label* knobl = new Label();
@@ -187,6 +188,7 @@ Knob* ObxdAudioProcessorEditor::addTinyKnob(int x , int y ,ObxdAudioProcessor* f
 	//knobl->setBounds(x-10,y+25,50,10);
 	//knobl->setText(name,dontSendNotification);
 	knob->setTextBoxIsEditable(false);
+	knob->setDoubleClickReturnValue(true,defval);
 	knob->addListener (this);
 	return knob;
 }

@@ -5,6 +5,7 @@ class Lfo
 private:
 	float phase;
 	float s, sq, sh;
+	float s1;
     Random rg;
 	float SampleRate;
 	float SampleRateInv;
@@ -13,6 +14,7 @@ public:
 	int waveForm;
 	Lfo()
 	{
+		s1=0;
 		Frequency=1;
 		phase=0;
 		s=sq=sh=0;
@@ -27,7 +29,7 @@ public:
                 Res+=sq;
             if((waveForm&4)!=0)
                 Res+=sh;
-            return Res;
+			return tptlpupw(s1, Res,200,SampleRateInv);
 	}
 	void setSamlpeRate(float sr)
 	{

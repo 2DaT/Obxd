@@ -1,10 +1,8 @@
 #pragma once
 #include "ObxdOscillatorB.h"
-#include "ObxdOscillator.h"
 #include "AdsrEnvelope.h"
 #include "Filter.h"
 #include "Decimator.h"
-#include "FirFilter.h"
 #include "APInterpolator.h"
 
 class ObxdVoice
@@ -16,12 +14,12 @@ private:
 	float port;
 	float velocityValue;
 
-	UpsampleFIRFilter* upff;
 	float d1,d2;
+	float c1,c2;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObxdVoice)
 public:
-
+	bool sustainHold;
 	AdsrEnvelope env;
 	AdsrEnvelope fenv;
 	ObxdOscillatorB osc;
@@ -89,6 +87,7 @@ public:
 		: ap(),
 		ng()
 	{
+		sustainHold = false;
 		vamp=vflt=0;
 		velocityValue=0;
 		lfoVibratoIn=0;
@@ -99,8 +98,7 @@ public:
 		oscpsw = 0;
 		cutoffwas = envelopewas=0;
 		Oversample= false;
-		d1=d2=0;
-		upff = new UpsampleFIRFilter();
+		c1=c2=d1=d2=0;
 		filterDrive = 0.1;
 		pitchWheel=pitchWheelAmt=0;
 		lfoIn=0;
@@ -124,7 +122,6 @@ public:
 	}
 	~ObxdVoice()
 	{
-		delete upff;
 		delete lenvd;
 		delete fenvd;
 	}
@@ -159,6 +156,7 @@ public:
 
 		float x2 = 0;
 		float oscps = osc.ProcessSample();
+		oscps = oscps - 0.45*tptlpupw(c1,oscps,15,sampleRateInv);
 		if(Oversample)
 		{
 			x2=  oscpsw;
@@ -246,8 +244,25 @@ public:
 	}
 	void NoteOff()
 	{
+		if(!sustainHold)
+		{
 		env.triggerRelease();
 		fenv.triggerRelease();
+		}
 		Active = false;
+	}
+	void sustOn()
+	{
+		sustainHold = true;
+	}
+	void sustOff()
+	{
+		sustainHold = false;
+		if(!Active)
+		{
+			env.triggerRelease();
+			fenv.triggerRelease();
+		}
+
 	}
 };

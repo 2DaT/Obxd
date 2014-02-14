@@ -74,6 +74,7 @@ public:
         }
     void triggerRelease()
         {
+			if(state!=4)
             coef = (float)((log(0.00001) - log(Value+0.0001)) / (SampleRate * (release) / 1000));
             state = 4;
         }
@@ -102,7 +103,7 @@ public:
                     }
 					else
 					{
-                        Value =Value + Value * coef + dc;
+                        Value =Value + Value * coef;
 					}
                     break;
                 case 3: Value = jmin(sustain, 0.9f);

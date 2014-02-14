@@ -12,7 +12,6 @@ public :
 			zd = 0;
 			li=0;
 	};
-	// N
 	inline float getInterp(float in)
 	{
 		float out = Nu * ( in - zd) + li;

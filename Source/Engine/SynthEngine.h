@@ -56,6 +56,14 @@ public:
 				synth->voices[i]->ResetEnvelope();
 			}
 	}
+	void sustainOn()
+	{
+		synth->sustainOn();
+	}
+	void sustainOff()
+	{
+		synth->sustainOff();
+	}
 	void procAsPlayedAlloc(float val)
 	{
 		synth->asPlayedMode = val > 0.5;

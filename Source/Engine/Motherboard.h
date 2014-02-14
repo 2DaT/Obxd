@@ -11,6 +11,7 @@ private:
 	bool wasUni;
 	bool awaitingkeys[129];
 	int priorities[129];
+
 	Decimator9 left,right;
 	int asPlayedCounter;
 	float lkl,lkr;
@@ -28,7 +29,7 @@ public:
 	const static int MAX_VOICES=8;
 	bool uni;
 	bool Oversample;
-	Motherboard()
+	Motherboard(): left(),right()
 	{
 		lkl=lkr=0;
 		vibratoEnabled = true;
@@ -41,8 +42,8 @@ public:
 		}
 		vibratoAmount = 0;
 		Oversample=false;
-		left = Decimator9();
-		right =  Decimator9();
+//		left = Decimator9();
+//		right =  Decimator9();
 		mlfo= Lfo();
 		vibratoLfo=Lfo();
 		vibratoLfo.waveForm = 1;
@@ -92,6 +93,22 @@ public:
 		for(int i = 0 ; i < MAX_VOICES;++i)
 		{
 			voices[i]->setSampleRate(sr);
+		}
+	}
+	void sustainOn()
+	{
+		for(int i = 0 ; i < MAX_VOICES;i++)
+		{
+			ObxdVoice* p = vq.GetNext();
+			p->sustOn();
+		}
+	}
+	void sustainOff()
+	{
+		for(int i = 0 ; i < MAX_VOICES;i++)
+		{
+			ObxdVoice* p = vq.GetNext();
+			p->sustOff();
 		}
 	}
 	void setNoteOn(int noteNo,float velocity)
@@ -311,8 +328,8 @@ public:
 			vr = right.Calc(vro,vr);
 		}
 		//DC remove
-		vl = vl - tptlp(lkl,vl,10,sampleRateInv);
-		vr = vr - tptlp(lkr,vr,10,sampleRateInv);
+		//vl = vl - tptlp(lkl,vl,10,sampleRateInv);
+		//vr = vr - tptlp(lkr,vr,10,sampleRateInv);
 		*sm1 = vl*Volume;
 		*sm2 = vr*Volume;
 	}

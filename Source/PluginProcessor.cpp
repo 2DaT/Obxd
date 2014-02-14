@@ -20,7 +20,6 @@ ObxdAudioProcessor::ObxdAudioProcessor() : bindings(),programs()
 	midiControlledParamSet = false;
 	lastMovedController = 0;
 	lastUsedParameter = 0;
-	sustainOn = false;
 	synth = new SynthEngine();
 	initAllParams();
 	rnd = Random();
@@ -519,10 +518,7 @@ inline void ObxdAudioProcessor::processMidiPerSample(MidiBuffer::Iterator* iter,
 		}
 		if (midiMsg->isNoteOff())
 		{
-			if(!sustainOn)
 			synth->procNoteOff(midiMsg->getNoteNumber());
-			else
-				sustain.push(*midiMsg);
 		}
 		if(midiMsg->isPitchWheel())
 		{
@@ -560,16 +556,11 @@ inline void ObxdAudioProcessor::processMidiPerSample(MidiBuffer::Iterator* iter,
 		}
 		if(midiMsg->isSustainPedalOn())
 		{
-			sustainOn = true;
+			synth->sustainOn();
 		}
 		if(midiMsg->isSustainPedalOff() || midiMsg->isAllNotesOff()||midiMsg->isAllSoundOff())
 		{
-			sustainOn = false;
-			while(!sustain.empty() )
-			{
-				synth->procNoteOff(sustain.top().getNoteNumber());
-				sustain.pop();
-			}
+			synth->sustainOff();
 		}
 		if(midiMsg->isAllNotesOff())
 		{

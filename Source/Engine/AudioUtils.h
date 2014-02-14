@@ -10,9 +10,7 @@ const float ln2 = 0.69314718056f;
 const float mult = ln2 / 12.0;
 inline static float getPitch(float index)
 {
-	//return (float)(A * pow(sq2_12, index));
 	return (440* expf( mult*index));
-	//return (A * EXP((double)(log(2) * index /12.0)));
 };
 
 inline static float nlp(float& state,float inp,float cutoff,float sr)
@@ -21,14 +19,6 @@ inline static float nlp(float& state,float inp,float cutoff,float sr)
 	state = state + (inp - state) * cutoff +dc;
 	return state;
 };
-inline static float tptlpstatic(float & state , float inp , const float cutoff,float srInv)
-{
-	const float sct =  tan(cutoff * (srInv)* (juce::float_Pi)) ;
-	double v = (inp - state) * sct/ (1 + sct);
-	double res = v + state;
-	state = res + v;
-	return res;
-}
 inline static float tptlpupw(float & state , float inp , float cutoff , float srInv)
 {
 	cutoff = (cutoff * srInv)*juce::float_Pi;
