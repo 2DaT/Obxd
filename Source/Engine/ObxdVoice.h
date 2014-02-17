@@ -66,15 +66,10 @@ public:
 
 	bool Oversample;
 
-	float filterDrive;
-
 	float envpitchmod;
 
 	bool fourpole;
 
-
-
-	bool stabguard;
 
 	DelayLine *lenvd,*fenvd;
 
@@ -99,13 +94,10 @@ public:
 		cutoffwas = envelopewas=0;
 		Oversample= false;
 		c1=c2=d1=d2=0;
-		filterDrive = 0.1;
 		pitchWheel=pitchWheelAmt=0;
 		lfoIn=0;
 		PortaDetuneAmt=0;
 		FltDetAmt=0;
-		//EnvDetune=1;
-		stabguard=  true;
 		porta =0;
 		prtst=0;
 		fltKF= false;
@@ -141,13 +133,6 @@ public:
 		osc.pw2 = lfopw2?lfoIn*lfoa2:0;
 		osc.pto1 =   (!pitchWheelOsc2Only? (pitchWheel*pitchWheelAmt):0 ) + ( lfoo1?lfoIn*lfoa1:0) + lfoVibratoIn;
 		osc.pto2 =  (pitchWheel *pitchWheelAmt) + (lfoo2?lfoIn*lfoa1:0) + (envpitchmod * envm) + lfoVibratoIn;
-		//if(lfopw1)
-		//{
-		//filtinput = 2*upff->processUpsamplingFiltreing(filtinput);
-		//filtinput2 = 2*upff->processUpsamplingFiltreing(filtinput2);
-		//	*(ptr) = tptlp(d1,x1,24000,SampleRate*2);
-		//	*(ptr+1)= tptlp(d1,x1,24000,SampleRate*2);
-		//}
 
 
 
@@ -165,7 +150,6 @@ public:
 			x2 = flt.Apply4Pole(x2,(cutoffcalc+cutoffwas)*0.5);
 			else
 				x2 = flt.Apply(x2,(cutoffcalc+cutoffwas)*0.5);
-			//x2 /= (filterDrive);
 			x2 *= (env+envelopewas)*0.5;
 			*(ptr+1) = x2;
 		}
@@ -192,8 +176,6 @@ public:
 		x1 *= (env);
 		*(ptr)=x1;
 
-		//*(ptr+1)=x1;
-		//
 		oscpsw = oscps;
 		cutoffwas = cutoffcalc;
 		envelopewas = env;
@@ -234,7 +216,6 @@ public:
 	{
 		if(velocity!=-0.5)
 		velocityValue = velocity;
-		//osc.midiIndex = mididx-81;
 		midiIndx = mididx;
 		if((!Active)||(legatoMode&1))
 			env.triggerAttack();

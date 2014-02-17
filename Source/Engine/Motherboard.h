@@ -1,3 +1,26 @@
+/*
+	==============================================================================
+	This file is part of Obxd synthesizer.
+
+	Copyright © 2013-2014 Filatov Vadim
+	
+	Contact author via email :
+	justdat_@_e1.ru
+
+	This file may be licensed under the terms of of the
+	GNU General Public License Version 2 (the ``GPL'').
+
+	Software distributed under the License is distributed
+	on an ``AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, either
+	express or implied. See the GPL for the specific language
+	governing rights and limitations.
+
+	You should have received a copy of the GPL along with this
+	program. If not, go to http://www.gnu.org/licenses/gpl.html
+	or write to the Free Software Foundation, Inc.,  
+	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+	==============================================================================
+ */
 #pragma once
 #include "VoiceQueue.h"
 #include "SynthEngine.h"
@@ -42,8 +65,6 @@ public:
 		}
 		vibratoAmount = 0;
 		Oversample=false;
-//		left = Decimator9();
-//		right =  Decimator9();
 		mlfo= Lfo();
 		vibratoLfo=Lfo();
 		vibratoLfo.waveForm = 1;
@@ -228,17 +249,13 @@ public:
 			}
 		}
 		wasUni = uni;
-		//  }
-		// WasUni = Params.Unison;
-		//if (!processed)
-		//vq.GetNext().Trigger(noteNo);
 	}
 
 	void setNoteOff(int noteNo)
 	{
 		awaitingkeys[noteNo] = false;
 		int reallocKey = 0;
-
+		//Voice release case
 		if(!asPlayedMode)
 		{
 			while(reallocKey < 129 &&(!awaitingkeys[reallocKey]))
@@ -273,7 +290,7 @@ public:
 			}
 		}
 		else
-
+		//No realloc
 		{
 			for (int i = 0; i < totalvc; i++)
 			{
@@ -322,14 +339,10 @@ public:
 		}
 		if(Oversample)
 		{
-
 			//Variables are swapped!
 			vl = left.Calc(vlo,vl);
 			vr = right.Calc(vro,vr);
 		}
-		//DC remove
-		//vl = vl - tptlp(lkl,vl,10,sampleRateInv);
-		//vr = vr - tptlp(lkr,vr,10,sampleRateInv);
 		*sm1 = vl*Volume;
 		*sm2 = vr*Volume;
 	}
