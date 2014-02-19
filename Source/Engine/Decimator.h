@@ -1,12 +1,6 @@
 #pragma once
 //MusicDsp 
 // T.Rochebois
-//static const float h0=(8192/16384.0f);
-//static const float h1=(5042/16384.0f);
-//static const float h3=(-1277/16384.0f);
-//static const float h5=(429/16384.0f);
-//static const float h7=(-116/16384.0f);
-//static const float h9=(18/16384.0f);
 //still indev
 class Decimator17
 {
