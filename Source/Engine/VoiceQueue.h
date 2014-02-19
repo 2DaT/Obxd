@@ -22,7 +22,7 @@
 	==============================================================================
  */
 #pragma once
-#include "Engine\ObxdVoice.h"
+#include "ObxdVoice.h"
 class VoiceQueue
 {
 private:

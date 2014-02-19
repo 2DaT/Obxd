@@ -25,10 +25,10 @@
 #ifndef PLUGINPROCESSOR_H_INCLUDED
 #define PLUGINPROCESSOR_H_INCLUDED
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "Engine\SynthEngine.h"
+#include "Engine/SynthEngine.h"
 #include <stack>
-#include "Engine\midiMap.h"
-#include "Engine\ObxdBank.h"
+#include "Engine/midiMap.h"
+#include "Engine/ObxdBank.h"
 
 //==============================================================================
 /**

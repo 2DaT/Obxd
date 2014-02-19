@@ -9,7 +9,7 @@ It contains the basic startup code for a Juce application.
 */
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "Engine\Params.h"
+#include "Engine/Params.h"
 #include <xmmintrin.h>
 //==============================================================================
 #define S(T) (juce::String(T))
