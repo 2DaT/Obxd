@@ -59,8 +59,8 @@ public:
 	
 	bool hasMidiMessage;
     int midiEventPos;
-	void ObxdAudioProcessor::processMidiPerSample(MidiBuffer::Iterator* iter,const int samplePos);
-	bool ObxdAudioProcessor::getNextEvent(MidiBuffer::Iterator* iter,const int samplePos);
+	void processMidiPerSample(MidiBuffer::Iterator* iter,const int samplePos);
+	bool getNextEvent(MidiBuffer::Iterator* iter,const int samplePos);
 
     //==============================================================================
 	SynthEngine* synth;
