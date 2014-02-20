@@ -10,19 +10,17 @@ It contains the basic startup code for a Juce application.
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "Engine\Params.h"
-#include <stack>
 #include <xmmintrin.h>
 //==============================================================================
 #define S(T) (juce::String(T))
-Random rnd;
 ObxdAudioProcessor::ObxdAudioProcessor() : bindings(),programs()
 {
 	midiControlledParamSet = false;
 	lastMovedController = 0;
 	lastUsedParameter = 0;
 	synth = new SynthEngine();
+	synth->setSampleRate(44100);
 	initAllParams();
-	rnd = Random();
 }
 
 ObxdAudioProcessor::~ObxdAudioProcessor()
@@ -53,7 +51,7 @@ float ObxdAudioProcessor::getParameter (int index)
 
 void ObxdAudioProcessor::setParameter (int index, float newValue)
 {
-	if(!midiControlledParamSet || index==MIDILEARN)
+	if(!midiControlledParamSet || index==MIDILEARN || index==UNLEARN)
 	lastUsedParameter = index;
 	programs.currentProgramPtr->values[index] = newValue;
 	switch(index)
