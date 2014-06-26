@@ -9,8 +9,12 @@ It contains the basic startup code for a Juce application.
 */
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "Engine\Params.h"
+#include "Engine/Params.h"
 #include <xmmintrin.h>
+
+#ifdef __SSE3__
+#include <pmmintrin.h>
+#endif
 //==============================================================================
 #define S(T) (juce::String(T))
 ObxdAudioProcessor::ObxdAudioProcessor() : bindings(),programs()
@@ -584,8 +588,12 @@ bool ObxdAudioProcessor::getNextEvent(MidiBuffer::Iterator* iter,const int sampl
 void ObxdAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
 	//SSE flags set
+#ifdef __SSE__
 	_MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+#endif
+#ifdef __SSE3__
 	_MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
+#endif
 	MidiBuffer::Iterator ppp(midiMessages);
 	const ScopedLock sl (this->getCallbackLock());
 	hasMidiMessage = ppp.getNextEvent(*nextMidi,midiEventPos);

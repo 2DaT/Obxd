@@ -12,11 +12,11 @@
 #ifndef PLUGINEDITOR_H_INCLUDED
 #define PLUGINEDITOR_H_INCLUDED
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include "JuceHeader.h"
 #include "PluginProcessor.h"
-#include "Gui\Knob.h"
-#include "Gui\TooglableButton.h"
-#include "Gui\ButtonList.h"
+#include "Gui/Knob.h"
+#include "Gui/TooglableButton.h"
+#include "Gui/ButtonList.h"
 
 
 //==============================================================================
