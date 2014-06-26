@@ -26,7 +26,7 @@
 #include "BlepData.h"
 class TriangleOsc 
 {
-	DelayLine* del1;
+	DelayLine<Samples> del1;
 	bool fall;
 	float *buffer1,*buffer2;
 	const int hsam;
@@ -37,7 +37,7 @@ public:
 	TriangleOsc() : hsam(Samples)
 		, n(Samples*2)
 	{
-		del1 =new DelayLine(hsam);
+		//del1 =new DelayLine(hsam);
 		fall = false;
 		bP1=bP2=0;
 		buffer1= new float[n];
@@ -51,7 +51,7 @@ public:
 	{
 		delete buffer1;
 		delete buffer2;
-		delete del1;
+		//delete del1;
 	}
 	inline float aliasReduction()
 	{
@@ -81,8 +81,8 @@ public:
 	inline float getValue(float x)
 	{
 		float mix = x < 0.5 ? 2*x-0.5 : 1.5-2*x;
-		del1->feedDelay(mix);
-		return del1->getDelayedSample();
+		del1.feedDelay(mix);
+		return del1.getDelayedSample();
 	}
 	inline float getValueFast(float x)
 	{
@@ -165,31 +165,13 @@ public:
 			lpIn += B_OVERSAMPLING;
 		}
 	}
-	inline float getDelayedSample(float* buf,int& dpos)
-	{
-		int idx;
-		idx = dpos-(hsam);
-		if(idx <0)
-			idx+=hsam;
-		return buf[idx];
-	}
-	inline void feedDelay(float* buf,int& dpos,float sm)
-	{
-		buf[dpos] = sm;
-		dpos++;
-		if(dpos >= (hsam))
-			dpos-=(hsam);
-	}
 	inline float getNextBlep(float* buf,int& bpos) 
 	{
 		buf[bpos]= 0.0f;
 		bpos++;
 
 		// Wrap pos
-		if (bpos>=n) 
-		{
-			bpos -= n;
-		}
+		bpos%=n;
 		return buf[bpos];
 	}
 };

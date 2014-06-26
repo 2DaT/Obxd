@@ -26,7 +26,7 @@
 #include "BlepData.h"
 class SawOsc 
 {
-	DelayLine* del1;
+	DelayLine<Samples> del1;
 	float *buffer1;
 	const int hsam;
 	const int n;
@@ -36,14 +36,14 @@ public:
 		, n(Samples*2)
 	{
 		bP1=0;
-		del1 = new DelayLine(hsam);
+		//del1 = new DelayLine(hsam);
 		buffer1= new float[n];
 		for(int i = 0 ; i < n ; i++)
 			buffer1[i]=0;
 	}
 	~SawOsc()
 	{
-		delete del1;
+		//delete del1;
 		delete buffer1;
 	}
 	inline float aliasReduction()
@@ -62,8 +62,8 @@ public:
 	}
 	inline float getValue(float x)
 	{
-		del1->feedDelay(x - 0.5);
-		return del1->getDelayedSample();
+		del1.feedDelay(x - 0.5);
+		return del1.getDelayedSample();
 	}
 	inline float getValueFast(float x)
 	{
@@ -105,31 +105,13 @@ public:
 			lpIn += B_OVERSAMPLING;
 		}
 	}
-	inline float getDelayedSample(float* buf,int& dpos)
-	{
-		int idx;
-		idx = dpos-(hsam);
-		if(idx <0)
-			idx+=hsam;
-		return buf[idx];
-	}
-	inline void feedDelay(float* buf,int& dpos,float sm)
-	{
-		buf[dpos] = sm;
-		dpos++;
-		if(dpos >= (hsam))
-			dpos-=(hsam);
-	}
 	inline float getNextBlep(float* buf,int& bpos) 
 	{
 		buf[bpos]= 0.0f;
 		bpos++;
 
 		// Wrap pos
-		if (bpos>=n) 
-		{
-			bpos -= n;
-		}
+		bpos%=n;
 		return buf[bpos];
 	}
 };

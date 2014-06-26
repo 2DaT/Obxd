@@ -23,87 +23,134 @@
  */
 #pragma once
 #include "SynthEngine.h"
-class DelayLine
+//Always feed first then get delayed sample!
+template<unsigned int DM> class DelayLine
 {
 private:
-	float* dl;
+	float dl[DM];
 	int iidx;
-	int maxc;
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayLine)
 public:
-	DelayLine() 
+		DelayLine() 
 	{
-		dl  = NULL;
 		iidx = 0;
-		maxc=0;
-	}
-	DelayLine(int count)
-	{
-		iidx=0;
-		maxc=count;
-		dl = new float[maxc];
-		for(int i = 0 ; i < maxc;i++)
-			dl[i]=0;
-	}
-	~DelayLine()
-	{
-		delete dl;
+		zeromem(dl,sizeof(float)*DM);
 	}
 	inline void feedDelay(float sm)
 	{
 		dl[iidx] = sm;
 		iidx++;
-		if(iidx >= (maxc))
-			iidx-=(maxc);
+		iidx%=DM;
 	}
 	inline float getDelayedSample()
 	{
-		int idx;
-		idx = iidx-(maxc);
-		if(idx <0)
-			idx+=maxc;
-		return dl[idx];
+		return dl[iidx];
 	}
+
 };
-class DelayLineBoolean
+//class DelayLine
+//{
+//private:
+//	float* dl;
+//	int iidx;
+//	int maxc;
+//	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayLine)
+//public:
+//	DelayLine() 
+//	{
+//		dl  = NULL;
+//		iidx = 0;
+//		maxc=0;
+//	}
+//	DelayLine(int count)
+//	{
+//		iidx=0;
+//		maxc=count;
+//		dl = new float[maxc];
+//		for(int i = 0 ; i < maxc;i++)
+//			dl[i]=0;
+//	}
+//	~DelayLine()
+//	{
+//		delete dl;
+//	}
+//	inline void feedDelay(float sm)
+//	{
+//		dl[iidx] = sm;
+//		iidx++;
+//		if(iidx >= (maxc))
+//			iidx-=(maxc);
+//	}
+//	inline float getDelayedSample()
+//	{
+//		int idx;
+//		idx = iidx-(maxc);
+//		if(idx <0)
+//			idx+=maxc;
+//		return dl[idx];
+//	}
+//};
+//class DelayLineBoolean
+//{
+//private:
+//	bool* dl;
+//	int iidx;
+//	int maxc;
+//	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayLineBoolean)
+//public:
+//	DelayLineBoolean() 
+//	{
+//		dl  = NULL;
+//		iidx = 0;
+//		maxc=0;
+//	}
+//	DelayLineBoolean(int count)
+//	{
+//		iidx=0;
+//		maxc=count;
+//		dl = new bool[maxc];
+//		for(int i = 0 ; i < maxc;i++)
+//			dl[i]=0;
+//	}
+//	~DelayLineBoolean()
+//	{
+//		delete dl;
+//	}
+//	inline void feedDelay(bool sm)
+//	{
+//		dl[iidx] = sm;
+//		iidx++;
+//		if(iidx >= (maxc))
+//			iidx-=(maxc);
+//	}
+//	inline bool getDelayedSample()
+//	{
+//		int idx;
+//		idx = iidx-(maxc);
+//		if(idx <0)
+//			idx+=maxc;
+//		return dl[idx];
+//	}
+//};
+template<unsigned int DM> class DelayLineBoolean
 {
 private:
-	bool* dl;
+	bool dl[DM];
 	int iidx;
-	int maxc;
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayLineBoolean)
 public:
-	DelayLineBoolean() 
+		DelayLineBoolean() 
 	{
-		dl  = NULL;
 		iidx = 0;
-		maxc=0;
-	}
-	DelayLineBoolean(int count)
-	{
-		iidx=0;
-		maxc=count;
-		dl = new bool[maxc];
-		for(int i = 0 ; i < maxc;i++)
-			dl[i]=0;
-	}
-	~DelayLineBoolean()
-	{
-		delete dl;
+		zeromem(dl,sizeof(bool)*DM);
 	}
 	inline void feedDelay(bool sm)
 	{
 		dl[iidx] = sm;
 		iidx++;
-		if(iidx >= (maxc))
-			iidx-=(maxc);
+		iidx%=DM;
 	}
 	inline bool getDelayedSample()
 	{
-		int idx;
-		idx = iidx-(maxc);
-		if(idx <0)
-			idx+=maxc;
-		return dl[idx];
+		return dl[iidx];
 	}
+
 };

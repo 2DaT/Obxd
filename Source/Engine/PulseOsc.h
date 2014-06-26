@@ -26,7 +26,7 @@
 #include "BlepData.h"
 class PulseOsc 
 {
-	DelayLine* del1;
+	DelayLine<Samples> del1;
 	bool pw1t;
 	float *buffer1;
 	const int hsam;
@@ -36,7 +36,7 @@ public:
 	PulseOsc() : hsam(Samples)
 		, n(Samples*2)
 	{
-		del1 = new DelayLine(hsam);
+	//	del1 = new DelayLine(hsam);
 		pw1t = false;
 		bP1=0;
 		buffer1= new float[n];
@@ -46,7 +46,7 @@ public:
 	~PulseOsc()
 	{
 		delete buffer1;
-		delete del1;
+	//	delete del1;
 	}
 	inline float aliasReduction()
 	{
@@ -88,8 +88,8 @@ public:
 			oscmix = 1 - (0.5-pulseWidth) - 0.5;
 		else
 			oscmix = -(0.5-pulseWidth) - 0.5;
-		del1->feedDelay(oscmix);
-		return del1->getDelayedSample();
+		del1.feedDelay(oscmix);
+		return del1.getDelayedSample();
 	}
 	inline float getValueFast(float x,float pulseWidth)
 	{
@@ -173,31 +173,13 @@ public:
 			lpIn += B_OVERSAMPLING;
 		}
 	}
-	inline float getDelayedSample(float* buf,int& dpos)
-	{
-		int idx;
-		idx = dpos-(hsam);
-		if(idx <0)
-			idx+=hsam;
-		return buf[idx];
-	}
-	inline void feedDelay(float* buf,int& dpos,float sm)
-	{
-		buf[dpos] = sm;
-		dpos++;
-		if(dpos >= (hsam))
-			dpos-=(hsam);
-	}
 	inline float getNextBlep(float* buf,int& bpos) 
 	{
 		buf[bpos]= 0.0f;
 		bpos++;
 
 		// Wrap pos
-		if (bpos>=n) 
-		{
-			bpos -= n;
-		}
+		bpos%=n;
 		return buf[bpos];
 	}
 };

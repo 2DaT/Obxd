@@ -52,11 +52,11 @@ private:
 	const int hsam;
 	const float *Blep;
 	//delay line implements fixed sample delay
-	DelayLine *del1,*del2;
-	DelayLine *xmodd;
-	DelayLineBoolean *syncd;
-	DelayLine *syncFracd;
-	DelayLine *cvd;
+	DelayLine<Samples> del1,del2;
+	DelayLine<Samples> xmodd;
+	DelayLineBoolean<Samples> syncd;
+	DelayLine<Samples> syncFracd;
+	DelayLine<Samples> cvd;
 	Random wn;
 	SawOsc o1s,o2s;
 	PulseOsc o1p,o2p;
@@ -122,21 +122,21 @@ public:
 		x1=wn.nextFloat();
 		x2=wn.nextFloat();
 
-		del1 = new DelayLine(hsam);
-		del2 = new DelayLine(hsam);
-		xmodd = new DelayLine(hsam);
-		syncd = new DelayLineBoolean(hsam);
-		syncFracd =  new DelayLine(hsam);
-		cvd = new DelayLine(hsam);
+		//del1 = new DelayLine(hsam);
+		//del2 = new DelayLine(hsam);
+		//xmodd = new DelayLine(hsam);
+		//syncd = new DelayLineBoolean(hsam);
+		//syncFracd =  new DelayLine(hsam);
+		//cvd = new DelayLine(hsam);
 	}
 	~ObxdOscillatorB()
 	{
-		delete del1;
-		delete del2;
-		delete xmodd;
-		delete cvd;
-		delete syncd;
-		delete syncFracd;
+		//delete del1;
+		//delete del2;
+		//delete xmodd;
+		//delete cvd;
+		//delete syncd;
+		//delete syncFracd;
 	}
 	void setSampleRate(float sr)
 	{
@@ -170,10 +170,10 @@ public:
 
 		hsr &= hardSync;
 		//Delaying our hard sync gate signal and frac
-		syncd->feedDelay(hsr);
-		syncFracd ->feedDelay(hsfrac);
-		hsr = syncd->getDelayedSample();
-		hsfrac = syncFracd->getDelayedSample();
+		syncd.feedDelay(hsr);
+		syncFracd.feedDelay(hsfrac);
+		hsr = syncd.getDelayedSample();
+		hsfrac = syncFracd.getDelayedSample();
 
 		if(osc1Pul)
 			osc1mix += o1p.getValue(x1,pwcalc) + o1p.aliasReduction();
@@ -184,8 +184,8 @@ public:
 		//Pitch control needs additional delay buffer to compensate
 		//This will give us less aliasing on xmod
 		//Hard sync gate signal delayed too
-		cvd->feedDelay( getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct +totalDetune*osc2Factor));
-		pitch2 = cvd->getDelayedSample();
+		cvd.feedDelay( getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct +totalDetune*osc2Factor));
+		pitch2 = cvd.getDelayedSample();
 
 
 		if(pitch2>21000)
@@ -218,9 +218,9 @@ public:
 			x2 =fracMaster;
 		}
 		//Delaying osc1 signal
-		xmodd ->feedDelay(osc1mix);
+		xmodd.feedDelay(osc1mix);
 		//And getting delayed back
-		osc1mix = xmodd->getDelayedSample();
+		osc1mix = xmodd.getDelayedSample();
 
 		if(osc2Pul)
 			osc2mix += o2p.getValue(x2,pwcalc) + o2p.aliasReduction();

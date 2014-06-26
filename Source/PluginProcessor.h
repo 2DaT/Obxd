@@ -63,7 +63,7 @@ public:
 	bool getNextEvent(MidiBuffer::Iterator* iter,const int samplePos);
 
     //==============================================================================
-	SynthEngine* synth;
+	SynthEngine synth;
 	//==============================================
 	ObxdBank programs;
 	//==============================================

@@ -40,7 +40,7 @@ private:
 	float d1,d2;
 	float c1,c2;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObxdVoice)
+	//JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObxdVoice)
 public:
 	bool sustainHold;
 	AdsrEnvelope env;
@@ -94,7 +94,7 @@ public:
 	bool fourpole;
 
 
-	DelayLine *lenvd,*fenvd;
+	DelayLine<Samples*2> lenvd,fenvd;
 
 	ApInterpolator ap;
 	float oscpsw;
@@ -132,13 +132,13 @@ public:
 		FenvDetune = Random::getSystemRandom().nextFloat()-0.5;
 		FltDetune = Random::getSystemRandom().nextFloat()-0.5;
 		PortaDetune =Random::getSystemRandom().nextFloat()-0.5;
-		lenvd=new DelayLine(Samples*2);
-		fenvd=new DelayLine(Samples*2);
+	//	lenvd=new DelayLine(Samples*2);
+	//	fenvd=new DelayLine(Samples*2);
 	}
 	~ObxdVoice()
 	{
-		delete lenvd;
-		delete fenvd;
+	//	delete lenvd;
+	//	delete fenvd;
 	}
 	inline void ProcessSample(float* ptr)
 	{
@@ -148,9 +148,9 @@ public:
 		osc.notePlaying = ptNote;
 		//both envelopes needs a delay equal to osc internal delay
 		float envm = fenv.processSample() * (1 - (1-velocityValue)*vflt);
-		fenvd->feedDelay(envm);
-		float cutoffcalc = jmin(getPitch((lfof?lfoIn*lfoa1:0)+cutoff+FltDetune*FltDetAmt+ fenvamt*fenvd->getDelayedSample() -45 + (fltKF ?ptNote+40:0)), (flt.SampleRate*0.5f-120.0f));
-		lenvd->feedDelay(env.processSample() * (1 - (1-velocityValue)*vamp));
+		fenvd.feedDelay(envm);
+		float cutoffcalc = jmin(getPitch((lfof?lfoIn*lfoa1:0)+cutoff+FltDetune*FltDetAmt+ fenvamt*fenvd.getDelayedSample() -45 + (fltKF ?ptNote+40:0)), (flt.SampleRate*0.5f-120.0f));
+		lenvd.feedDelay(env.processSample() * (1 - (1-velocityValue)*vamp));
 
 		osc.pw1 = lfopw1?lfoIn*lfoa2:0;
 		osc.pw2 = lfopw2?lfoIn*lfoa2:0;
@@ -160,7 +160,7 @@ public:
 
 
 		//variable sort magic
-		float env = lenvd->getDelayedSample();
+		float env = lenvd.getDelayedSample();
 
 		float x2 = 0;
 		float oscps = osc.ProcessSample();

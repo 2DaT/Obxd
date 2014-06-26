@@ -22,14 +22,14 @@ ObxdAudioProcessor::ObxdAudioProcessor() : bindings(),programs()
 	midiControlledParamSet = false;
 	lastMovedController = 0;
 	lastUsedParameter = 0;
-	synth = new SynthEngine();
-	synth->setSampleRate(44100);
+	//synth = new SynthEngine();
+	synth.setSampleRate(44100);
 	initAllParams();
 }
 
 ObxdAudioProcessor::~ObxdAudioProcessor()
 {
-	delete synth;
+	//delete synth;
 }
 //==============================================================================
 void ObxdAudioProcessor::initAllParams()
@@ -61,208 +61,208 @@ void ObxdAudioProcessor::setParameter (int index, float newValue)
 	switch(index)
 	{
 	case VAMPENV:
-		synth->procAmpVelocityAmount(newValue);
+		synth.procAmpVelocityAmount(newValue);
 		break;
 	case VFLTENV:
-		synth->procFltVelocityAmount(newValue);
+		synth.procFltVelocityAmount(newValue);
 		break;
 	case ASPLAYEDALLOCATION:
-		synth->procAsPlayedAlloc(newValue);
+		synth.procAsPlayedAlloc(newValue);
 		break;
 	case BENDLFORATE:
-		synth->procModWheelFrequency(newValue);
+		synth.procModWheelFrequency(newValue);
 		break;
 	case FOURPOLE:
-		synth->processFourPole(newValue);
+		synth.processFourPole(newValue);
 		break;
 	case LEGATOMODE:
-		synth->processLegatoMode(newValue);
+		synth.processLegatoMode(newValue);
 		break;
 	case ENVPITCH:
-		synth->processEnvelopeToPitch(newValue);
+		synth.processEnvelopeToPitch(newValue);
 		break;
 	case OSCQuantize:
-		synth->processPitchQuantization(newValue);
+		synth.processPitchQuantization(newValue);
 		break;
 	case VOICE_COUNT:
-		synth->setVoiceCount(newValue);
+		synth.setVoiceCount(newValue);
 		break;
 	case BANDPASS:
-		synth->processBandpassSw(newValue);
+		synth.processBandpassSw(newValue);
 		break;
 	case FILTER_WARM:
-		synth->processOversampling(newValue);
+		synth.processOversampling(newValue);
 		break;
 	case BENDOSC2:
-		synth->procPitchWheelOsc2Only(newValue);
+		synth.procPitchWheelOsc2Only(newValue);
 		break;
 	case BENDRANGE:
-		synth->procPitchWheelAmount(newValue);
+		synth.procPitchWheelAmount(newValue);
 		break;
 	case NOISEMIX:
-		synth->processNoiseMix(newValue);
+		synth.processNoiseMix(newValue);
 		break;
 	case OCTAVE:
-		synth->processOctave(newValue);
+		synth.processOctave(newValue);
 		break;
 	case TUNE:
-		synth->processTune(newValue);
+		synth.processTune(newValue);
 		break;
 	case BRIGHTNESS:
-		synth->processBrightness(newValue);
+		synth.processBrightness(newValue);
 		break;
 	case MULTIMODE:
-		synth->processMultimode(newValue);
+		synth.processMultimode(newValue);
 		break;
 	case LFOFREQ:
-		synth->processLfoFrequency(newValue);
+		synth.processLfoFrequency(newValue);
 		break;
 	case LFO1AMT:
-		synth->processLfoAmt1(newValue);
+		synth.processLfoAmt1(newValue);
 		break;
 	case LFO2AMT:
-		synth->processLfoAmt2(newValue);
+		synth.processLfoAmt2(newValue);
 		break;
 	case LFOSINWAVE:
-		synth->processLfoSine(newValue);
+		synth.processLfoSine(newValue);
 		break;
 	case LFOSQUAREWAVE:
-		synth->processLfoSquare(newValue);
+		synth.processLfoSquare(newValue);
 		break;
 	case LFOSHWAVE:
-		synth->processLfoSH(newValue);
+		synth.processLfoSH(newValue);
 		break;
 	case LFOFILTER:
-		synth->processLfoFilter(newValue);
+		synth.processLfoFilter(newValue);
 		break;
 	case LFOOSC1:
-		synth->processLfoOsc1(newValue);
+		synth.processLfoOsc1(newValue);
 		break;
 	case LFOOSC2:
-		synth->processLfoOsc2(newValue);
+		synth.processLfoOsc2(newValue);
 		break;
 	case LFOPW1:
-		synth->processLfoPw1(newValue);
+		synth.processLfoPw1(newValue);
 		break;
 	case LFOPW2:
-		synth->processLfoPw2(newValue);
+		synth.processLfoPw2(newValue);
 		break;
 	case PORTADER:
-		synth->processPortamentoDetune(newValue);
+		synth.processPortamentoDetune(newValue);
 		break;
 	case FILTERDER:
-		synth->processFilterDetune(newValue);
+		synth.processFilterDetune(newValue);
 		break;
 	case ENVDER:
-		synth->processEnvelopeDetune(newValue);
+		synth.processEnvelopeDetune(newValue);
 		break;
 	case XMOD:
-		synth->processOsc2Xmod(newValue);
+		synth.processOsc2Xmod(newValue);
 		break;
 	case OSC2HS:
-		synth->processOsc2HardSync(newValue);
+		synth.processOsc2HardSync(newValue);
 		break;
 	case OSC2P:
-		synth->processOsc2Pitch(newValue);
+		synth.processOsc2Pitch(newValue);
 		break;
 	case OSC1P:
-		synth->processOsc1Pitch(newValue);
+		synth.processOsc1Pitch(newValue);
 		break;
 	case PORTAMENTO:
-		synth->processPortamento(newValue);
+		synth.processPortamento(newValue);
 		break;
 	case UNISON:
-		synth->processUnison(newValue);
+		synth.processUnison(newValue);
 		break;
 	case FLT_KF:
-		synth->processFilterKeyFollow(newValue);
+		synth.processFilterKeyFollow(newValue);
 		break;
 	case OSC1MIX:
-		synth->processOsc1Mix(newValue);
+		synth.processOsc1Mix(newValue);
 		break;
 	case OSC2MIX:
-		synth->processOsc2Mix(newValue);
+		synth.processOsc2Mix(newValue);
 		break;
 	case PW:
-		synth->processPulseWidth(newValue);
+		synth.processPulseWidth(newValue);
 		break;
 	case OSC1Saw:
-		synth->processOsc1Saw(newValue);
+		synth.processOsc1Saw(newValue);
 		break;
 	case OSC2Saw:
-		synth->processOsc2Saw(newValue);
+		synth.processOsc2Saw(newValue);
 		break;
 	case OSC1Pul:
-		synth->processOsc1Pulse(newValue);
+		synth.processOsc1Pulse(newValue);
 		break;
 	case OSC2Pul:
-		synth->processOsc2Pulse(newValue);
+		synth.processOsc2Pulse(newValue);
 		break;
 	case VOLUME:
-		synth->processVolume(newValue);
+		synth.processVolume(newValue);
 		break;
 	case UDET:
-		synth->processDetune(newValue);
+		synth.processDetune(newValue);
 		break;
 	case OSC2_DET:
-		synth->processOsc2Det(newValue);
+		synth.processOsc2Det(newValue);
 		break;
 	case CUTOFF:
-		synth->processCutoff(newValue);
+		synth.processCutoff(newValue);
 		break;
 	case RESONANCE:
-		synth->processResonance(newValue);
+		synth.processResonance(newValue);
 		break;
 	case ENVELOPE_AMT:
-		synth->processFilterEnvelopeAmt(newValue);
+		synth.processFilterEnvelopeAmt(newValue);
 		break;
 	case LATK:
-		synth->processLoudnessEnvelopeAttack(newValue);
+		synth.processLoudnessEnvelopeAttack(newValue);
 		break;
 	case LDEC:
-		synth->processLoudnessEnvelopeDecay(newValue);
+		synth.processLoudnessEnvelopeDecay(newValue);
 		break;
 	case LSUS:
-		synth->processLoudnessEnvelopeSustain(newValue);
+		synth.processLoudnessEnvelopeSustain(newValue);
 		break;
 	case LREL:
-		synth->processLoudnessEnvelopeRelease(newValue);
+		synth.processLoudnessEnvelopeRelease(newValue);
 		break;
 	case FATK:
-		synth->processFilterEnvelopeAttack(newValue);
+		synth.processFilterEnvelopeAttack(newValue);
 		break;
 	case FDEC:
-		synth->processFilterEnvelopeDecay(newValue);
+		synth.processFilterEnvelopeDecay(newValue);
 		break;
 	case FSUS:
-		synth->processFilterEnvelopeSustain(newValue);
+		synth.processFilterEnvelopeSustain(newValue);
 		break;
 	case FREL:
-		synth->processFilterEnvelopeRelease(newValue);
+		synth.processFilterEnvelopeRelease(newValue);
 		break;
 	case PAN1:
-		synth->processPan(newValue,1);
+		synth.processPan(newValue,1);
 		break;
 	case PAN2:
-		synth->processPan(newValue,2);
+		synth.processPan(newValue,2);
 		break;
 	case PAN3:
-		synth->processPan(newValue,3);
+		synth.processPan(newValue,3);
 		break;
 	case PAN4:
-		synth->processPan(newValue,4);
+		synth.processPan(newValue,4);
 		break;
 	case PAN5:
-		synth->processPan(newValue,5);
+		synth.processPan(newValue,5);
 		break;
 	case PAN6:
-		synth->processPan(newValue,6);
+		synth.processPan(newValue,6);
 		break;
 	case PAN7:
-		synth->processPan(newValue,7);
+		synth.processPan(newValue,7);
 		break;
 	case PAN8:
-		synth->processPan(newValue,8);
+		synth.processPan(newValue,8);
 		break;
 	}
 	sendChangeMessage();
@@ -502,7 +502,7 @@ void ObxdAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 	// initialisation that you need..
 	nextMidi= new MidiMessage(0xF0);
 	midiMsg = new MidiMessage(0xF0);
-	synth->setSampleRate(sampleRate);
+	synth.setSampleRate(sampleRate);
 
 }
 
@@ -516,19 +516,19 @@ inline void ObxdAudioProcessor::processMidiPerSample(MidiBuffer::Iterator* iter,
 	{
 		if(midiMsg->isNoteOn())
 		{
-			synth->procNoteOn(midiMsg->getNoteNumber(),midiMsg->getFloatVelocity());
+			synth.procNoteOn(midiMsg->getNoteNumber(),midiMsg->getFloatVelocity());
 		}
 		if (midiMsg->isNoteOff())
 		{
-			synth->procNoteOff(midiMsg->getNoteNumber());
+			synth.procNoteOff(midiMsg->getNoteNumber());
 		}
 		if(midiMsg->isPitchWheel())
 		{
 			// [0..16383] center = 8192;
-			synth->procPitchWheel((midiMsg->getPitchWheelValue()-8192) / 8192.0);
+			synth.procPitchWheel((midiMsg->getPitchWheelValue()-8192) / 8192.0);
 		}
 		if(midiMsg->isController() && midiMsg->getControllerNumber()==1)
-			synth->procModWheel(midiMsg->getControllerValue() / 127.0);
+			synth.procModWheel(midiMsg->getControllerValue() / 127.0);
 		if(midiMsg->isController())
 		{
 			lastMovedController = midiMsg->getControllerNumber();
@@ -558,19 +558,19 @@ inline void ObxdAudioProcessor::processMidiPerSample(MidiBuffer::Iterator* iter,
 		}
 		if(midiMsg->isSustainPedalOn())
 		{
-			synth->sustainOn();
+			synth.sustainOn();
 		}
 		if(midiMsg->isSustainPedalOff() || midiMsg->isAllNotesOff()||midiMsg->isAllSoundOff())
 		{
-			synth->sustainOff();
+			synth.sustainOff();
 		}
 		if(midiMsg->isAllNotesOff())
 		{
-			synth->allNotesOff();
+			synth.allNotesOff();
 		}
 		if(midiMsg->isAllSoundOff())
 		{
-			synth->allSoundOff();
+			synth.allSoundOff();
 		}
 
 	}
@@ -605,7 +605,7 @@ void ObxdAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& mi
 	{
 		processMidiPerSample(&ppp,samplePos);
 
-		synth->processSample(channelData1+samplePos,channelData2+samplePos);
+		synth.processSample(channelData1+samplePos,channelData2+samplePos);
 
 		samplePos++;
 	}
