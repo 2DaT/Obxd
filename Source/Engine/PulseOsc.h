@@ -28,7 +28,7 @@ class PulseOsc
 {
 	DelayLine<Samples> del1;
 	bool pw1t;
-	float *buffer1;
+	float buffer1[Samples*2];
 	const int hsam;
 	const int n;
 	int bP1;
@@ -39,13 +39,13 @@ public:
 	//	del1 = new DelayLine(hsam);
 		pw1t = false;
 		bP1=0;
-		buffer1= new float[n];
+		//buffer1= new float[n];
 		for(int i = 0 ; i < n ; i++)
 			buffer1[i]=0;
 	}
 	~PulseOsc()
 	{
-		delete buffer1;
+	//	delete buffer1;
 	//	delete del1;
 	}
 	inline float aliasReduction()

@@ -28,7 +28,7 @@ class TriangleOsc
 {
 	DelayLine<Samples> del1;
 	bool fall;
-	float *buffer1,*buffer2;
+	float buffer1[Samples*2];
 	const int hsam;
 	const int n;
 
@@ -40,17 +40,13 @@ public:
 		//del1 =new DelayLine(hsam);
 		fall = false;
 		bP1=bP2=0;
-		buffer1= new float[n];
+	//	buffer1= new float[n];
 		for(int i = 0 ; i < n ; i++)
 			buffer1[i]=0;
-		buffer2= new float[n];
-		for(int i = 0 ; i < n ; i++)
-			buffer2[i]=0;
 	}
 	~TriangleOsc()
 	{
-		delete buffer1;
-		delete buffer2;
+		//delete buffer1;
 		//delete del1;
 	}
 	inline float aliasReduction()

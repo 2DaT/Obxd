@@ -27,7 +27,7 @@
 class SawOsc 
 {
 	DelayLine<Samples> del1;
-	float *buffer1;
+	float buffer1[Samples*2];
 	const int hsam;
 	const int n;
 	int bP1;
@@ -37,14 +37,14 @@ public:
 	{
 		bP1=0;
 		//del1 = new DelayLine(hsam);
-		buffer1= new float[n];
+		//buffer1= new float[n];
 		for(int i = 0 ; i < n ; i++)
 			buffer1[i]=0;
 	}
 	~SawOsc()
 	{
 		//delete del1;
-		delete buffer1;
+		//delete buffer1;
 	}
 	inline float aliasReduction()
 	{
