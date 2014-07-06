@@ -52,8 +52,11 @@ public:
 	ObxdVoice voices[MAX_VOICES];
 	bool uni;
 	bool Oversample;
+
+	bool economyMode;
 	Motherboard(): left(),right()
 	{
+		economyMode = true;
 		lkl=lkr=0;
 		vibratoEnabled = true;
 		asPlayedMode = false;
@@ -322,18 +325,23 @@ public:
 		float viblfo = vibratoEnabled?(vibratoLfo.getVal() * vibratoAmount):0;
 		for(int i = 0 ; i < totalvc;i++)
 		{
-			float mem[2] = {0,0};
-			voices[i].lfoIn=lfovalue;
-			voices[i].lfoVibratoIn=viblfo;
-			(voices[i].ProcessSample(mem));
-			float x1 = mem[0];
-			vl+=x1*(1-pannings[i]);
-			vr+=x1*(pannings[i]);
-			if(Oversample)
+			if(economyMode)
+				voices[i].checkAdsrState();
+			if(voices[i].shouldProcessed ||(!economyMode))
 			{
-				float x2 = mem[1];
-				vlo+=x2*(1-pannings[i]);
-				vro+=x2*(pannings[i]);
+				float mem[2] = {0,0};
+				voices[i].lfoIn=lfovalue;
+				voices[i].lfoVibratoIn=viblfo;
+				(voices[i].ProcessSample(mem));
+				float x1 = mem[0];
+				vl+=x1*(1-pannings[i]);
+				vr+=x1*(pannings[i]);
+				if(Oversample)
+				{
+					float x2 = mem[1];
+					vlo+=x2*(1-pannings[i]);
+					vro+=x2*(pannings[i]);
+				}
 			}
 		}
 		if(Oversample)

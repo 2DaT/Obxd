@@ -45,6 +45,10 @@ public:
 	{
 		return dl[iidx];
 	}
+	inline void fillZeroes()
+	{
+		zeromem(dl,DM*sizeof(float));
+	}
 
 };
 //class DelayLine

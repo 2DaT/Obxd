@@ -50,7 +50,6 @@ private:
 	//blep const
 	const int n;
 	const int hsam;
-	const float *Blep;
 	//delay line implements fixed sample delay
 	DelayLine<Samples> del1,del2;
 	DelayLine<Samples> xmodd;
@@ -65,6 +64,8 @@ public:
 
 	float tune;//+-1 
 	int oct;
+
+	float dirt;
 
 	float notePlaying;
 
@@ -95,11 +96,11 @@ public:
 	ObxdOscillatorB() : 
 		n(Samples*2),
 		hsam(Samples),
-		Blep(blep),
 		o1s(),o2s(),
 		o1p(),o2p(),
 		o1t(),o2t()
 	{
+		dirt = 0.1;
 		totalDetune = 0;
 		wn = Random(Random::getSystemRandom().nextInt64());
 		osc1Factor = wn.nextFloat()-0.5;
@@ -118,7 +119,6 @@ public:
 		notePlaying = 30;
 		pulseWidth = 0;
 		o1mx=o2mx=0;
-		Blep = blep;
 		x1=wn.nextFloat();
 		x2=wn.nextFloat();
 
@@ -145,7 +145,9 @@ public:
 	}
 	inline float ProcessSample()
 	{
-		pitch1 = getPitch(notePlaying + (quantizeCw?((int)(osc1p)):osc1p)+ pto1 + tune + oct+totalDetune*osc1Factor);
+		float noiseGen = wn.nextFloat()-0.5;
+		noiseGen = wn.nextFloat()-0.5;
+		pitch1 = getPitch(dirt * noiseGen + notePlaying + (quantizeCw?((int)(osc1p)):osc1p)+ pto1 + tune + oct+totalDetune*osc1Factor);
 		if(pitch1 > 21000)
 			pitch1 = 21000;
 		bool hsr = false;
@@ -184,8 +186,9 @@ public:
 		//Pitch control needs additional delay buffer to compensate
 		//This will give us less aliasing on xmod
 		//Hard sync gate signal delayed too
-		cvd.feedDelay( getPitch(notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct +totalDetune*osc2Factor));
-		pitch2 = cvd.getDelayedSample();
+		noiseGen = wn.nextFloat()-0.5;
+		cvd.feedDelay(dirt *noiseGen + notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct +totalDetune*osc2Factor);
+		pitch2 = getPitch(cvd.getDelayedSample());
 
 
 		if(pitch2>21000)
@@ -229,8 +232,8 @@ public:
 		else if(!osc2Pul)
 			osc2mix = o2t.getValue(x2) + o2t.aliasReduction();
 
-		//mixing 
-		float res =o1mx*osc1mix + o2mx *osc2mix + (wn.nextFloat()-0.5)*(nmx*1.3);
+		//mixing
+		float res =o1mx*osc1mix + o2mx *osc2mix + (noiseGen)*(nmx*1.3);
 		return res*3;
 	}
 };

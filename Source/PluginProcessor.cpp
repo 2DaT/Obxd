@@ -60,6 +60,9 @@ void ObxdAudioProcessor::setParameter (int index, float newValue)
 	programs.currentProgramPtr->values[index] = newValue;
 	switch(index)
 	{
+	case ECONOMY_MODE:
+		synth.procEconomyMode(newValue);
+		break;
 	case VAMPENV:
 		synth.procAmpVelocityAmount(newValue);
 		break;
@@ -271,6 +274,8 @@ const String ObxdAudioProcessor::getParameterName (int index)
 {
 	switch(index)
 	{
+	case ECONOMY_MODE:
+		return S("EconomyMode");
 	case UNLEARN:
 		return S("MidiUnlearn");
 	case MIDILEARN:
@@ -503,7 +508,6 @@ void ObxdAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 	nextMidi= new MidiMessage(0xF0);
 	midiMsg = new MidiMessage(0xF0);
 	synth.setSampleRate(sampleRate);
-
 }
 
 void ObxdAudioProcessor::releaseResources()

@@ -43,6 +43,8 @@ private:
 	//JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObxdVoice)
 public:
 	bool sustainHold;
+	//bool resetAdsrsOnAttack;
+
 	AdsrEnvelope env;
 	AdsrEnvelope fenv;
 	ObxdOscillatorB osc;
@@ -69,7 +71,9 @@ public:
 	int midiIndx;
 
 	bool Active;
-	bool fltKF;
+	bool shouldProcessed;
+
+	float fltKF;
 
 	float porta;
 	float prtst;
@@ -94,7 +98,7 @@ public:
 	bool fourpole;
 
 
-	DelayLine<Samples*2> lenvd,fenvd;
+	DelayLine<Samples*2> lenvd,fenvd,lfod;
 
 	ApInterpolator ap;
 	float oscpsw;
@@ -102,10 +106,11 @@ public:
 	float briHold;
 
 	ObxdVoice() 
-		: ap(),
-		ng()
+		: ap()
 	{
+		ng = Random(Random::getSystemRandom().nextInt64());
 		sustainHold = false;
+		shouldProcessed = false;
 		vamp=vflt=0;
 		velocityValue=0;
 		lfoVibratoIn=0;
@@ -146,20 +151,35 @@ public:
 		//implements rc circuit
 		float ptNote  =tptlpupw(prtst, midiIndx-81, porta * (1+PortaDetune*PortaDetuneAmt),sampleRateInv);
 		osc.notePlaying = ptNote;
-		//both envelopes needs a delay equal to osc internal delay
+		//both envelopes and filter cv need a delay equal to osc internal delay
+
+		lfod.feedDelay(lfoIn);
+		float lfoDelayed = lfod.getDelayedSample();
 		float envm = fenv.processSample() * (1 - (1-velocityValue)*vflt);
 		fenvd.feedDelay(envm);
-		float cutoffcalc = jmin(getPitch((lfof?lfoIn*lfoa1:0)+cutoff+FltDetune*FltDetAmt+ fenvamt*fenvd.getDelayedSample() -45 + (fltKF ?ptNote+40:0)), (flt.SampleRate*0.5f-120.0f));
 		lenvd.feedDelay(env.processSample() * (1 - (1-velocityValue)*vamp));
+		//filter exp cutoff calculation
+		float cutoffcalc = jmin(getPitch(
+			(ng.nextFloat()-0.5)*20+
+			(lfof?lfoDelayed*lfoa1:0)+
+			cutoff+
+			FltDetune*FltDetAmt+
+			fenvamt*fenvd.getDelayedSample()
+			-45 + (fltKF*(ptNote+40)))
+			, (flt.SampleRate*0.5f-120.0f));//for numerical stability purposes
 
+
+		//PW modulation
 		osc.pw1 = lfopw1?lfoIn*lfoa2:0;
 		osc.pw2 = lfopw2?lfoIn*lfoa2:0;
+
+		//Pitch modulation
 		osc.pto1 =   (!pitchWheelOsc2Only? (pitchWheel*pitchWheelAmt):0 ) + ( lfoo1?lfoIn*lfoa1:0) + lfoVibratoIn;
 		osc.pto2 =  (pitchWheel *pitchWheelAmt) + (lfoo2?lfoIn*lfoa1:0) + (envpitchmod * envm) + lfoVibratoIn;
 
 
 
-		//variable sort magic
+		//variable sort magic - upsample trick
 		float env = lenvd.getDelayedSample();
 
 		float x2 = 0;
@@ -224,6 +244,10 @@ public:
 		sampleRateInv = 1 / sr;
 		brightCoef = tan(jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi) * flt.sampleRateInv);
 	}
+	void checkAdsrState()
+	{
+		shouldProcessed = env.isActive();
+	}
 	void ResetEnvelope()
 	{
 		env.ResetEnvelopeState();
@@ -237,8 +261,17 @@ public:
 	}
 	void NoteOn(int mididx,float velocity)
 	{
+		if(!shouldProcessed)
+		{
+			//When your processing is paused we need to clear delay lines and envelopes
+			//Not doing this will cause clicks of glitches
+			lenvd.fillZeroes();
+			fenvd.fillZeroes();
+			ResetEnvelope();
+		}
+		shouldProcessed = true;
 		if(velocity!=-0.5)
-		velocityValue = velocity;
+			velocityValue = velocity;
 		midiIndx = mididx;
 		if((!Active)||(legatoMode&1))
 			env.triggerAttack();

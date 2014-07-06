@@ -64,6 +64,7 @@ public:
 		values[PAN6]=0.5;
 		values[PAN7]=0.5;
 		values[PAN8]=0.5;
+		values[ECONOMY_MODE] = 1;
 	}
 	~ObxdParams()
 	{

@@ -47,7 +47,7 @@ public:
 		s1=s2=s3=s4=0;
 		SampleRate = 44000;
 		sampleRateInv = 1 / SampleRate;
-		rcor =560.0 / 44000;
+		rcor =500.0 / 44000;
 		rcorInv = 1 / rcor;
 		rcor24 = 970.0 / 44000;
 		rcor24Inv = 1 / rcor24;
@@ -65,7 +65,7 @@ public:
 		SampleRate = sr;
 		sampleRateInv = 1/SampleRate;
 		float rcrate =sqrt((44000/SampleRate));
-		rcor = (480.0 / 44000)*rcrate;
+		rcor = (500.0 / 44000)*rcrate;
 		rcor24 = (970.0 / 44000)*rcrate;
 		rcorInv = 1 / rcor;
 		rcor24Inv = 1 / rcor24;

@@ -36,7 +36,7 @@ private:
 	ParamSmoother cutoffSmoother;
 	ParamSmoother pitchWheelSmoother;
 	ParamSmoother modWheelSmoother;
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthEngine)
+	//JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthEngine)
 public:
 	SynthEngine():
 		cutoffSmoother(),
@@ -99,6 +99,16 @@ public:
 	{
 		synth.setNoteOff(noteNo);
 	}
+	void procEconomyMode(float val)
+	{
+		synth.economyMode = val>0.5;
+	}
+#define ForEachVoice(expr) \
+	for(int i = 0 ; i < synth.MAX_VOICES;i++) \
+		{\
+			synth.voices[i].expr;\
+		}\
+
 	void procAmpVelocityAmount(float val)
 	{
 		for(int i = 0 ; i < synth.MAX_VOICES;i++)
@@ -188,7 +198,7 @@ public:
 	{
 		for(int i = 0 ; i < synth.MAX_VOICES;i++)
 		{
-			synth.voices[i].fltKF = param>0.5;
+			synth.voices[i].fltKF = param;
 		}
 	}
 	void processUnison(float param)
@@ -373,7 +383,7 @@ public:
 	{
 		for(int i = 0 ; i < synth.MAX_VOICES;i++)
 		{
-			synth.voices[i].setBrightness(  linsc(param,10000,26000));
+			synth.voices[i].setBrightness(  linsc(param,7000,26000));
 		}
 	}
 	void processOsc2Det(float param)
@@ -424,10 +434,7 @@ public:
 	}
 	inline void processCutoffSmoothed(float param)
 	{
-			for(int i = 0 ; i < synth.MAX_VOICES;i++)
-		{
-			synth.voices[i].cutoff = param;
-		}
+		ForEachVoice(cutoff=param);
 	}
 	void processBandpassSw(float param)
 	{
