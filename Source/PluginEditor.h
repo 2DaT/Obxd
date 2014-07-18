@@ -40,7 +40,7 @@ public:
         its parameters changes.
     */
 	void changeListenerCallback (ChangeBroadcaster* source);
-	int changeListenerCallback (void*){return 0;};
+	//int changeListenerCallback (void*){return 0;};
 
 
 

@@ -19,6 +19,7 @@ It contains the basic startup code for a Juce application.
 #define S(T) (juce::String(T))
 ObxdAudioProcessor::ObxdAudioProcessor() : bindings(),programs()
 {
+	isHostAutomatedChange = true;
 	midiControlledParamSet = false;
 	lastMovedController = 0;
 	lastUsedParameter = 0;
@@ -56,10 +57,13 @@ float ObxdAudioProcessor::getParameter (int index)
 void ObxdAudioProcessor::setParameter (int index, float newValue)
 {
 	if(!midiControlledParamSet || index==MIDILEARN || index==UNLEARN)
-	lastUsedParameter = index;
+		lastUsedParameter = index;
 	programs.currentProgramPtr->values[index] = newValue;
 	switch(index)
 	{
+	case LFO_SYNC:
+		synth.procLfoSync(newValue);
+		break;
 	case ECONOMY_MODE:
 		synth.procEconomyMode(newValue);
 		break;
@@ -268,12 +272,15 @@ void ObxdAudioProcessor::setParameter (int index, float newValue)
 		synth.processPan(newValue,8);
 		break;
 	}
-	sendChangeMessage();
+	if(isHostAutomatedChange)
+		sendChangeMessage();
 }
 const String ObxdAudioProcessor::getParameterName (int index)
 {
 	switch(index)
 	{
+	case LFO_SYNC:
+		return S("LfoSync");
 	case ECONOMY_MODE:
 		return S("EconomyMode");
 	case UNLEARN:
@@ -486,8 +493,11 @@ void ObxdAudioProcessor::setCurrentProgram (int index)
 {
 	programs.currentProgram = index;
 	programs.currentProgramPtr = programs.programs + programs.currentProgram;
+	isHostAutomatedChange = false;
 	for(int i = 0 ; i < PARAM_COUNT;i++)
 		setParameter(i,programs.currentProgramPtr->values[i]);
+	isHostAutomatedChange = true;
+	sendSynchronousChangeMessage();
 }
 
 const String ObxdAudioProcessor::getProgramName (int index)
@@ -497,7 +507,7 @@ const String ObxdAudioProcessor::getProgramName (int index)
 
 void ObxdAudioProcessor::changeProgramName (int index, const String& newName)
 {
-	 programs.programs[index].name = newName;
+	programs.programs[index].name = newName;
 }
 
 //==============================================================================
@@ -599,12 +609,16 @@ void ObxdAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& mi
 	_MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
 #endif
 	MidiBuffer::Iterator ppp(midiMessages);
-	const ScopedLock sl (this->getCallbackLock());
 	hasMidiMessage = ppp.getNextEvent(*nextMidi,midiEventPos);
 	int samplePos = 0;
 	int numSamples = buffer.getNumSamples();
 	float* channelData1 = buffer.getSampleData(0);
 	float* channelData2 = buffer.getSampleData(1);
+	AudioPlayHead::CurrentPositionInfo pos;
+    if (getPlayHead() != 0 && getPlayHead()->getCurrentPosition (pos))
+    {
+		synth.setPlayHead(pos.bpm,pos.ppqPosition);
+    }
 	while (samplePos < numSamples)
 	{
 		processMidiPerSample(&ppp,samplePos);
@@ -623,7 +637,7 @@ bool ObxdAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* ObxdAudioProcessor::createEditor()
 {
-	 return new ObxdAudioProcessorEditor (this);
+	return new ObxdAudioProcessorEditor (this);
 	//return NULL;
 }
 
@@ -638,21 +652,21 @@ void ObxdAudioProcessor::getStateInformation (MemoryBlock& destData)
 	xmlState.setAttribute(S("currentProgram"),programs.currentProgram);
 	XmlElement* xprogs=  new XmlElement("programs");
 	for(int i = 0 ; i < PROGRAMCOUNT;i++)
-		 {
-			 XmlElement* xpr = new XmlElement("program");
-			 xpr->setAttribute(S("programName"),programs.programs[i].name);
-			 for(int k = 0 ; k < PARAM_COUNT;k++)
-			 {
-				 xpr->setAttribute(String(k), programs.programs[i].values[k]);
-			 }
-			 xprogs->addChildElement(xpr);
-		 }
-		xmlState.addChildElement(xprogs);
-		for(int i = 0 ; i < 255;i++)
+	{
+		XmlElement* xpr = new XmlElement("program");
+		xpr->setAttribute(S("programName"),programs.programs[i].name);
+		for(int k = 0 ; k < PARAM_COUNT;k++)
 		{
-			xmlState.setAttribute(String(i),bindings.controllers[i]);
+			xpr->setAttribute(String(k), programs.programs[i].values[k]);
 		}
-		 copyXmlToBinary(xmlState,destData);
+		xprogs->addChildElement(xpr);
+	}
+	xmlState.addChildElement(xprogs);
+	for(int i = 0 ; i < 255;i++)
+	{
+		xmlState.setAttribute(String(i),bindings.controllers[i]);
+	}
+	copyXmlToBinary(xmlState,destData);
 }
 
 void ObxdAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
@@ -661,24 +675,24 @@ void ObxdAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 	// whose contents will have been created by the getStateInformation() call.
 	XmlElement* const xmlState = getXmlFromBinary(data,sizeInBytes);
 	XmlElement* xprogs = xmlState->getFirstChildElement();
-	if(xprogs->hasTagName(S("programs")));
+	if(xprogs->hasTagName(S("programs")))
 	{
 		int i = 0 ;
 		forEachXmlChildElement (*xprogs, e)
-            {
-				programs.programs[i].setDefaultValues();
-				for(int k = 0 ; k < PARAM_COUNT;k++)
-				{
-					programs.programs[i].values[k] = e->getDoubleAttribute(String(k),programs.programs[i].values[k]);
-				}
-				programs.programs[i].name= e->getStringAttribute(S("programName"),S("Default"));
-                i++;
-            }
+		{
+			programs.programs[i].setDefaultValues();
+			for(int k = 0 ; k < PARAM_COUNT;k++)
+			{
+				programs.programs[i].values[k] = e->getDoubleAttribute(String(k),programs.programs[i].values[k]);
+			}
+			programs.programs[i].name= e->getStringAttribute(S("programName"),S("Default"));
+			i++;
+		}
 	}
 	for(int i = 0 ; i < 255;i++)
-		{
-			bindings.controllers[i] = xmlState->getIntAttribute(String(i),0);
-		}
+	{
+		bindings.controllers[i] = xmlState->getIntAttribute(String(i),0);
+	}
 	setCurrentProgram(xmlState->getIntAttribute(S("currentProgram"),0));
 	delete xmlState;
 }
@@ -687,21 +701,22 @@ void  ObxdAudioProcessor::setCurrentProgramStateInformation(const void* data,int
 	XmlElement* const e = getXmlFromBinary(data,sizeInBytes);
 	programs.currentProgramPtr->setDefaultValues();
 	for(int k = 0 ; k < PARAM_COUNT;k++)
-				{
-					programs.currentProgramPtr->values[k] = e->getDoubleAttribute(String(k),programs.currentProgramPtr->values[k]);
-				}
+	{
+		programs.currentProgramPtr->values[k] = e->getDoubleAttribute(String(k),programs.currentProgramPtr->values[k]);
+	}
 	programs.currentProgramPtr->name =  e->getStringAttribute(S("programName"),S("Default"));
 	setCurrentProgram(programs.currentProgram);
+	delete e;
 }
 void ObxdAudioProcessor::getCurrentProgramStateInformation(MemoryBlock& destData)
 {
 	XmlElement xmlState = XmlElement("Datsounds");
 	for(int k = 0 ; k < PARAM_COUNT;k++)
-				{
-				 xmlState.setAttribute(String(k), programs.currentProgramPtr->values[k]);
+	{
+		xmlState.setAttribute(String(k), programs.currentProgramPtr->values[k]);
 	}
 	xmlState.setAttribute(S("programName"),programs.currentProgramPtr->name);
-		 copyXmlToBinary(xmlState,destData);
+	copyXmlToBinary(xmlState,destData);
 }
 //==============================================================================
 // This creates new instances of the plugin..

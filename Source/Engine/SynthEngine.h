@@ -36,21 +36,33 @@ private:
 	ParamSmoother cutoffSmoother;
 	ParamSmoother pitchWheelSmoother;
 	ParamSmoother modWheelSmoother;
+	float sampleRate;
+	bool isLfoSync;
 	//JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthEngine)
 public:
+
 	SynthEngine():
 		cutoffSmoother(),
+		//synth = new Motherboard();
 		pitchWheelSmoother(),
 		modWheelSmoother()
 	{
-		//synth = new Motherboard();
+		isLfoSync = false;
 	}
 	~SynthEngine()
 	{
 		//delete synth;
 	}
+	void setPlayHead(float bpm,float retrPos)
+	{
+		if(isLfoSync)
+		{
+			synth.mlfo.hostSyncRetrigger(bpm,retrPos);
+		}
+	}
 	void setSampleRate(float sr)
 	{
+		sampleRate = sr;
 		cutoffSmoother.setSampleRate(sr);
 		pitchWheelSmoother.setSampleRate(sr);
 		modWheelSmoother.setSampleRate(sr);
@@ -86,6 +98,14 @@ public:
 	void sustainOff()
 	{
 		synth.sustainOff();
+	}
+	void procLfoSync(float val)
+	{
+		isLfoSync = val>0.5;
+		if(val > 0.5)
+			synth.mlfo.setSynced();
+		else
+			synth.mlfo.setUnsynced();
 	}
 	void procAsPlayedAlloc(float val)
 	{
@@ -133,7 +153,7 @@ public:
 	}
 	void procModWheelFrequency(float val)
 	{
-		synth.vibratoLfo.Frequency = logsc(val,3,10);
+		synth.vibratoLfo.setFrequency (logsc(val,3,10));
 		synth.vibratoEnabled = val>0.05;
 	}
 	void procPitchWheel(float val)
@@ -218,7 +238,8 @@ public:
 	}
 	void processLfoFrequency(float param)
 	{
-		synth.mlfo.Frequency = logsc(param,0,50,120);
+		synth.mlfo.setRawParam(param);
+		synth.mlfo.setFrequency(logsc(param,0,50,120));
 	}
 	void processLfoSine(float param)
 	{

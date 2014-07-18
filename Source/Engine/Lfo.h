@@ -32,16 +32,49 @@ private:
     Random rg;
 	float SampleRate;
 	float SampleRateInv;
+
+	float syncRate;
+	bool synced;
+
 public:
 	float Frequency;
+	float phaseInc;
+	float frUnsc;//frequency value without sync
+	float rawParam;
 	int waveForm;
 	Lfo()
 	{
+		phaseInc = 0;
+		frUnsc=0;
+		syncRate = 1;
+		rawParam=0;
+		synced = false;
 		s1=0;
 		Frequency=1;
 		phase=0;
 		s=sq=sh=0;
 		rg=Random();
+	}
+	void setSynced()
+	{
+		synced = true;
+		recalcRate(rawParam);
+	}
+	void setUnsynced()
+	{
+		synced = false;
+		phaseInc = frUnsc * SampleRateInv;
+	}
+	void hostSyncRetrigger(float bpm,float quaters)
+	{
+		if(synced)
+		{
+			phaseInc = (bpm/60.0)*syncRate;
+			//how much it 
+			phase = phaseInc*quaters;
+			phaseInc*=SampleRateInv;
+			phase = (fmod(phase,1)*float_Pi*2-float_Pi);
+		}
 	}
 	inline float getVal()
 	{
@@ -61,7 +94,7 @@ public:
 	}
 	inline void update()
 	{
-		phase+=((Frequency * SampleRateInv * float_Pi*2));
+		phase+=((phaseInc * float_Pi*2));
 		sq = (phase>0?1:-1);
 		s = sin(phase);
 		if(phase > float_Pi)
@@ -70,5 +103,59 @@ public:
 			sh = rg.nextFloat()*2-1;
 		}
 
+	}
+	void setFrequency(float val)
+	{
+		frUnsc = val;
+		if(!synced)
+			phaseInc = val * SampleRateInv;
+	}
+	void setRawParam(float param)//used for synced rate changes
+	{
+		rawParam = param;
+		if(synced)
+		{
+			recalcRate(param);
+		}
+	}
+	void recalcRate(float param)
+	{
+		const int ratesCount = 9;
+		int parval = (int)(param*(ratesCount-1));
+		float rt = 1;
+		switch(parval)
+		{
+		case 0:
+			rt = 1.0 / 8;
+			break;
+		case 1:
+			rt = 1.0 / 4;
+			break;
+		case 2:
+			rt = 1.0 / 3;
+			break;
+		case 3:
+			rt = 1.0 / 2;
+			break;
+		case 4:
+			rt = 1.0;
+			break;
+		case 5:
+			rt = 3.0 / 2;
+			break;
+		case 6:
+			rt = 2;
+			break;
+		case 7:
+			rt = 3;
+			break;
+		case 8:
+			rt = 4;
+			break;
+		default:
+			rt = 1;
+			break;
+		}
+		syncRate = rt;
 	}
 };

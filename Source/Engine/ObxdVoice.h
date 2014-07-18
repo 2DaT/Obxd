@@ -159,13 +159,16 @@ public:
 		fenvd.feedDelay(envm);
 		lenvd.feedDelay(env.processSample() * (1 - (1-velocityValue)*vamp));
 		//filter exp cutoff calculation
-		float cutoffcalc = jmin(getPitch(
-			(ng.nextFloat()-0.5)*20+
+		float cutoffcalc = jmin(
+			getPitch(
 			(lfof?lfoDelayed*lfoa1:0)+
 			cutoff+
 			FltDetune*FltDetAmt+
-			fenvamt*fenvd.getDelayedSample()
-			-45 + (fltKF*(ptNote+40)))
+			fenvamt*fenvd.getDelayedSample()+
+			-45 + (fltKF*(ptNote+40))
+			)+
+			//noisy filter cutoff
+			(ng.nextFloat()-0.5f)*3.5f
 			, (flt.SampleRate*0.5f-120.0f));//for numerical stability purposes
 
 

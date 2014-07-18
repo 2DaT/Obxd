@@ -121,6 +121,9 @@ public:
 			case 3:
 				mc = y1;
 				break;
+			default:
+				mc=0;
+				break;
 			}
 			//half volume comp
 			return mc * (1 + R24 * 0.45);

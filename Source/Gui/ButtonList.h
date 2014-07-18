@@ -45,7 +45,7 @@ public:
 	{
 		return ((getSelectedId()-1)/ (float)(count-1));
 	}
-	void setValue(float val,int notify)
+	void setValue(float val,NotificationType notify)
 	{
 		setSelectedId((int)(val*(count -1) + 1),notify);
 	}

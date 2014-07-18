@@ -27,12 +27,12 @@
 class ObxdParams
 {
 public:
-	float* values;
+	float values[PARAM_COUNT];
 	String name;
 	ObxdParams()
 	{
 		name = "Default";
-		values = new float[PARAM_COUNT];
+		//values = new float[PARAM_COUNT];
 		setDefaultValues();
 	}
 	void setDefaultValues()
@@ -68,7 +68,7 @@ public:
 	}
 	~ObxdParams()
 	{
-		delete values;
+		//delete values;
 	}
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdParams)
+	//JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ObxdParams)
 };

@@ -127,7 +127,7 @@ ObxdAudioProcessorEditor::ObxdAudioProcessorEditor (ObxdAudioProcessor* ownerFil
 	legatoSwitch ->setValue(ownerFilter->getParameter(LEGATOMODE),dontSendNotification);
 
 
-	getFilter()->addChangeListener(this);
+	ownerFilter->addChangeListener(this);
 }
 void ObxdAudioProcessorEditor::placeLabel(int x , int y , String text)
 {
@@ -262,7 +262,6 @@ void ObxdAudioProcessorEditor::comboBoxChanged (ComboBox* cb)
 void ObxdAudioProcessorEditor::sliderValueChanged (Slider* c)
 {
 	ObxdAudioProcessor* flt = getFilter();
-	//		flt->beginParameterChangeGesture();
 #define sp(T) {flt->setParameterNotifyingHost(T,c->getValue());}
 #define handleSParam(K,T)  if (c == K) {sp(T)} else
 	handleSParam(cutoffKnob,CUTOFF)
@@ -300,7 +299,7 @@ void ObxdAudioProcessorEditor::sliderValueChanged (Slider* c)
 		handleSParam(lfoAmt1Knob,LFO1AMT)
 		handleSParam(lfoAmt2Knob,LFO2AMT)
 
-				handleSParam(pan1Knob,PAN1)
+		handleSParam(pan1Knob,PAN1)
 		handleSParam(pan2Knob,PAN2)
 		handleSParam(pan3Knob,PAN3)
 		handleSParam(pan4Knob,PAN4)

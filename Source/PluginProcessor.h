@@ -26,7 +26,6 @@
 #define PLUGINPROCESSOR_H_INCLUDED
 #include "JuceHeader.h"
 #include "Engine/SynthEngine.h"
-#include <stack>
 #include "Engine/midiMap.h"
 #include "Engine/ObxdBank.h"
 
@@ -72,7 +71,8 @@ public:
     int getNumParameters();
 
 	//
-
+	bool isHostAutomatedChange;
+	//
 
 	void initAllParams();
 	//
