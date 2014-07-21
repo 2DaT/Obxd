@@ -337,6 +337,26 @@ public:
 			synth.voices[i].osc.pulseWidth = linsc(param,0.0,0.95);
 		}
 	}
+	void processPwEnv(float param)
+	{
+		ForEachVoice (pwenvmod=linsc(param,0,0.85));
+	}
+	void processPwOfs(float param)
+	{
+		ForEachVoice(pwOfs = linsc(param,0,0.75));
+	}
+	void processPwEnvBoth(float param)
+	{
+		ForEachVoice(pwEnvBoth = param>0.5);
+	}
+	void processInvertFenv(float param)
+	{
+		ForEachVoice(invertFenv = param>0.5);
+	}
+	void processPitchModBoth(float param)
+	{
+		ForEachVoice(pitchModBoth = param>0.5);
+	}
 	void processOsc2Xmod(float param)
 	{
 		for(int i = 0 ; i < synth.MAX_VOICES;i++)
@@ -517,7 +537,7 @@ public:
 	{
 		for(int i = 0 ; i < synth.MAX_VOICES;i++)
 		{
-			synth.voices[i].env.setRelease(logsc(param,4,60000,900));
+			synth.voices[i].env.setRelease(logsc(param,8,60000,900));
 		}
 	}
 	void processLoudnessEnvelopeSustain(float param)
@@ -575,6 +595,10 @@ for(int i = 0 ; i < synth.MAX_VOICES;i++)
 		{
 			synth.voices[i].PortaDetuneAmt = linsc(param,0.0,0.75);
 		}
+	}
+	void processLoudnessDetune(float param)
+	{
+		ForEachVoice(levelDetuneAmt = linsc(param,0.0,0.67));
 	}
 
 		 

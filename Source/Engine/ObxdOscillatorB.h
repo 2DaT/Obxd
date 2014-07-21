@@ -233,7 +233,7 @@ public:
 			osc2mix = o2t.getValue(x2) + o2t.aliasReduction();
 
 		//mixing
-		float res =o1mx*osc1mix + o2mx *osc2mix + (noiseGen)*(nmx*1.3);
+		float res =o1mx*osc1mix + o2mx *osc2mix + (noiseGen)*(nmx*1.3 + 0.0016);
 		return res*3;
 	}
 };

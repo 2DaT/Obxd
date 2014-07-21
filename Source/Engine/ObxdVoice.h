@@ -66,6 +66,9 @@ public:
 	float PortaDetune;
 	float PortaDetuneAmt;
 
+	float levelDetune;
+	float levelDetuneAmt;
+
 	float brightCoef;
 
 	int midiIndx;
@@ -85,6 +88,7 @@ public:
 
 	float pitchWheel;
 	float pitchWheelAmt;
+
 	bool pitchWheelOsc2Only;
 
 	float lfoa1,lfoa2;
@@ -94,6 +98,14 @@ public:
 	bool Oversample;
 
 	float envpitchmod;
+	float pwenvmod;
+
+	float pwOfs;
+	bool pwEnvBoth;
+	bool pitchModBoth;
+
+	bool invertFenv;
+
 
 	bool fourpole;
 
@@ -108,6 +120,10 @@ public:
 	ObxdVoice() 
 		: ap()
 	{
+		pitchModBoth = false;
+		pwOfs = 0 ;
+		invertFenv = false;
+		pwEnvBoth = false;
 		ng = Random(Random::getSystemRandom().nextInt64());
 		sustainHold = false;
 		shouldProcessed = false;
@@ -118,6 +134,7 @@ public:
 		legatoMode = 0;
 		brightCoef =briHold= 1;
 		envpitchmod = 0;
+		pwenvmod = 0;
 		oscpsw = 0;
 		cutoffwas = envelopewas=0;
 		Oversample= false;
@@ -126,6 +143,7 @@ public:
 		lfoIn=0;
 		PortaDetuneAmt=0;
 		FltDetAmt=0;
+		levelDetuneAmt=0;
 		porta =0;
 		prtst=0;
 		fltKF= false;
@@ -133,6 +151,7 @@ public:
 		fenvamt = 0;
 		Active = false;
 		midiIndx = 30;
+		levelDetune = Random::getSystemRandom().nextFloat()-0.5;
 		EnvDetune = Random::getSystemRandom().nextFloat()-0.5;
 		FenvDetune = Random::getSystemRandom().nextFloat()-0.5;
 		FltDetune = Random::getSystemRandom().nextFloat()-0.5;
@@ -155,7 +174,10 @@ public:
 
 		lfod.feedDelay(lfoIn);
 		float lfoDelayed = lfod.getDelayedSample();
+		//filter envelope undelayed
 		float envm = fenv.processSample() * (1 - (1-velocityValue)*vflt);
+		if(invertFenv)
+			envm = -envm;
 		fenvd.feedDelay(envm);
 		lenvd.feedDelay(env.processSample() * (1 - (1-velocityValue)*vamp));
 		//filter exp cutoff calculation
@@ -173,11 +195,11 @@ public:
 
 
 		//PW modulation
-		osc.pw1 = lfopw1?lfoIn*lfoa2:0;
-		osc.pw2 = lfopw2?lfoIn*lfoa2:0;
+		osc.pw1 = (lfopw1?(lfoIn * lfoa2):0) + (pwEnvBoth?(pwenvmod * envm) : 0);
+		osc.pw2 = (lfopw2?(lfoIn * lfoa2):0) + pwenvmod * envm + pwOfs;
 
 		//Pitch modulation
-		osc.pto1 =   (!pitchWheelOsc2Only? (pitchWheel*pitchWheelAmt):0 ) + ( lfoo1?lfoIn*lfoa1:0) + lfoVibratoIn;
+		osc.pto1 =   (!pitchWheelOsc2Only? (pitchWheel*pitchWheelAmt):0 ) + ( lfoo1?(lfoIn * lfoa1):0) + (pitchModBoth?(envpitchmod * envm):0) + lfoVibratoIn;
 		osc.pto2 =  (pitchWheel *pitchWheelAmt) + (lfoo2?lfoIn*lfoa1:0) + (envpitchmod * envm) + lfoVibratoIn;
 
 
@@ -186,7 +208,10 @@ public:
 		float env = lenvd.getDelayedSample();
 
 		float x2 = 0;
-		float oscps = osc.ProcessSample();
+
+		float oscps = osc.ProcessSample() * (1 - levelDetuneAmt*levelDetune);
+
+
 		oscps = oscps - 0.45*tptlpupw(c1,oscps,15,sampleRateInv);
 		if(Oversample)
 		{

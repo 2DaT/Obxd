@@ -61,6 +61,24 @@ void ObxdAudioProcessor::setParameter (int index, float newValue)
 	programs.currentProgramPtr->values[index] = newValue;
 	switch(index)
 	{
+	case PW_ENV_BOTH:
+		synth.processPwEnvBoth(newValue);
+		break;
+	case PW_OSC2_OFS:
+		synth.processPwOfs(newValue);
+		break;
+	case ENV_PITCH_BOTH:
+		synth.processPitchModBoth(newValue);
+		break;
+	case FENV_INVERT:
+		synth.processInvertFenv(newValue);
+		break;
+	case LEVEL_DIF:
+		synth.processLoudnessDetune(newValue);
+		break;
+	case PW_ENV:
+		synth.processPwEnv(newValue);
+		break;
 	case LFO_SYNC:
 		synth.procLfoSync(newValue);
 		break;
@@ -279,6 +297,18 @@ const String ObxdAudioProcessor::getParameterName (int index)
 {
 	switch(index)
 	{
+	case ENV_PITCH_BOTH:
+		return S("EnvPitchBoth");
+	case FENV_INVERT:
+		return S("FenvInvert");
+	case PW_OSC2_OFS:
+		return S("PwOfs");
+	case LEVEL_DIF:
+		return S("LevelDif");
+	case PW_ENV_BOTH:
+		return S("PwEnvBoth");
+	case PW_ENV:
+		return S("PwEnv");
 	case LFO_SYNC:
 		return S("LfoSync");
 	case ECONOMY_MODE:
