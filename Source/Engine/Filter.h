@@ -32,6 +32,7 @@ private:
 	float R24;
 	float rcor,rcorInv;
 	float rcor24,rcor24Inv;
+
 	//24 db multimode
 	float mmt;
 	int mmch;
@@ -40,8 +41,10 @@ public:
 	float sampleRateInv;
 	bool bandPassSw;
 	float mm;
+	bool selfOscPush;
 	Filter()
 	{
+		selfOscPush = false;
 		bandPassSw = false;
 		mm=0;
 		s1=s2=s3=s4=0;
@@ -75,11 +78,71 @@ public:
 		R = 1-res;
 		R24 =( 3.5 * res);
 	}
+	
+	inline float diode_pair(float x)
+	{
+		return sinh(x);
+	}
+	inline float diodePairRes(float x)
+	{
+		if(x == 0)
+			return 1;
+		return diode_pair(x) / x;
+	}
+	inline float diodePairResistanceApprox(float x)
+	{
+		return (((((0.0103592f)*x + 0.00920833f)*x + 0.185f)*x + 0.05f )*x + 1.0f);
+		//Taylor approx of slightly mismatched diode pair
+		//1.+0.05 x+0.185 x^2+0.00920833 x^3+0.0103592 x^4+0.000510292 x^5+O(x^6)
+	}
+	//resolve 0-delay feedback
 	inline float NR(float sample, float g)
 	{ 
-		float y = ((sample- R * s1*2 - g*s1  - s2)/(1+ g*(2*R + g))) + dc;
+		//calculating feedback non-linear transconducance and compensated for R (-1)
+		//Boosting non-linearity
+		float tCfb;
+		if(!selfOscPush)
+			tCfb = diodePairResistanceApprox(s1*0.084) - 1;
+		else
+			tCfb = diodePairResistanceApprox(s1*0.084) - 1.035;
+		//float tCfb = 0;
+		//disable non-linearity == digital filter
+
+		//resolve linear feedback
+		float y = ((sample - 2*(s1*(R+tCfb)) - g*s1  - s2)/(1+ g*(2*(R+tCfb)+ g)));
+
+		//float y = ((sample - 2*(s1*(R+tCfb)) - g2*s1  - s2)/(1+ g1*(2*(R+tCfb)+ g2)));
+
 		return y;
 	}
+	inline float Apply(float sample,float g)
+        {
+
+			float gpw = (float)tan(g *sampleRateInv * juce::float_Pi);
+			g = gpw;
+            //float v = ((sample- R * s1*2 - g2*s1 - s2)/(1+ R*g1*2 + g1*g2));
+			float v = NR(sample,g);
+
+            float y1 = v*g + s1;
+            s1 = v*g + y1;
+
+			float y2 = y1*g + s2;
+			s2 = y1*g + y2;
+
+            double mc;
+			if(!bandPassSw)
+            mc = (1-mm)*y2 + (mm)*v;
+			else
+			{
+
+				mc =2 * ( mm < 0.5 ? 
+					((0.5 - mm) * y2 + (mm) * y1):
+					((1-mm) * y1 + (mm-0.5) * v)
+						);
+			}
+
+			return mc;
+        }
 	inline float NR24(float sample,float g,float lpc)
 	{
 		float ml = 1 / (1+g);
@@ -92,6 +155,8 @@ public:
 	{
 			float g1 = (float)tan(g *sampleRateInv * juce::float_Pi);
 			g = g1;
+
+
 			
 			float lpc = g / (1 + g);
 			float y0 = NR24(sample,g,lpc);
@@ -128,31 +193,4 @@ public:
 			//half volume comp
 			return mc * (1 + R24 * 0.45);
 	}
-	inline float Apply(float sample,float g)
-        {
-			float g1 = (float)tan(g *sampleRateInv * juce::float_Pi);
-			g = g1;
-            //float v = ((sample- R * s1*2 - g2*s1 - s2)/(1+ R*g1*2 + g1*g2));
-			float v = NR(sample,g);
-            float y1 = v*g + s1;
-            s1 = v*g+y1;
-			//damping
-			s1 = atan(s1 * rcor) * rcorInv;
-
-			float y2 = y1*g + s2;
-			s2 = y2 + y1*g;
-            double mc;
-			if(!bandPassSw)
-            mc = (1-mm)*y2 + (mm)*v;
-			else
-			{
-
-				mc =2 * ( mm < 0.5 ? 
-					((0.5 - mm) * y2 + (mm) * y1):
-					((1-mm) * y1 + (mm-0.5) * v)
-						);
-			}
-
-			return mc;
-        }
 };

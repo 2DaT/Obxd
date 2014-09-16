@@ -37,7 +37,6 @@ private:
 	ParamSmoother pitchWheelSmoother;
 	ParamSmoother modWheelSmoother;
 	float sampleRate;
-	bool isLfoSync;
 	//JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthEngine)
 public:
 
@@ -47,7 +46,6 @@ public:
 		pitchWheelSmoother(),
 		modWheelSmoother()
 	{
-		isLfoSync = false;
 	}
 	~SynthEngine()
 	{
@@ -55,10 +53,7 @@ public:
 	}
 	void setPlayHead(float bpm,float retrPos)
 	{
-		if(isLfoSync)
-		{
-			synth.mlfo.hostSyncRetrigger(bpm,retrPos);
-		}
+		synth.mlfo.hostSyncRetrigger(bpm,retrPos);
 	}
 	void setSampleRate(float sr)
 	{
@@ -101,7 +96,6 @@ public:
 	}
 	void procLfoSync(float val)
 	{
-		isLfoSync = val>0.5;
 		if(val > 0.5)
 			synth.mlfo.setSynced();
 		else
@@ -220,6 +214,11 @@ public:
 		{
 			synth.voices[i].fltKF = param;
 		}
+	}
+	void processSelfOscPush(float param)
+	{
+		ForEachVoice(selfOscPush = param>0.5);
+		ForEachVoice(flt.selfOscPush = param>0.5);
 	}
 	void processUnison(float param)
 	{

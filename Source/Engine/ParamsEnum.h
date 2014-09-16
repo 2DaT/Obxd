@@ -89,5 +89,6 @@ enum ObxdParameters
 	FENV_INVERT,
 	PW_OSC2_OFS,
 	LEVEL_DIF,
+	SELF_OSC_PUSH,
 	PARAM_COUNT,
 };

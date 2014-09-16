@@ -10,11 +10,16 @@ It contains the basic startup code for a Juce application.
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "Engine/Params.h"
-#include <xmmintrin.h>
-
-#ifdef __SSE3__
-#include <pmmintrin.h>
+//only sse2 version on windows
+#ifdef _WINDOWS
+#define __SSE2__
+#define __SSE__
 #endif
+
+#ifdef __SSE2__
+#include <xmmintrin.h>
+#endif
+
 //==============================================================================
 #define S(T) (juce::String(T))
 ObxdAudioProcessor::ObxdAudioProcessor() : bindings(),programs()
@@ -61,6 +66,9 @@ void ObxdAudioProcessor::setParameter (int index, float newValue)
 	programs.currentProgramPtr->values[index] = newValue;
 	switch(index)
 	{
+	case SELF_OSC_PUSH:
+		synth.processSelfOscPush(newValue);
+		break;
 	case PW_ENV_BOTH:
 		synth.processPwEnvBoth(newValue);
 		break;
@@ -297,6 +305,8 @@ const String ObxdAudioProcessor::getParameterName (int index)
 {
 	switch(index)
 	{
+	case SELF_OSC_PUSH:
+		return S("SelfOscPush");
 	case ENV_PITCH_BOTH:
 		return S("EnvPitchBoth");
 	case FENV_INVERT:
@@ -635,7 +645,7 @@ void ObxdAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& mi
 #ifdef __SSE__
 	_MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
 #endif
-#ifdef __SSE3__
+#ifdef __SSE2__
 	_MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
 #endif
 	MidiBuffer::Iterator ppp(midiMessages);

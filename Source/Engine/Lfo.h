@@ -63,16 +63,14 @@ public:
 	void setUnsynced()
 	{
 		synced = false;
-		phaseInc = frUnsc * SampleRateInv;
+		phaseInc = frUnsc;
 	}
 	void hostSyncRetrigger(float bpm,float quaters)
 	{
 		if(synced)
 		{
 			phaseInc = (bpm/60.0)*syncRate;
-			//how much it 
 			phase = phaseInc*quaters;
-			phaseInc*=SampleRateInv;
 			phase = (fmod(phase,1)*float_Pi*2-float_Pi);
 		}
 	}
@@ -94,7 +92,7 @@ public:
 	}
 	inline void update()
 	{
-		phase+=((phaseInc * float_Pi*2));
+		phase+=((phaseInc * float_Pi*2 * SampleRateInv));
 		sq = (phase>0?1:-1);
 		s = sin(phase);
 		if(phase > float_Pi)
@@ -108,7 +106,7 @@ public:
 	{
 		frUnsc = val;
 		if(!synced)
-			phaseInc = val * SampleRateInv;
+			phaseInc = val;
 	}
 	void setRawParam(float param)//used for synced rate changes
 	{

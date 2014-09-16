@@ -96,6 +96,7 @@ public:
 	bool lfopw1,lfopw2;
 
 	bool Oversample;
+	bool selfOscPush;
 
 	float envpitchmod;
 	float pwenvmod;
@@ -120,6 +121,7 @@ public:
 	ObxdVoice() 
 		: ap()
 	{
+		selfOscPush = false;
 		pitchModBoth = false;
 		pwOfs = 0 ;
 		invertFenv = false;
@@ -188,10 +190,15 @@ public:
 			FltDetune*FltDetAmt+
 			fenvamt*fenvd.getDelayedSample()+
 			-45 + (fltKF*(ptNote+40))
-			)+
+			)
 			//noisy filter cutoff
-			(ng.nextFloat()-0.5f)*3.5f
+			+(ng.nextFloat()-0.5f)*3.5f
 			, (flt.SampleRate*0.5f-120.0f));//for numerical stability purposes
+
+		//limit our max cutoff on self osc to prevent alising
+		if(selfOscPush)
+			cutoffcalc = jmin(cutoffcalc,22050.0f);
+
 
 
 		//PW modulation
@@ -212,7 +219,7 @@ public:
 		float oscps = osc.ProcessSample() * (1 - levelDetuneAmt*levelDetune);
 
 
-		oscps = oscps - 0.45*tptlpupw(c1,oscps,15,sampleRateInv);
+		oscps = oscps - 0.8*tptlpupw(c1,oscps,15,sampleRateInv);
 		if(Oversample)
 		{
 			x2=  oscpsw;
