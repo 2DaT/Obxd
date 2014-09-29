@@ -146,7 +146,6 @@ public:
 	inline float ProcessSample()
 	{
 		float noiseGen = wn.nextFloat()-0.5;
-		noiseGen = wn.nextFloat()-0.5;
 		pitch1 = getPitch(dirt * noiseGen + notePlaying + (quantizeCw?((int)(osc1p)):osc1p)+ pto1 + tune + oct+totalDetune*osc1Factor);
 		if(pitch1 > 21000)
 			pitch1 = 21000;
@@ -159,14 +158,20 @@ public:
 		float pwcalc =jlimit<float>(0.1f,1.0f,(pulseWidth + pw1)*0.5f + 0.5f);
 
 		if(osc1Pul)
-			o1p.processMaster(x1,fs,hsr,hsfrac,pwcalc,pw1w);
+			o1p.processMaster(x1,fs,pwcalc,pw1w);
 		if(osc1Saw)
-			o1s.processMaster(x1,fs,hsr,hsfrac);
+			o1s.processMaster(x1,fs);
 		else if(!osc1Pul)
-			o1t.processMaster(x1,fs,hsr,hsfrac);
+			o1t.processMaster(x1,fs);
 
 		if(x1 >= 1.0f)
+		{
 			x1-=1.0f;
+			hsfrac = x1/fs;
+			hsr = true;
+		}
+
+		
 
 		pw1w = pwcalc;
 

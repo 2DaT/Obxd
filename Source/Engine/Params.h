@@ -65,6 +65,11 @@ public:
 		values[PAN7]=0.5;
 		values[PAN8]=0.5;
 		values[ECONOMY_MODE] = 1;
+		values[ENVDER] = 0.3;
+		values[FILTERDER]=0.3;
+		values[LEVEL_DIF]=0.3;
+		values[PORTADER]=0.3;
+		values[UDET]=0.2;
 	}
 	~ObxdParams()
 	{

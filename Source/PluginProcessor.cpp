@@ -298,6 +298,9 @@ void ObxdAudioProcessor::setParameter (int index, float newValue)
 		synth.processPan(newValue,8);
 		break;
 	}
+	//DIRTY HACK
+	//This should be checked to avoid stalling on gui update
+	//It is needed because some hosts do  wierd stuff
 	if(isHostAutomatedChange)
 		sendChangeMessage();
 }

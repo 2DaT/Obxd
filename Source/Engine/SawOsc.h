@@ -50,14 +50,12 @@ public:
 	{
 		return -getNextBlep(buffer1,bP1);
 	}
-	inline void processMaster(float x,float delta,bool& hardSyncReset,float& hardSyncFrac)
+	inline void processMaster(float x,float delta)
 	{
 		if(x >= 1.0f)
 		{
 			x-=1.0f;
-			hardSyncFrac = x/delta;
 			mixInImpulseCenter(buffer1,bP1,x/delta, 1);
-			hardSyncReset = true;
 		}
 	}
 	inline float getValue(float x)

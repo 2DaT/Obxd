@@ -102,9 +102,9 @@ public:
 		//Boosting non-linearity
 		float tCfb;
 		if(!selfOscPush)
-			tCfb = diodePairResistanceApprox(s1*0.084) - 1;
+			tCfb = diodePairResistanceApprox(s1*0.084f) - 1.0f;
 		else
-			tCfb = diodePairResistanceApprox(s1*0.084) - 1.035;
+			tCfb = diodePairResistanceApprox(s1*0.084f) - 1.035f;
 		//float tCfb = 0;
 		//disable non-linearity == digital filter
 
@@ -117,8 +117,8 @@ public:
 	}
 	inline float Apply(float sample,float g)
         {
-
-			float gpw = (float)tan(g *sampleRateInv * juce::float_Pi);
+			
+			float gpw = tanf(g *sampleRateInv * juce::float_Pi);
 			g = gpw;
             //float v = ((sample- R * s1*2 - g2*s1 - s2)/(1+ R*g1*2 + g1*g2));
 			float v = NR(sample,g);
@@ -129,7 +129,7 @@ public:
 			float y2 = y1*g + s2;
 			s2 = y1*g + y2;
 
-            double mc;
+            float mc;
 			if(!bandPassSw)
             mc = (1-mm)*y2 + (mm)*v;
 			else

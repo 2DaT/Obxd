@@ -197,8 +197,7 @@ public:
 
 		//limit our max cutoff on self osc to prevent alising
 		if(selfOscPush)
-			cutoffcalc = jmin(cutoffcalc,22050.0f);
-
+			cutoffcalc = jmin(cutoffcalc,21050.0f);
 
 
 		//PW modulation

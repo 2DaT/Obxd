@@ -52,17 +52,15 @@ public:
 	{
 		return -getNextBlep(buffer1,bP1);
 	}
-	inline void processMaster(float x,float delta,bool& hardSyncReset,float& hardSyncFrac,float pulseWidth,float pulseWidthWas)
+	inline void processMaster(float x,float delta,float pulseWidth,float pulseWidthWas)
 	{
 		float summated = delta- (pulseWidth - pulseWidthWas);
 		if((pw1t) && x >= 1.0f)
 		{
 			x -= 1.0f;
-			hardSyncFrac = x/delta;
 			if(pw1t)
 				mixInImpulseCenter(buffer1,bP1,x/delta, 1);
 			pw1t=false;
-			hardSyncReset = true;
 		}
 		if((!pw1t)&& (x >= pulseWidth)&&(x - summated <=pulseWidth))
 		{
@@ -73,11 +71,9 @@ public:
 		if((pw1t) && x >= 1.0f)
 		{
 			x-=1.0f;
-			hardSyncFrac = x/delta;
 			if(pw1t)
 				mixInImpulseCenter(buffer1,bP1,x/delta, 1);
 			pw1t=false;
-			hardSyncReset = true;
 		}
 
 	}
