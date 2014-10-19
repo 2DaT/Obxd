@@ -143,12 +143,26 @@ public:
 
 			return mc;
         }
+		inline float fdbShape(float x)
+	{
+		float xs = x*x;
+		return 1 / ((((0.0021164f*xs)-0.0222222f) *xs+0.3333333f) *xs+1);
+	}
 	inline float NR24(float sample,float g,float lpc)
 	{
+		//same as 12 db filter
+		//but our non-linearity is changed
+				float tCfb;
+		if(!selfOscPush)
+			tCfb = fdbShape(s4*0.35f);
+		else
+			tCfb = fdbShape(s4*0.35f) +0.22f;
+
+
 		float ml = 1 / (1+g);
 		float S = (lpc*(lpc*(lpc*s1 + s2) + s3) +s4)*ml;
 		float G = lpc*lpc*lpc*lpc;
-		float y = (sample - R24 * S) / (1 + R24*G);
+		float y = (sample - tCfb*R24 * S) / (1 + tCfb*R24*G);
 		return y + 1e-8;
 	}
 	inline float Apply4Pole(float sample,float g)
@@ -165,7 +179,7 @@ public:
 			double res = v + s1;
 			s1 = res + v;
 			//damping
-			s1 =atan(s1*rcor24)*rcor24Inv;
+			//s1 =atan(s1*rcor24)*rcor24Inv;
 
 			float y1= res;
 			float y2 = tptpc(s2,y1,g);
