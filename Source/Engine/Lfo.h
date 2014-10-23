@@ -83,7 +83,7 @@ public:
                 Res+=sq;
             if((waveForm&4)!=0)
                 Res+=sh;
-			return tptlpupw(s1, Res,700,SampleRateInv);
+			return tptlpupw(s1, Res,3000,SampleRateInv);
 	}
 	void setSamlpeRate(float sr)
 	{

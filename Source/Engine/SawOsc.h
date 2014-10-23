@@ -93,13 +93,17 @@ public:
 	{
 		int lpIn =(int)(B_OVERSAMPLING*(offset));
 		float frac = offset * B_OVERSAMPLING - lpIn;
-		for(int i = 0 ; i <n;i++)
+		float f1 = 1.0f-frac;
+		for(int i = 0 ; i < Samples;i++)
 		{
-			float mixvalue = 0;
-			mixvalue = (blep[lpIn]*(1-frac)+blep[lpIn+1]*(frac));
-			if(i>=Samples)
-				mixvalue-=1;
+			float mixvalue = (blep[lpIn]*f1+blep[lpIn+1]*(frac));
 			buf[(bpos+i)&(n-1)]  += mixvalue*scale;
+			lpIn += B_OVERSAMPLING;
+		}
+		for(int i = Samples ; i <n;i++)
+		{
+			float mixvalue = (blep[lpIn]*f1+blep[lpIn+1]*(frac));
+			buf[(bpos+i)&(n-1)]  -= mixvalue*scale;
 			lpIn += B_OVERSAMPLING;
 		}
 	}
@@ -109,7 +113,7 @@ public:
 		bpos++;
 
 		// Wrap pos
-		bpos%=n;
+		bpos&=n;
 		return buf[bpos];
 	}
 };

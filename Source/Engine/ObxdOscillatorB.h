@@ -146,8 +146,9 @@ public:
 	inline float ProcessSample()
 	{
 		float noiseGen = wn.nextFloat()-0.5;
+		noiseGen = 0;
 		pitch1 = getPitch(dirt * noiseGen + notePlaying + (quantizeCw?((int)(osc1p)):osc1p)+ pto1 + tune + oct+totalDetune*osc1Factor);
-		pitch1 = jmin(21000.0f,pitch1);
+		pitch1 = jmin(20000.0f,pitch1);
 		bool hsr = false;
 		float hsfrac=0;
 		float fs = pitch1*(sampleRateInv);
@@ -191,10 +192,11 @@ public:
 		//This will give us less aliasing on xmod
 		//Hard sync gate signal delayed too
 		noiseGen = wn.nextFloat()-0.5;
+		noiseGen = 0;
 		cvd.feedDelay(dirt *noiseGen + notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct +totalDetune*osc2Factor);
 		pitch2 = getPitch(cvd.getDelayedSample());
 
-		pitch2 = jmin(pitch2,21000.0f);
+		pitch2 = jmin(pitch2,20000.0f);
 		fs = pitch2 * (sampleRateInv);
 
 		pwcalc = jlimit<float>(0.1f,1.0f,(pulseWidth + pw2)*0.5f + 0.5f);

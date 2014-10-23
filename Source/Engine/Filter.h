@@ -79,16 +79,6 @@ public:
 		R24 =( 3.5 * res);
 	}
 	
-	inline float diode_pair(float x)
-	{
-		return sinh(x);
-	}
-	inline float diodePairRes(float x)
-	{
-		if(x == 0)
-			return 1;
-		return diode_pair(x) / x;
-	}
 	inline float diodePairResistanceApprox(float x)
 	{
 		return (((((0.0103592f)*x + 0.00920833f)*x + 0.185f)*x + 0.05f )*x + 1.0f);
@@ -102,9 +92,9 @@ public:
 		//Boosting non-linearity
 		float tCfb;
 		if(!selfOscPush)
-			tCfb = diodePairResistanceApprox(s1*0.084f) - 1.0f;
+			tCfb = diodePairResistanceApprox(s1*0.077f) - 1.0f;
 		else
-			tCfb = diodePairResistanceApprox(s1*0.084f) - 1.035f;
+			tCfb = diodePairResistanceApprox(s1*0.077f) - 1.035f;
 		//float tCfb = 0;
 		//disable non-linearity == digital filter
 
@@ -154,9 +144,9 @@ public:
 		//but our non-linearity is changed
 				float tCfb;
 		if(!selfOscPush)
-			tCfb = fdbShape(s4*0.35f);
+			tCfb = fdbShape(s4*0.5f);
 		else
-			tCfb = fdbShape(s4*0.35f) +0.22f;
+			tCfb = fdbShape(s4*0.5f) +0.22f;
 
 
 		float ml = 1 / (1+g);

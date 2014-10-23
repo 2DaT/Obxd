@@ -218,7 +218,8 @@ public:
 		float oscps = osc.ProcessSample() * (1 - levelDetuneAmt*levelDetune);
 
 
-		//oscps = oscps - tptlpupw(c1,oscps,8,sampleRateInv);
+		oscps = oscps - tptlpupw(c1,oscps,12,sampleRateInv);
+
 		if(Oversample)
 		{
 			x2=  oscpsw;
