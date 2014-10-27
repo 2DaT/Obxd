@@ -31,6 +31,8 @@ class TriangleOsc
 	float buffer1[Samples*2];
 	const int hsam;
 	const int n;
+	float const * blepPTR;
+	float const * blampPTR;
 
 	int bP1,bP2;
 public:
@@ -43,11 +45,23 @@ public:
 	//	buffer1= new float[n];
 		for(int i = 0 ; i < n ; i++)
 			buffer1[i]=0;
+		blepPTR = blep;
+		blampPTR = blamp;
 	}
 	~TriangleOsc()
 	{
 		//delete buffer1;
 		//delete del1;
+	}
+	inline void setDecimation()
+	{
+		blepPTR = blepd2;
+		blampPTR = blampd2;
+	}
+	inline void removeDecimation()
+	{
+		blepPTR = blep;
+		blampPTR = blamp;
 	}
 	inline float aliasReduction()
 	{
@@ -73,8 +87,7 @@ public:
 	inline float getValue(float x)
 	{
 		float mix = x < 0.5 ? 2*x-0.5 : 1.5-2*x;
-		del1.feedDelay(mix);
-		return del1.getDelayedSample();
+		return del1.feedReturn(mix);
 	}
 	inline float getValueFast(float x)
 	{
@@ -135,7 +148,7 @@ public:
 		float f1 = 1.0f-frac;
 		for(int i = 0 ; i < n;i++)
 		{
-			float mixvalue = (blamp[lpIn]*f1+blamp[lpIn+1]*(frac));
+			float mixvalue = (blampPTR[lpIn]*f1+blampPTR[lpIn+1]*(frac));
 			buf[(bpos+i)&(n-1)]  += mixvalue*scale;
 			lpIn += B_OVERSAMPLING;
 		}
@@ -147,13 +160,13 @@ public:
 		float f1 = 1.0f-frac;
 		for(int i = 0 ; i < Samples;i++)
 		{
-			float mixvalue = (blep[lpIn]*f1+blep[lpIn+1]*(frac));
+			float mixvalue = (blepPTR[lpIn]*f1+blepPTR[lpIn+1]*(frac));
 			buf[(bpos+i)&(n-1)]  += mixvalue*scale;
 			lpIn += B_OVERSAMPLING;
 		}
 		for(int i = Samples ; i <n;i++)
 		{
-			float mixvalue = (blep[lpIn]*f1+blep[lpIn+1]*(frac));
+			float mixvalue = (blepPTR[lpIn]*f1+blepPTR[lpIn+1]*(frac));
 			buf[(bpos+i)&(n-1)]  -= mixvalue*scale;
 			lpIn += B_OVERSAMPLING;
 		}
@@ -164,7 +177,7 @@ public:
 		bpos++;
 
 		// Wrap pos
-		bpos&=n;
+		bpos&=(n-1);
 		return buf[bpos];
 	}
 };

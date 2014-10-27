@@ -138,6 +138,24 @@ public:
 		//delete syncd;
 		//delete syncFracd;
 	}
+	void setDecimation()
+	{
+		o1p.setDecimation();
+		o1t.setDecimation();
+		o1s.setDecimation();
+		o2p.setDecimation();
+		o2t.setDecimation();
+		o2s.setDecimation();
+	}
+	void removeDecimation()
+	{
+		o1p.removeDecimation();
+		o1t.removeDecimation();
+		o1s.removeDecimation();
+		o2p.removeDecimation();
+		o2t.removeDecimation();
+		o2s.removeDecimation();
+	}
 	void setSampleRate(float sr)
 	{
 		SampleRate = sr;
@@ -146,12 +164,10 @@ public:
 	inline float ProcessSample()
 	{
 		float noiseGen = wn.nextFloat()-0.5;
-		noiseGen = 0;
 		pitch1 = getPitch(dirt * noiseGen + notePlaying + (quantizeCw?((int)(osc1p)):osc1p)+ pto1 + tune + oct+totalDetune*osc1Factor);
-		pitch1 = jmin(20000.0f,pitch1);
 		bool hsr = false;
 		float hsfrac=0;
-		float fs = pitch1*(sampleRateInv);
+		float fs = jmin(pitch1*(sampleRateInv),0.45f);
 		x1+=fs;
 		hsfrac = 0;
 		float osc1mix=0.0f;
@@ -177,10 +193,8 @@ public:
 
 		hsr &= hardSync;
 		//Delaying our hard sync gate signal and frac
-		syncd.feedDelay(hsr);
-		syncFracd.feedDelay(hsfrac);
-		hsr = syncd.getDelayedSample();
-		hsfrac = syncFracd.getDelayedSample();
+		hsr = syncd.feedReturn(hsr);
+		hsfrac = syncFracd.feedReturn(hsfrac);
 
 		if(osc1Pul)
 			osc1mix += o1p.getValue(x1,pwcalc) + o1p.aliasReduction();
@@ -192,12 +206,9 @@ public:
 		//This will give us less aliasing on xmod
 		//Hard sync gate signal delayed too
 		noiseGen = wn.nextFloat()-0.5;
-		noiseGen = 0;
-		cvd.feedDelay(dirt *noiseGen + notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct +totalDetune*osc2Factor);
-		pitch2 = getPitch(cvd.getDelayedSample());
+		pitch2 = getPitch(cvd.feedReturn(dirt *noiseGen + notePlaying + osc2Det + (quantizeCw?((int)(osc2p)):osc2p) + pto2+ osc1mix *xmod + tune + oct +totalDetune*osc2Factor));
 
-		pitch2 = jmin(pitch2,20000.0f);
-		fs = pitch2 * (sampleRateInv);
+		fs = jmin(pitch2 * (sampleRateInv),0.45f);
 
 		pwcalc = jlimit<float>(0.1f,1.0f,(pulseWidth + pw2)*0.5f + 0.5f);
 
@@ -225,9 +236,8 @@ public:
 			x2 =fracMaster;
 		}
 		//Delaying osc1 signal
-		xmodd.feedDelay(osc1mix);
 		//And getting delayed back
-		osc1mix = xmodd.getDelayedSample();
+		osc1mix = xmodd.feedReturn(osc1mix);
 
 		if(osc2Pul)
 			osc2mix += o2p.getValue(x2,pwcalc) + o2p.aliasReduction();

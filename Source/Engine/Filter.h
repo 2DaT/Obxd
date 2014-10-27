@@ -83,7 +83,6 @@ public:
 	{
 		return (((((0.0103592f)*x + 0.00920833f)*x + 0.185f)*x + 0.05f )*x + 1.0f);
 		//Taylor approx of slightly mismatched diode pair
-		//1.+0.05 x+0.185 x^2+0.00920833 x^3+0.0103592 x^4+0.000510292 x^5+O(x^6)
 	}
 	//resolve 0-delay feedback
 	inline float NR(float sample, float g)
@@ -92,9 +91,9 @@ public:
 		//Boosting non-linearity
 		float tCfb;
 		if(!selfOscPush)
-			tCfb = diodePairResistanceApprox(s1*0.077f) - 1.0f;
+			tCfb = diodePairResistanceApprox(s1*0.0876f) - 1.0f;
 		else
-			tCfb = diodePairResistanceApprox(s1*0.077f) - 1.035f;
+			tCfb = diodePairResistanceApprox(s1*0.0876f) - 1.035f;
 		//float tCfb = 0;
 		//disable non-linearity == digital filter
 
@@ -133,27 +132,13 @@ public:
 
 			return mc;
         }
-		inline float fdbShape(float x)
-	{
-		float xs = x*x;
-		return 1 / ((((0.0021164f*xs)-0.0222222f) *xs+0.3333333f) *xs+1);
-	}
 	inline float NR24(float sample,float g,float lpc)
 	{
-		//same as 12 db filter
-		//but our non-linearity is changed
-				float tCfb;
-		if(!selfOscPush)
-			tCfb = fdbShape(s4*0.5f);
-		else
-			tCfb = fdbShape(s4*0.5f) +0.22f;
-
-
 		float ml = 1 / (1+g);
 		float S = (lpc*(lpc*(lpc*s1 + s2) + s3) +s4)*ml;
 		float G = lpc*lpc*lpc*lpc;
-		float y = (sample - tCfb*R24 * S) / (1 + tCfb*R24*G);
-		return y + 1e-8;
+		float y = (sample - R24 * S) / (1 + R24*G);
+		return y;
 	}
 	inline float Apply4Pole(float sample,float g)
 	{
@@ -169,7 +154,7 @@ public:
 			double res = v + s1;
 			s1 = res + v;
 			//damping
-			//s1 =atan(s1*rcor24)*rcor24Inv;
+			s1 =atan(s1*rcor24)*rcor24Inv;
 
 			float y1= res;
 			float y2 = tptpc(s2,y1,g);

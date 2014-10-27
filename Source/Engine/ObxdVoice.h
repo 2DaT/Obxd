@@ -40,6 +40,8 @@ private:
 	float d1,d2;
 	float c1,c2;
 
+	bool hq;
+
 	//JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ObxdVoice)
 public:
 	bool sustainHold;
@@ -121,6 +123,7 @@ public:
 	ObxdVoice() 
 		: ap()
 	{
+		hq = false;
 		selfOscPush = false;
 		pitchModBoth = false;
 		pwOfs = 0 ;
@@ -166,29 +169,25 @@ public:
 	//	delete lenvd;
 	//	delete fenvd;
 	}
-	inline void ProcessSample(float* ptr)
+	inline float ProcessSample()
 	{
 		//portamento on osc input voltage
 		//implements rc circuit
 		float ptNote  =tptlpupw(prtst, midiIndx-81, porta * (1+PortaDetune*PortaDetuneAmt),sampleRateInv);
 		osc.notePlaying = ptNote;
 		//both envelopes and filter cv need a delay equal to osc internal delay
-
-		lfod.feedDelay(lfoIn);
-		float lfoDelayed = lfod.getDelayedSample();
+		float lfoDelayed = lfod.feedReturn(lfoIn);
 		//filter envelope undelayed
 		float envm = fenv.processSample() * (1 - (1-velocityValue)*vflt);
 		if(invertFenv)
 			envm = -envm;
-		fenvd.feedDelay(envm);
-		lenvd.feedDelay(env.processSample() * (1 - (1-velocityValue)*vamp));
 		//filter exp cutoff calculation
 		float cutoffcalc = jmin(
 			getPitch(
 			(lfof?lfoDelayed*lfoa1:0)+
 			cutoff+
 			FltDetune*FltDetAmt+
-			fenvamt*fenvd.getDelayedSample()+
+			fenvamt*fenvd.feedReturn(envm)+
 			-45 + (fltKF*(ptNote+40))
 			)
 			//noisy filter cutoff
@@ -197,7 +196,7 @@ public:
 
 		//limit our max cutoff on self osc to prevent alising
 		if(selfOscPush)
-			cutoffcalc = jmin(cutoffcalc,21050.0f);
+			cutoffcalc = jmin(cutoffcalc,19000.0f);
 
 
 		//PW modulation
@@ -211,7 +210,7 @@ public:
 
 
 		//variable sort magic - upsample trick
-		float env = lenvd.getDelayedSample();
+		float envVal = lenvd.feedReturn(env.processSample() * (1 - (1-velocityValue)*vamp));
 
 		float x2 = 0;
 
@@ -220,43 +219,14 @@ public:
 
 		oscps = oscps - tptlpupw(c1,oscps,12,sampleRateInv);
 
-		if(Oversample)
-		{
-			x2=  oscpsw;
-			x2 = tptpc(d2,x2,brightCoef);
-			if(fourpole)
-			x2 = flt.Apply4Pole(x2,(cutoffcalc+cutoffwas)*0.5);
-			else
-				x2 = flt.Apply(x2,(cutoffcalc+cutoffwas)*0.5);
-			x2 *= (env+envelopewas)*0.5;
-			*(ptr+1) = x2;
-		}
-		float x1;
-		if(!Oversample)
-		{
-			x1 = oscps;
-			x1 = tptpc(d2,x1,brightCoef);
-			if(fourpole)
+		float x1 = oscps;
+		x1 = tptpc(d2,x1,brightCoef);
+		if(fourpole)
 			x1 = flt.Apply4Pole(x1,(cutoffcalc)); 
-			else
-				x1 = flt.Apply(x1,(cutoffcalc)); 
-
-		}
 		else
-		{
-			x1 = ap.getInterp(oscps);
-			x1 = tptpc(d2,x1,brightCoef);
-			if(fourpole)
-			x1 = flt.Apply4Pole(x1,(cutoffcalc)); 
-			else
-				x1 = flt.Apply(x1,(cutoffcalc)); 
-		}
-		x1 *= (env);
-		*(ptr)=x1;
-
-		oscpsw = oscps;
-		cutoffwas = cutoffcalc;
-		envelopewas = env;
+			x1 = flt.Apply(x1,(cutoffcalc)); 
+		x1 *= (envVal);
+		return x1;
 	}
 	void setBrightness(float val)
 	{
@@ -269,9 +239,20 @@ public:
 		env.setUniqueDeriviance(1 + EnvDetune*d);
 		fenv.setUniqueDeriviance(1 + FenvDetune*d);
 	}
+	void setHQ(bool hq)
+	{
+		if(hq)
+		{
+			osc.setDecimation();
+		}
+		else
+		{
+			osc.removeDecimation();
+		}
+	}
 	void setSampleRate(float sr)
 	{
-		flt.setSampleRate((Oversample)?2*sr:sr);
+		flt.setSampleRate(sr);
 		osc.setSampleRate(sr);
 		env.setSampleRate(sr);
 		fenv.setSampleRate(sr);
@@ -288,18 +269,12 @@ public:
 		env.ResetEnvelopeState();
 		fenv.ResetEnvelopeState();
 	}
-	void ToogleOversample()
-	{
-		flt.setSampleRate((Oversample)?SampleRate:2*SampleRate);
-		Oversample = !Oversample;
-		brightCoef = tan(jmin(briHold,flt.SampleRate*0.5f-10)* (juce::float_Pi)* flt.sampleRateInv);
-	}
 	void NoteOn(int mididx,float velocity)
 	{
 		if(!shouldProcessed)
 		{
 			//When your processing is paused we need to clear delay lines and envelopes
-			//Not doing this will cause clicks of glitches
+			//Not doing this will cause clicks or glitches
 			lenvd.fillZeroes();
 			fenvd.fillZeroes();
 			ResetEnvelope();

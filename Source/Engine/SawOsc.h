@@ -30,6 +30,7 @@ class SawOsc
 	float buffer1[Samples*2];
 	const int hsam;
 	const int n;
+	float const * blepPTR;
 	int bP1;
 public:
 	SawOsc() : hsam(Samples)
@@ -40,11 +41,20 @@ public:
 		//buffer1= new float[n];
 		for(int i = 0 ; i < n ; i++)
 			buffer1[i]=0;
+		blepPTR = blep;
 	}
 	~SawOsc()
 	{
 		//delete del1;
 		//delete buffer1;
+	}
+	inline void setDecimation()
+	{
+		blepPTR = blepd2;
+	}
+	inline void removeDecimation()
+	{
+		blepPTR = blep;
 	}
 	inline float aliasReduction()
 	{
@@ -60,8 +70,7 @@ public:
 	}
 	inline float getValue(float x)
 	{
-		del1.feedDelay(x - 0.5);
-		return del1.getDelayedSample();
+		return del1.feedReturn(x-0.5);
 	}
 	inline float getValueFast(float x)
 	{
@@ -96,13 +105,13 @@ public:
 		float f1 = 1.0f-frac;
 		for(int i = 0 ; i < Samples;i++)
 		{
-			float mixvalue = (blep[lpIn]*f1+blep[lpIn+1]*(frac));
+			float mixvalue = (blepPTR[lpIn]*f1+blepPTR[lpIn+1]*frac);
 			buf[(bpos+i)&(n-1)]  += mixvalue*scale;
 			lpIn += B_OVERSAMPLING;
 		}
 		for(int i = Samples ; i <n;i++)
 		{
-			float mixvalue = (blep[lpIn]*f1+blep[lpIn+1]*(frac));
+			float mixvalue = (blepPTR[lpIn]*f1+blepPTR[lpIn+1]*frac);
 			buf[(bpos+i)&(n-1)]  -= mixvalue*scale;
 			lpIn += B_OVERSAMPLING;
 		}
@@ -113,7 +122,7 @@ public:
 		bpos++;
 
 		// Wrap pos
-		bpos&=n;
+		bpos&=(n-1);
 		return buf[bpos];
 	}
 };

@@ -35,7 +35,7 @@ private:
 	bool awaitingkeys[129];
 	int priorities[129];
 
-	Decimator9 left,right;
+	Decimator17 left,right;
 	int asPlayedCounter;
 	float lkl,lkr;
 	float sampleRate,sampleRateInv;
@@ -117,6 +117,7 @@ public:
 		{
 			voices[i].setSampleRate(sr);
 		}
+		SetOversample(Oversample);
 	}
 	void sustainOn()
 	{
@@ -306,14 +307,37 @@ public:
 	}
 	void SetOversample(bool over)
 	{
-		if(over!=Oversample)
+		if(over==true)
 		{
-			for(int i = 0 ; i < MAX_VOICES;i++)
-			{
-				voices[i].ToogleOversample();
-			}
+			mlfo.setSamlpeRate(sampleRate*2);
+			vibratoLfo.setSamlpeRate(sampleRate*2);
+		}
+		else
+		{
+			mlfo.setSamlpeRate(sampleRate);
+			vibratoLfo.setSamlpeRate(sampleRate);
+		}
+		for(int i = 0 ; i < MAX_VOICES;i++)
+		{
+			voices[i].setHQ(over);
+			if(over)
+				voices[i].setSampleRate(sampleRate*2);
+			else
+				voices[i].setSampleRate(sampleRate);
 		}
 		Oversample = over;
+	}
+	inline float processSynthVoice(ObxdVoice& b,float lfoIn,float vibIn )
+	{
+		if(economyMode)
+			b.checkAdsrState();
+		if(b.shouldProcessed||(!economyMode))
+		{
+				b.lfoIn=lfoIn;
+				b.lfoVibratoIn=vibIn;
+				return b.ProcessSample();
+		}
+		return 0;
 	}
 	void processSample(float* sm1,float* sm2)
 	{
@@ -323,32 +347,31 @@ public:
 		float vlo = 0 , vro = 0 ;
 		float lfovalue = mlfo.getVal();
 		float viblfo = vibratoEnabled?(vibratoLfo.getVal() * vibratoAmount):0;
+		float lfovalue2=0,viblfo2;
+		if(Oversample)
+		{		
+			mlfo.update();
+		vibratoLfo.update();
+		lfovalue2 = mlfo.getVal();
+		viblfo2 = vibratoEnabled?(vibratoLfo.getVal() * vibratoAmount):0;
+		}
+
 		for(int i = 0 ; i < totalvc;i++)
 		{
-			if(economyMode)
-				voices[i].checkAdsrState();
-			if(voices[i].shouldProcessed ||(!economyMode))
-			{
-				float mem[2] = {0,0};
-				voices[i].lfoIn=lfovalue;
-				voices[i].lfoVibratoIn=viblfo;
-				(voices[i].ProcessSample(mem));
-				float x1 = mem[0];
-				vl+=x1*(1-pannings[i]);
-				vr+=x1*(pannings[i]);
+				float x1 = processSynthVoice(voices[i],lfovalue,viblfo);
 				if(Oversample)
 				{
-					float x2 = mem[1];
+					float x2 =  processSynthVoice(voices[i],lfovalue2,viblfo2);
 					vlo+=x2*(1-pannings[i]);
 					vro+=x2*(pannings[i]);
 				}
-			}
+				vl+=x1*(1-pannings[i]);
+				vr+=x1*(pannings[i]);
 		}
 		if(Oversample)
 		{
-			//Variables are swapped!
-			vl = left.Calc(vlo,vl);
-			vr = right.Calc(vro,vr);
+			vl = left.Calc(vl,vlo);
+			vr = right.Calc(vr,vro);
 		}
 		*sm1 = vl*Volume;
 		*sm2 = vr*Volume;
